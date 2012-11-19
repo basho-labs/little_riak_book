@@ -1,0 +1,10 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    redcarpet (2.2.2)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  redcarpet
