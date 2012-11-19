@@ -1,6 +1,6 @@
 # A Little Riak Book
 
-You can download different formats from [rendered](./tree/master/rendered).
+You can download different formats from [rendered](https://github.com/coderoshi/little_riak_book/tree/master/rendered/).
 
 ### Building
 
