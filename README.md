@@ -1,6 +1,6 @@
 # A Little Riak Book
 
-You can download different formats from [rendered](rendered).
+You can download different formats from [rendered](./tree/master/rendered).
 
 ### Building
 
