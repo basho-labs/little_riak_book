@@ -362,7 +362,7 @@ The Riak mechanism uses internal hashing and system clocks to stop unbounded vcl
 
 <h3>Riak and ACID</h3>
 
-<aside id="acid" class="sidebar"><h3>Distributed Relational is Not ACID</h3>
+<aside id="acid" class="sidebar"><h3>Distributed Relational is Not Exempt</h3>
 
 You may have wondered why we don't just distribute a standard relational database. Afterall, MySQL has the ability to cluster, and it's ACID, right? Yes and no.
 
