@@ -362,6 +362,15 @@ The Riak mechanism uses internal hashing and system clocks to stop unbounded vcl
 
 <h3>Riak and ACID</h3>
 
+<aside id="acid" class="sidebar"><h3>Distributed Relational is Not ACID</h3>
+
+You may have wondered why we don't just distribute a standard relational database. Afterall, MySQL has the ability to cluster, and it's ACID, right? Yes and no.
+
+A single node in the cluster is ACID, but the entire cluster is not (at least... not without loss of availability). When you write to a primary node, and a secondary node is replicated to, a network partition can occur. To remain available, the secondary will not be in sync (eventually consistent). Have you ever lost data between a failure and a backup? Same idea.
+
+Or, the entire transaction can fail, making the whole cluster unavailable. Even ACID databases cannot escape the scourge of CAP.
+</aside>
+
 Unlike single node databases like Neo4j or PostgreSQL, Riak does not support ACID transactions. Locking across multiple servers would kill write availability, and equally concerning, increase latency. While ACID transactions promise Atomicity, Consistency, Isolation, and Durability---Riak and other NoSQL databases follow BASE, or Basically Available, Soft state, Eventually consistent.
 
 The BASE acronym was meant as shorthand for the goals of non-ACID-transactional databases like Riak. It is an acceptance that distribution is never perfect (basically available), all data is in flux (soft state), and that true consistency is generally untennable (eventually consistent).
