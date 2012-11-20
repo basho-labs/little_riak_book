@@ -27,7 +27,7 @@ def gen_html(language)
     html << markdown.render(chapter)
   end
   prelude = markdown.render(File.read("en/prelude.pmd"))
-  html = "<html><head><title>A Little Riak Book</title></head><body>#{prelude}#{toc}#{html}</body></html>"
+  html = "<html><head><title>A Little Riak Book</title></head><meta charset=\"utf-8\"><body>#{prelude}#{toc}#{html}</body></html>"
   full_file = "#{OUTPUT_DIR}/riaklil-#{language}.html"
   File.open(full_file, 'w') {|f| f.write(html) }
   full_file
