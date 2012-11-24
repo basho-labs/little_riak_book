@@ -4,7 +4,7 @@ When I first encountered Riak, I found a few concepts daunting. But understandin
 
 ## The Landscape
 
-Before we understand where Riak sits in the spectrum of databases, it's good to have a little front matter. The existence of databases like Riak is the culmination of two things: accessible technology spuring different data requirements, and gaps in the data management market.
+Before we understand where Riak sits in the spectrum of databases, it's good to have a little front matter. The existence of databases like Riak is the culmination of two things: accessible technology spurring different data requirements, and gaps in the data management market.
 
 First, as we've seen steady improvements in technology along with reductions in cost, vast amounts of computing power and storage are now within the grasp of nearly anyone. Along with our increasingly interconnected world caused by the web and shrinking, cheaper computers (like smartphones), this has catalyzed an exponential growth of data, and a demand for more predictability and speed by savvier users. In short, more data is being created on the front-end, while more data is being managed on the backend.
 
@@ -20,7 +20,7 @@ Modern database can be loosely grouped into the way they represent data. Althoug
 
 Unlike relational databases, but similar to document and columnar stores, objects cannot be joined by Riak. Client code is responsible for accessing values and merging them, or by other code such as mapreduce.
 
-The ability to easily join data across physical servers is a tradeoff that seperates single node databases like relational and graph, from naturally partitionable systems like document, columnar, and key/value stores.
+The ability to easily join data across physical servers is a tradeoff that separates single node databases like relational and graph, from naturally partitionable systems like document, columnar, and key/value stores.
 
 This limitation changes how you model data. Relational normalization (organizing data to reduce redundancy) exists for systems that can cheaply join data together per request. However, the ability to spread data across multiple nodes requires a denormalized approach, where some data is duplicated, and computed values may be stored for the sake of performance.
 </aside>
@@ -33,7 +33,7 @@ This limitation changes how you model data. Relational normalization (organizing
     Examples: *PostgreSQL*, *MySQL*, *Oracle*
   2. **Graph**. These exist for highly interconnected data. They excel in
     modeling complex relationships between nodes, and many implementations can
-    handle multiple billions of nodes and relationships (or edges and vertices). I tend to include *triplestores* and *object DBs* to be specialized varients.
+    handle multiple billions of nodes and relationships (or edges and vertices). I tend to include *triplestores* and *object DBs* to be specialized variants.
     
     Examples: *Neo4j*, *Graphbase*, *InfiniteGraph*
   3. **Document**. Document datastores model hierarchical values called documents,
@@ -84,7 +84,7 @@ hashtable["favorite"] = "cold pizza"
 
 Successive requests for `favorite` will now return `cold pizza`.
 
-For convenience, we call a key/value pair an *object*. Together our `favorite`/`pizza` pair is refered to as the "`favorite` object", rather than the more verbose "`favorite` key and its value".
+For convenience, we call a key/value pair an *object*. Together our `favorite`/`pizza` pair is referred to as the "`favorite` object", rather than the more verbose "`favorite` key and its value".
 
 <h3>Buckets</h3>
 
@@ -92,7 +92,7 @@ For convenience, we call a key/value pair an *object*. Together our `favorite`/`
 
 You can think of buckets as [namespaces](http://en.wikipedia.org/wiki/Namespace_(computer_science\)).
 
-Using our `favorite` example from above, we can specify a favorite food, versus a favorite animal, by using the same key. Unless you're a midwest farm kid like me, these categories probably won't overlap much.
+Using our `favorite` example from above, we can specify a favorite food, versus a favorite animal, by using the same key. Unless you're a Midwest farm kid like me, these categories probably won't overlap much.
 
 ```javascript
 food["favorite"] = "pizza"
@@ -141,12 +141,12 @@ For example, imagine you have a list of country keys, whose values contain those
 "Zimbabwe":    "Harare"
 ```
 
-The downside with replication is that you are multiplying the amount of storeage required for every duplicate. There is also some network overhead with this approach, since values must also be routed to all replicated nodes on write. But there is a more insidious problem with this approach which we will cover shortly.
+The downside with replication is that you are multiplying the amount of storage required for every duplicate. There is also some network overhead with this approach, since values must also be routed to all replicated nodes on write. But there is a more insidious problem with this approach, which we will cover shortly.
 
 
 <h3>Partitions</h3>
 
-A **partition** is how we divide a set of keys onto seperate physical servers. Rather than duplicate values, we pick one server to exclusively host a range of keys, and the other servers to host remaining non-overlapping ranges.
+A **partition** is how we divide a set of keys onto separate  physical servers. Rather than duplicate values, we pick one server to exclusively host a range of keys, and the other servers to host remaining non-overlapping ranges.
 
 With partitioning, our total capacity can increase without any big expensive hardware, just lots of cheap commodity servers. If we decided to partition our database into 1000 parts across 1000 nodes, we have (hypothetically) reduced the amount of work any particular server must do to 1/1000th.
 
@@ -172,7 +172,7 @@ For example, if we partition our countries into 2 servers, we might put all coun
 "Zimbabwe":    "Harare"
 ```
 
-There is a bit of overhead the parition approach. Some service must keep track of what range of values live on which node. A requesting application must know that the key `Spain` will be routed to Node B, not Node A.
+There is a bit of overhead the partition approach. Some service must keep track of what range of values live on which node. A requesting application must know that the key `Spain` will be routed to Node B, not Node A.
 
 There's also another downside. Unlike replication, simple partitioning of data actually *decreases* uptime. If one node goes down, that entire partition of data is unavailable. This is why Riak combines both replication and partitioning.
 
@@ -181,7 +181,7 @@ There's also another downside. Unlike replication, simple partitioning of data a
 
 <h3>Replication+Partitions</h3>
 
-Since partitions allow us to increase capacity, and relication improves availability, Riak combines them. We partition data across multiple nodes, as well as replicate that data into multiple nodes.
+Since partitions allow us to increase capacity, and replication improves availability, Riak combines them. We partition data across multiple nodes, as well as replicate that data into multiple nodes.
 
 Where our previous example partitioned data into 2 nodes, we can replicate each of those partitions into 2 more nodes, for a total of 4.
 
@@ -230,7 +230,7 @@ If we visualize our 64 partitions as a ring, `favorite` falls here.
 
 [IMAGE]
 
-You may have wondered, "Didn't he say that Riak suggests a minimum of 5 nodes? How can we put 64 partitions on 5 nodes?" We just give each node more than one partition, which Riak calls a vnode, or virtual node.
+You may have wondered, "Didn't he say that Riak suggests a minimum of 5 nodes? How can we put 64 partitions on 5 nodes?" We just give each node more than one partition, which Riak calls a *vnode*, or *virtual node*.
 
 We count around the ring of vnodes in order, assigning each node to the next available vnode, until all vnodes are accounted for. So partition/vnode 1 would be owned by Node A, vnode 2 owned by Node B, up to vnode 5 owned by Node E. Then we continue by giving Node A vnode 6, Node B vnode 7, and so on, until our vnodes have been exhausted, leaving us this list.
 
@@ -244,7 +244,7 @@ So far we've partitioned the ring, but what about replication? When we write a n
 
 So when we write our `favorite` object to vnode 3, it will be replicated to vnodes 4 and 5. This places the object in physical nodes C, D, and E. Once the write is complete, even if node C crashes, the value is still available on 2 other nodes. This is the secret of Riak's high availability.
 
-We can visualize the Ring with it's vnodes, managing nodes, and where `favorite` will go.
+We can visualize the Ring with its vnodes, managing nodes, and where `favorite` will go.
 
 [IMAGE]
 
@@ -258,11 +258,11 @@ So far we've covered the good parts of partitioning and replication: highly avai
 
 <h3>CAP Theorem</h3>
 
-Classic RDBMS databases are *write consistent*. Once a write is confirmed, successive reads are guarenteed to return the newest value. If I save the value `cold pizza` to my key `favorite`, every future read will consistently return `cold pizza` until I change it.
+Classic RDBMS databases are *write consistent*. Once a write is confirmed, successive reads are guaranteed to return the newest value. If I save the value `cold pizza` to my key `favorite`, every future read will consistently return `cold pizza` until I change it.
 
 <!-- The very act of placing our data in multiple servers carries some inherent risk. -->
 
-But when values are distributed, *consistency* might not be guarenteed. In the middle of an object's replication, two servers could have different results. When we update `favorite` to `cold pizza` on one node, another node might temporarily contain the older value `pizza`. If you request the value of `favorite` during this replication, two different results can be returned---the database is inconsistent.
+But when values are distributed, *consistency* might not be guaranteed. In the middle of an object's replication, two servers could have different results. When we update `favorite` to `cold pizza` on one node, another node might temporarily contain the older value `pizza`. If you request the value of `favorite` during this replication, two different results can be returned---the database is inconsistent.
 
 We do have an alternative choice. Rather than lose consistency, you could chose to lose *availability*. We may, for instance, decide to lock the entire database during a write, and simply refuse to serve requests until that value has been replicated to all relevant nodes. Even for that split second time, clients have to wait while their results can be brought into a consistent state (meaning, all replicas will return the same value). For many high-traffic read/write use-cases, like an online shopping cart where even minor delays will cause people to just shop elsewhere, this is not an acceptable sacrifice.
 
@@ -312,7 +312,7 @@ If you've followed thus far, I only have one more conceptual wrench to throw at 
 
 Vector clocks measure a sequence of events, just like a normal clock. But since we can't reasonably keep dozens, or hundreds, or thousands of servers in sync (without really exotic hardware, like geosynchronous atomic clocks), we instead keep track of how, and who, modifies an object. It's as easy as keeping a vector (or array) of which clients change an object in which order. That way we can tell if an object is being updated or if a write conflict has occurred.
 
-Let's use our `favorite` example again, but this time we have 3 people trying to come to a concensus on their favorite food: Aaron, Britney, and Carrie. We'll track the value each has chosen, and the relevant vector clock, or vclock.
+Let's use our `favorite` example again, but this time we have 3 people trying to come to a consensus on their favorite food: Aaron, Britney, and Carrie. We'll track the value each has chosen, and the relevant vector clock, or vclock.
 
 When Aaron sets the `favorite` object to `pizza`, a hypothetical vector clock could contain his name, and the number of updates he's performed.
 
@@ -328,11 +328,11 @@ vclock: [Aaron: 1, Britney: 1]
 value:  cold pizza
 ```
 
-At the same time as Britney, Carrie decides that pizza all around was a bad choice, and tried to change Aaron's value to `lasagne`.
+At the same time as Britney, Carrie decides that pizza all around was a bad choice, and tried to change Aaron's value to `lasagna`.
 
 ```
 vclock: [Aaron: 1, Carrie: 1]
-value:  lasagne
+value:  lasagna
 ```
 
 This presents a problem, because there are now two vector clocks in play that diverge after `[Aaron: 1]`. So Riak can store both values and both vclocks.
@@ -344,7 +344,7 @@ vclock: [Aaron: 1, Britney: 1]
 value:  cold pizza
 ---
 vclock: [Aaron: 1, Carrie: 1]
-value:  lasagne
+value:  lasagna
 ```
 
 It's clear that a decision must be made. Since two people generally agreed on `pizza`, Britney resolves the conflict by deciding on Aaron's original `pizza` value, and updating with her vclock.
@@ -364,7 +364,7 @@ The Riak mechanism uses internal hashing and system clocks to stop unbounded vcl
 
 <aside id="acid" class="sidebar"><h3>Distributed Relational is Not Exempt</h3>
 
-You may have wondered why we don't just distribute a standard relational database. Afterall, MySQL has the ability to cluster, and it's ACID, right? Yes and no.
+You may have wondered why we don't just distribute a standard relational database. After all, MySQL has the ability to cluster, and it's ACID, right? Yes and no.
 
 A single node in the cluster is ACID, but the entire cluster is not without a loss of availability, and often worse, increased latency. When you write to a primary node, and a secondary node is replicated to, a network partition can occur. To remain available, the secondary will not be in sync (eventually consistent). Have you ever lost data between a failure and a backup? Same idea.
 
@@ -373,7 +373,7 @@ Or, the entire transaction can fail, making the whole cluster unavailable. Even 
 
 Unlike single node databases like Neo4j or PostgreSQL, Riak does not support ACID transactions. Locking across multiple servers would kill write availability, and equally concerning, increase latency. While ACID transactions promise Atomicity, Consistency, Isolation, and Durability---Riak and other NoSQL databases follow BASE, or Basically Available, Soft state, Eventually consistent.
 
-The BASE acronym was meant as shorthand for the goals of non-ACID-transactional databases like Riak. It is an acceptance that distribution is never perfect (basically available), all data is in flux (soft state), and that true consistency is generally untennable (eventually consistent).
+The BASE acronym was meant as shorthand for the goals of non-ACID-transactional databases like Riak. It is an acceptance that distribution is never perfect (basically available), all data is in flux (soft state), and that true consistency is generally untenable (eventually consistent).
 
 Be wary if anyone has promised distributed ACID transactions---it's usually couched in some diminishing adjective or caveat like *row transactions*, or *per node transactions*, which basically mean *not transactional* in terms you would normally use to define it.
 
@@ -381,7 +381,7 @@ As your server count grows---especially as you introduce multiple datacenters---
 
 ## Wrapup
 
-Riak is designed to bestow a range of real-world benefits, but equally, to handle the fallout of weidling such power. Consistent hashing and vnodes are an elegant solution to horizontally scaling across servers. N/R/W allows you to dance with the CAP theorem by fine-tuning against its constraints. And vector clocks allow another step closer to true consistency by allowing you to manage conflicts that will occur at high load.
+Riak is designed to bestow a range of real-world benefits, but equally, to handle the fallout of wielding such power. Consistent hashing and vnodes are an elegant solution to horizontally scaling across servers. N/R/W allows you to dance with the CAP theorem by fine-tuning against its constraints. And vector clocks allow another step closer to true consistency by allowing you to manage conflicts that will occur at high load.
 
 We'll cover other technical concepts as needed, like the gossip protocol or read-repair.
 

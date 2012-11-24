@@ -4,12 +4,12 @@
 
 It's worth mentioning that I use the word "node" a lot. Realistically, this means a physical/virtual server, but really, the workhorses of Riak are vnodes. 
 
-When you write to multiple vnodes, Riak will attempt to spread values to as many physical servers as possible. However, this isn't guarenteed (for example, if you have 64 vnodes, and only two physical ones, setting replication to 5 is perfectly fine, if not a bit redundant). You're safe conceptualizing nodes as Riak instances, and it's simpler than qualifying "vnode" all the time. If someting applies specifically to a vnode, I'll mention it.
+When you write to multiple vnodes, Riak will attempt to spread values to as many physical servers as possible. However, this isn't guaranteed (for example, if you have 64 vnodes, and only two physical ones, setting replication to 5 is perfectly fine, if not a bit redundant). You're safe conceptualizing nodes as Riak instances, and it's simpler than qualifying "vnode" all the time. If something applies specifically to a vnode, I'll mention it.
 </aside>
 
 _We're going to hold off on the details of installing Riak at the moment. If you'd like to follow along, it's easy enough to get started by following the documentation on the website. If not, this is a perfect section to read while you sit on a train without internet connection._
 
-Developing with a Riak database is quite easy to do, once you understand some of the finer points. It is a key/value store, in the technical sense (you associate values with keys, and retrieve them using the same keys) but it offers so much more. You can embed write hooks to fire before or after a write, or index data for quick retrieval. Riak has a SOLR-based search, and lets you run mapreduce functions to extract and aggregate data across a huge cluster with TB of data in a reletively short timespan. We'll show some of the bucket-specific settings developers can configure.
+Developing with a Riak database is quite easy to do, once you understand some of the finer points. It is a key/value store, in the technical sense (you associate values with keys, and retrieve them using the same keys) but it offers so much more. You can embed write hooks to fire before or after a write, or index data for quick retrieval. Riak has a SOLR-based search, and lets you run mapreduce functions to extract and aggregate data across a huge cluster with TB of data in a relatively short timespan. We'll show some of the bucket-specific settings developers can configure.
 
 ## Lookup
 
@@ -65,7 +65,7 @@ curl -i -XGET 'http://localhost:8098/riak/food/favorite'
 HTTP/1.1 200 OK
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmdwZTImMfKcN3h1Um+LAA=
 Vary: Accept-Encoding
-Server: MochiWeb/1.1 WebMachine/1.9.0 (someone had painted it blue)
+Server: MochiWeb/1.1 WebMachine/1.9.0 (someone had painted...
 Link: </riak/food>; rel="up"
 Last-Modified: Wed, 10 Oct 2012 18:56:23 GMT
 ETag: "1yHn7L0XMEoMVXRGp4gOom"
@@ -80,7 +80,7 @@ The anatomy of HTTP is a bit beyond this little book, but let's look at a few pa
 
 <h5>Status Codes</h5>
 
-The first line gives the HTTP version 1.1 response code code `200 OK`. You may be familiar with the common website code `404 Not Found`. There are many kinds of [HTTP status codes](http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html), and the Riak HTTP interface stays true to their intent: **1xx Informational**, **2xx Success**, **3xx Further Action**, **4xx Client Error**, **5xx Server Error**
+The first line gives the HTTP version 1.1 response code `200 OK`. You may be familiar with the common website code `404 Not Found`. There are many kinds of [HTTP status codes](http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html), and the Riak HTTP interface stays true to their intent: **1xx Informational**, **2xx Success**, **3xx Further Action**, **4xx Client Error**, **5xx Server Error**
 
 Different actions can return different response/error codes. Complete lists can be found in the [official API docs](http://docs.basho.com/riak/latest/references/apis/).
 
@@ -115,14 +115,14 @@ curl -i -XPOST 'http://localhost:8098/riak/people' \
   -d '{"name":"aaron"}'
 HTTP/1.1 201 Created
 Vary: Accept-Encoding
-Server: MochiWeb/1.1 WebMachine/1.9.2 (someone had painted it blue)
+Server: MochiWeb/1.1 WebMachine/1.9.2 (someone had painted...
 Location: /riak/people/DNQGJY0KtcHMirkidasA066yj5V
 Date: Wed, 10 Oct 2012 17:55:22 GMT
 Content-Type: application/json
 Content-Length: 0
 ```
 
-You can extract this key from the `Location` value. Other than not being pretty, thiis key is just as if you defined your own key by a PUT.
+You can extract this key from the `Location` value. Other than not being pretty, this key is just as if you defined your own key by a PUT.
 
 <h5>Body</h5>
 
@@ -135,7 +135,7 @@ curl -i -XPOST 'http://localhost:8098/riak/people?returnbody=true' \
 HTTP/1.1 201 Created
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmdwZTImMfKkD3z10m+LAA=
 Vary: Accept-Encoding
-Server: MochiWeb/1.1 WebMachine/1.9.0 (someone had painted it blue)
+Server: MochiWeb/1.1 WebMachine/1.9.0 (someone had painted...
 Location: /riak/people/DnetI8GHiBK2yBFOEcj1EhHprss
 Link: </riak/people>; rel="up"
 Last-Modified: Tue, 23 Oct 2012 04:30:35 GMT
@@ -218,7 +218,7 @@ The basis of Riak's availability and tolerance is that it can read from, or writ
 
 N is the number of total nodes that a value should be replicated to, defaulting to 3. But we can set this `n_val` to any number fewer than the total number of nodes.
 
-Any bucket property, including `n_val`, can be set by sending a `props` value as a JSON object to the bucket url. Let's set the `n_val` to 5 nodes, meaning that objects written to `cart` will be replicated to 5 nodes.
+Any bucket property, including `n_val`, can be set by sending a `props` value as a JSON object to the bucket URL. Let's set the `n_val` to 5 nodes, meaning that objects written to `cart` will be replicated to 5 nodes.
 
 ```bash
 curl -i -XPUT http://localhost:8098/riak/cart \
@@ -254,11 +254,11 @@ As you can see, `n_val` is 5. That's expected. But you may also have noticed tha
 
 <h5>Symbolic Values</h5>
 
-A *quorum* is a one more than half of all the total replicated nodes (floor(N/2) + 1). This is an important figure, since if more than half of all nodes are written to, and more than half of all nodes are read from, then you will get the most recent value (under normal circumstances).
+A *quorum* is a one more than half of all the total replicated nodes (`floor(N/2) + 1`). This is an important figure, since if more than half of all nodes are written to, and more than half of all nodes are read from, then you will get the most recent value (under normal circumstances).
 
-Here's an example with the above `n_val` of 5 ({A,B,C,D,E}). Your `w` is a quorum (which is `3`, or floor(5/2)+1), so a PUT may respond successfully after writing to {A,B,C} ({D,E} will eventually be replicated to). Immediately after, a read quorum may GET values from {C,D,E}. Even if D and E have older values, you have pulled a value from node C, meaning you will receive the most recent value.
+Here's an example with the above `n_val` of 5 ({A,B,C,D,E}). Your `w` is a quorum (which is `3`, or `floor(5/2)+1`), so a PUT may respond successfully after writing to {A,B,C} ({D,E} will eventually be replicated to). Immediately after, a read quorum may GET values from {C,D,E}. Even if D and E have older values, you have pulled a value from node C, meaning you will receive the most recent value.
 
-What's important is that your reads and writes *overlap*. As long as r+w > n, you'll be able to get the newest values. In other words, you'll have consistency.
+What's important is that your reads and writes *overlap*. As long as `r+w > n`, you'll be able to get the newest values. In other words, you'll have consistency.
 
 A `quorum` is an excellent default, since you're reading and writing from a balance of nodes. But if you have specific requirements, like a log that is often written to, but rarely read, you might find it make more sense to write to a single node, but read from all of them. This affords you an overlap 
 
@@ -278,7 +278,7 @@ Some other values you may have noticed in the bucket's `props` object are `pw`, 
 
 `pr` and `pw` ensure that many *primary* nodes are available before a read or write. Riak will read or write from backup nodes if one is unavailable, because of network partition or some other server outage. This `p` prefix will ensure that only the primary nodes are used, *primary* meaning the vnode which matches the bucket plus N successive vnodes.
 
-Finally `dw` represents the minimal *durable* writes necessary for success. For a normal `w` write to count a write as successful, it merely needs to promise a write has started, even though that write is still in memory, with no guarentee that write has been written to disk, aka, is durable. The `dw` setting represents a minimum number of durable writes necessary to be considered a success. Although a high `dw` value is likely slower than a high `w` value, there are cases where this extra enforcement is good to have, such as dealing with financial data.
+Finally `dw` represents the minimal *durable* writes necessary for success. For a normal `w` write to count a write as successful, it merely needs to promise a write has started, even though that write is still in memory, with no guarantee that write has been written to disk, aka, is durable. The `dw` setting represents a minimum number of durable writes necessary to be considered a success. Although a high `dw` value is likely slower than a high `w` value, there are cases where this extra enforcement is good to have, such as dealing with financial data.
 
 <h5>Per Request</h5>
 
@@ -309,7 +309,8 @@ I put my custom files under the riak installation `./custom/my_validators.erl`.
 %% Object size must be greater than 0 bytes
 value_exists(RiakObject) ->
   case erlang:byte_size(riak_object:get_value(RiakObject)) of
-    Size when Size == 0 -> {fail, "A value sized greater than 0 is required"};
+    Size when Size == 0 ->
+      {fail, "A value sized greater than 0 is required"};
     _ -> RiakObject
   end.
 ```
@@ -329,7 +330,7 @@ Install the file by informing the Riak installation of your new code in `app.con
 }
 ```
 
-All you need to do is set the erlang module and function as a JSON value to the bucket's precommit array `{"mod":"my_validators","fun":"value_exists"}`.
+All you need to do is set the Erlang module and function as a JSON value to the bucket's precommit array `{"mod":"my_validators","fun":"value_exists"}`.
 
 ```bash
 curl -i -XPUT http://localhost:8098/riak/cart \
@@ -351,7 +352,7 @@ Post-commits are similar in form and function, but they react after a commit has
 
 ## Entropy
 
-Entropy is a biproduct of eventual consistency. In other words: although eventual consistency says a write will replicate to other nodes in time, there can be a bit of delay while all nodes do not contain the same value.
+Entropy is a byproduct of eventual consistency. In other words: although eventual consistency says a write will replicate to other nodes in time, there can be a bit of delay while all nodes do not contain the same value.
 
 That difference is *entropy*, and so Riak has created several *anti-entropy* strategies (also called *AE*). We've already talked about how an R/W quorum can deal with differing values when write/read requests overlap at least one node. Riak can repair entropy, or allow you the option to do so yourself.
 
@@ -402,7 +403,7 @@ curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
 HTTP/1.1 200 OK
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA=
 Vary: Accept-Encoding
-Server: MochiWeb/1.1 WebMachine/1.9.0 (someone had painted it blue)
+Server: MochiWeb/1.1 WebMachine/1.9.0 (someone had painted...
 Link: </riak/cart>; rel="up"
 Last-Modified: Thu, 01 Nov 2012 00:13:28 GMT
 ETag: "2IGTrV8g1NXEfkPZ45WfAP"
@@ -426,7 +427,7 @@ curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
 HTTP/1.1 200 OK
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmTwZTIlMfKcMaK7RRfFgA=
 Vary: Accept-Encoding
-Server: MochiWeb/1.1 WebMachine/1.9.0 (someone had painted it blue)
+Server: MochiWeb/1.1 WebMachine/1.9.0 (someone had painted...
 Link: </riak/cart>; rel="up"
 Last-Modified: Thu, 01 Nov 2012 00:14:04 GMT
 ETag: "62NRijQH3mRYPRybFneZaY"
@@ -457,7 +458,7 @@ curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
 HTTP/1.1 300 Multiple Choices
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmTwZTInMfKoG7LdoovCwA=
 Vary: Accept-Encoding
-Server: MochiWeb/1.1 WebMachine/1.9.0 (someone had painted it blue)
+Server: MochiWeb/1.1 WebMachine/1.9.0 (someone had painted...
 Last-Modified: Thu, 01 Nov 2012 00:24:07 GMT
 ETag: "54Nx22W9M7JUKJnLBrRehj"
 Date: Thu, 01 Nov 2012 00:24:07 GMT
@@ -482,13 +483,13 @@ Last-Modified: Thu, 01 Nov 2012 00:24:07 GMT
 --Ql3O0enxVdaMF3YlXFOdmO5bvrs--
 ```
 
-Woah! What's all that?
+Whoa! What's all that?
 
 Since there was a conflict between what Mark and Andy both set the fridge value to be, Riak kept both values.
 
 <h4>V-Tag</h4>
 
-Since we're using the HTTP client, Riak returned a `300 Multiple Choices` code with a `multipart/mixed` mime type. It's up to you to seperate the results, however, you can request a specific value by it's Etag, also called a Vtag.
+Since we're using the HTTP client, Riak returned a `300 Multiple Choices` code with a `multipart/mixed` mime type. It's up to you to separate the results, however, you can request a specific value by it's Etag, also called a Vtag.
 
 Issuing a plain get on the `/cart/fridge-97207` key will also return the vtags of all siblings.
 
@@ -525,7 +526,7 @@ Riak not to resolve this conflict automatically... we want this flexibility.
 
 <h4>Resolving Conflicts</h4>
 
-With all of our options available, we want to resolve this conflict. Since the way of resolving this conflict is largely *use-case specific*, our application can decide how to preceed.
+With all of our options available, we want to resolve this conflict. Since the way of resolving this conflict is largely *use-case specific*, our application can decide how to proceed.
 
 Let's merge the values into a single result set, taking the larger *count* if the *item* is the same. Pass in the vclock of the multipart object, so Riak knows you're resolving the conflict, and you'll get back a new vector clock.
 
@@ -554,7 +555,7 @@ So far we've only dealt with key-value lookups. The truth is, key-value is a pre
 
 <h3>Secondary Indexing (2i)</h3>
 
-A *secondary index* (2i) is a datastructure that lowers the cost of
+A *secondary index* (2i) is a data structure that lowers the cost of
 finding non-key values. Like many other databases, Riak has the
 ability to index data. However, since Riak has no real knowledge of
 the data it stores (they're just binary values), it uses metadata to
@@ -597,17 +598,17 @@ That's about it. It's a basic form of 2i, with a decent array of utility.
 
 <h3>MapReduce/Link Walking</h3>
 
-MapReduce is a method of aggregating large amounts of data by seperating the
+MapReduce is a method of aggregating large amounts of data by separating the
 processing into two phases, map and reduce, that themselves are executed
 in parts. Map will be executed per object to convert/extract some value,
 then those mapped values will be reduced into some aggregate result. What
 do we gain from this structure? It's predicated on the idea that it's cheaper
-to move the algorithms to where the data lives, than to transfering massive 
+to move the algorithms to where the data lives, than to transferring massive 
 amounts of data to a single server to run a calculation.
 
 This method, popularized by Google, can be seen in a wide array of NoSQL
 databases. In Riak, you execute a mapreduce job on a single node, which
-then propogates to the other nodes. The results are mapped and reduced,
+then propagates to the other nodes. The results are mapped and reduced,
 then further reduced down to the calling node and returned.
 
 [IMAGE]
@@ -751,7 +752,7 @@ curl -XPUT http://localhost:8098/riak/people/mark \
 
 With a Link in place, now it's time to walk it. Walking is like a normal
 request, but with the suffix of `/[bucket],[riaktag],[keep]`. In other words,
-the *bucket* a possble link points to, the value of a *riaktag*, and whether to
+the *bucket* a possible link points to, the value of a *riaktag*, and whether to
 *keep* the results of this phase (only useful when chaining link walks). Each
 of these values can be set to a wildcard _, meaning you don't care the value.
 
@@ -794,7 +795,7 @@ case of mapreduce.
 
 There is another phase of a mapreduce query called "link". Rather than
 executing a function, however, it only requires the same configuration
-that you pass through the shortcut url query.
+that you pass through the shortcut URL query.
 
 ```json
     ...
@@ -929,7 +930,7 @@ value. All tagged values will be returned on matching results.
 
 ## Wrapup
 
-Riak is a distributed datastore with several additions to improve upon the
+Riak is a distributed data store with several additions to improve upon the
 standard key-value lookups, like specifying replication values. Since values
 in Riak are opaque, many of these methods either: require custom code to
 extract and give meaning to values,

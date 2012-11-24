@@ -1,0 +1,18 @@
+aside.sidebar {
+  background-color: #CCC;
+  padding: 0.5em;
+  border: 1px solid #999;
+}
+aside.sidebar {
+  padding-top:0;
+  margin-top:0;
+}
+blockquote {
+  font-style:italic;
+}
+pre {
+  font-size:80%;
+}
+code {
+  font-size:95%;
+}

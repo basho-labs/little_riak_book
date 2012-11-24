@@ -39,7 +39,7 @@ partition, it starts over at the first one.
 
 Secondly, the Ring is also used as a shorthand for describing the state of the
 circular hash ring I just mentioned. This Ring (aka *Ring State*) is a
-datastructure that gets passed around between nodes, so they all know the state
+data structure that gets passed around between nodes, so each knows the state
 of the entire cluster. Which node manages which vnodes? If a node gets a
 request for an object managed by other nodes, it consults the Ring and forwards
 on the request to the proper nodes. It's a local copy of a contract that all of
@@ -52,11 +52,11 @@ a *gossip protocol*.
 
 <h3>Gossip</h3>
 
-The *gossip protocol* is Riak's method of keeping all nodes current on the state of the Ring. If a node goes up or down, that information is propgated to other nodes. Periodically, nodes will also send their status to a random peer for added consistency.
+The *gossip protocol* is Riak's method of keeping all nodes current on the state of the Ring. If a node goes up or down, that information is propagated to other nodes. Periodically, nodes will also send their status to a random peer for added consistency.
 
 [IMAGE]
 
-Propogating changes in Ring is an asynchronous operation, and can take a couple minutes depending on
+Propagating changes in Ring is an asynchronous operation, and can take a couple minutes depending on
 Ring size.
 
 <!-- Transfers will not start while a gossip is in progress. -->
@@ -149,7 +149,7 @@ down the list N times. If we set N=3, then the `food/favorite` object will be wr
 the `D@10.0.1.4` node's partition `5480631...` (I truncated the number here),
 `A@10.0.1.1` partition `7307508...`, and `B@10.0.1.2` partition `9134385...`.
 
-If something has happend to one of those nodes, like a network split
+If something has happened to one of those nodes, like a network split
 (confusingly also called a partition---the "P" in "CAP"), the remaining
 active nodes in the list become candidates to hold the data.
 
@@ -166,15 +166,15 @@ a node is unavailable, by simply trying the next available node in the list.
 <h3>Hinted Handoff</h3>
 
 When a node goes down data is replicated to a backup node. But this is not a solution, merely a
-bandaid. So Riak will periodically trigger vnodes to check if they reside on the correct node
+band aid. So Riak will periodically trigger vnodes to check if they reside on the correct node
 (according to the Ring). If not, the managing process will attempt to connect with the home
 node, and if that node responds, will hand off any data it hold back to proper node.
 
 As long as the temporary node cannot connect to the primary, it will continue to access writes
-and reads on behalf of its incapacitated bretheren.
+and reads on behalf of its incapacitated brethren.
 
 High availability is not the only purpose of hinted handoff. In the case where the ring changes,
-because a node was added or removed, data must be transfered to its new home. In this case,
+because a node was added or removed, data must be transferred to its new home. In this case,
 the same thing will happen: a vnode checks if it's in the correct place, and if not, attempts
 to transfer its data to its new home node.
 
@@ -197,9 +197,9 @@ Install Riak on four or five nodes---five being the recommended safe minimum for
 
 <h3>Command Line</h3>
 
-Most Riak operations can be performed though the command line. We'll concern outselves with two: `riak` and `riak-admin`.
+Most Riak operations can be performed though the command line. We'll concern ourselves with two: `riak` and `riak-admin`.
 
-<h4>`riak`</h4>
+<h4>riak</h4>
 
 Simply typing the `riak` command will give a useage list, although not a
 terribly descriptive one.
@@ -230,7 +230,7 @@ dev/dev1/bin/riak-admin cluster commit
 You should now have a 5 node cluster running locally.
 -->
 
-<h4>`riak-admin`</h4>
+<h4>riak-admin</h4>
 
 The `riak-admin` command is the meat operations, the tool you'll use most often. This is where you'll join nodes to the Ring, diagnose issues, check status, and trigger backups.
 
@@ -274,7 +274,7 @@ but they instead must be informed by either `js-reload` or `erl-reload` command.
 to a node, which I find useful for testing a client's ability to connect, and the node's
 ability to write.
 
-Finally, `top` is an analysis command checking the Erlang details of a partitular node in
+Finally, `top` is an analysis command checking the Erlang details of a particular node in
 real time. Different processes have different process ids (Pids), use varying amounts of memory,
 queue up so many messages at a time (MsgQ), and so on. This is useful for advanced diagnostics,
 and is especially useful if you know Erlang, or seek help from other users, the Riak team, or
@@ -399,7 +399,7 @@ Cluster changes committed
 ```
 
 Without any data, adding a node to a cluster is a quick operation. However, with large amounts of
-data to be transfered to a new node, it can take quite a while before the service is available.
+data to be transferred to a new node, it can take quite a while before the service is available.
 
 <h3>Status Options</h3>
 
@@ -597,7 +597,7 @@ partitioned keyspace, launching and supervising vnodes, preference list
 building, hinted handoff, and things that aren't related specifically to
 client interfaces, handling requests, or storage.
 
-Riak Core, like any project, has some hard coded values (for exmaple, how
+Riak Core, like any project, has some hard coded values (for example, how
 protocol buffer messages are encoded in binary). However, many values
 can be modified to fit your use-case. The majority of this configuration
 occurs under `app.config`. This file is Erlang code, so commented lines
@@ -659,7 +659,7 @@ in the cluster (`ring_creation_size`), and several port options.
 Riak KV is the Key/Value implementation of Riak Core. This is where the magic
 happens, such as handling requests, coordinating them for redundancy and read
 repair. It's what makes the Riak, as we know it, a KV store rather than something
-else like a Cassandra-style columnar datastore.
+else like a Cassandra-style columnar data store.
 
 <!-- When configuring KV, you may scratch your head about about when a setting belongs
 under `riak_kv` versus `riak_core`. For example, if `http` is under core, why
@@ -667,8 +667,8 @@ is raw_name under riak. -->
 
 HTTP access to KV defaults to the `/riak` path as we've seen in examples
 throughout the book. This prefix is editable via `raw_name`. Many of the
-other KV settings are concerned with backward compatability modes,
-backend settings, mapreduce, and javascript integration.
+other KV settings are concerned with backward compatibility  modes,
+backend settings, mapreduce, and Javascript integration.
 
 ```erlang
 %% Riak KV config
@@ -856,7 +856,7 @@ the following options.
 ]},
 ```
 
-With the Multi backend, you can even choose different different backends
+With the Multi backend, you can even choose different backends
 for different buckets. This can make sense, as one bucket may hold
 user information that you wish to index (use eleveldb), while another
 bucket holds volatile session information that you may prefer to simply
@@ -905,14 +905,14 @@ So far, all of the components we've seen have been inside the Riak house. The AP
 is the front door. *In a perfect world*, the API would manage two implementations:
 Protocol buffers (PB), an efficient binary protocol framework designed by Google;
 and HTTP. Unfortunately the HTTP client interface is not yet ported, leaving only
-PB for now---though I like to cosider this as a mere implementation detail, to be
+PB for now---though I like to consider this as a mere implementation detail, to be
 unraveled from KV soon.
 
-But because they are not yet seperated, only PB is configured under `riak_api`,
+But because they are not yet separated, only PB is configured under `riak_api`,
 while HTTP still remains under KV.
 
 In any case, Riak API represents the client facing aspect of Riak. Implementations
-handle how data is encoded and transfered, and this project handles the services
+handle how data is encoded and transferred, and this project handles the services
 for presenting those interfaces, managing connections, providing entry points.
 
 
@@ -991,7 +991,7 @@ docs
 ]},
 ```
 
-<h3>Backward Incompatability</h3>
+<h3>Backward Incompatibility</h3>
 
 Riak is a project in evolution. And as such, it has a lot of projects that have
 been created, but over time are being replaced with newer versions. Obviously
@@ -1016,7 +1016,7 @@ Riaknostic is a diagnostic tool for Riak, meant to run a suite of checks against
 an installation to discover potential problems. If it finds any, it also
 recommends potential resolutions.
 
-Riaknostic exists seperately from the core project, but is meant to be
+Riaknostic exists separately from the core project, but is meant to be
 downloaded and integrated with an installation.
 
 http://riaknostic.basho.com/

@@ -4,8 +4,6 @@ require 'redcarpet'
 OUTPUT_DIR = 'rendered'
 
 def gen_html(language)
-  Dir.mkdir('tmp') rescue nil
-
   markdown_toc = Redcarpet::Markdown.new(Redcarpet::Render::HTML_TOC.new(),
     :fenced_code_blocks => true,
     :autolink => true,
@@ -38,10 +36,12 @@ def gen_book(language, html_file, format)
     '--language', language,
     '--authors', 'Eric Redmond',
     '--comments', "Licensed under the Creative-Commons Attribution-Noncommercial-Share Alike 3.0 Unported",
-    # '--cover', 'assets/cover.png',
+    '--cover', 'assets/cover.jpeg',
+    '--extra-css', 'assets/style.css',
+    '--tags', 'riak,free',
     '--level1-toc', '//h:h1',
     '--level2-toc', '//h:h2',
-    '--level3-toc', '//h:h3')
+    '--smarten-punctuation')
 end
 
 

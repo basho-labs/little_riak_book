@@ -1,4 +1,4 @@
-<html><head><title>A Little Riak Book</title></head><body><h1 id="toc_24">A Little Riak Book</h1>
+<html><head><title>A Little Riak Book</title></head><meta charset="utf-8"><body><h1 id="toc_24">A Little Riak Book</h1>
 
 <h3 id="toc_25"><em>Eric Redmond</em></h3>
 
@@ -112,11 +112,9 @@ facts are being verified, texts are being edited, jokes are being made funny.</e
 
 <p>It&#39;s a hard number to pin down, because Big Data is a personal figure. What&#39;s big to one might be small to another. Ths is why many definitions don&#39;t refer to byte count at all, but instead about relative potentials. A reasonable, albeit wordy, <a href="http://www.gartner.com/DisplayDocument?ref=clientFriendlyUrl&amp;id=2057415">definition of Big Data</a> is given by Gartner.</p>
 
-<blockquote>Big Data are high-volume, high-velocity, and/or high-variety information assets that require new forms of processing to enable enhanced decision making, insight discovery and process optimization.</blockquote>
+<p><blockquote>Big Data are high-volume, high-velocity, and/or high-variety information assets that require new forms of processing to enable enhanced decision making, insight discovery and process optimization.</blockquote></aside></p>
 
-<p></aside></p>
-
-<p>The sweet-spot of Riak is high-volume (data that&#39;s available to read and write when you need it), high-velocity (easily responds to growth), and high-variety information assets (you can store any type of data as a value).</p>
+<p>The sweet spot of Riak is high-volume (data that&#39;s available to read and write when you need it), high-velocity (easily responds to growth), and high-variety information assets (you can store any type of data as a value).</p>
 
 <p>Riak was built as a solution to real Big Data problems, based on the <em>Amazon Dynamo</em> design. Dynamo is a highly available design---meaning that it responds to requests quickly at very large scales, even if your application is storing and serving terabytes of data a day. Riak had been used in production prior to being open-sourced in 2009. It&#39;s currently used by Github, Comcast, Voxer, Disqus and others, with the larger systems storing hundreds of TBs of data, and handling several GBs per node daily.</p>
 
@@ -135,7 +133,7 @@ facts are being verified, texts are being edited, jokes are being made funny.</e
 
 <h2 id="toc_4">The Landscape</h2>
 
-<p>Before we understand where Riak sits in the spectrum of databases, it&#39;s good to have a little front matter. The existence of databases like Riak is the culmination of two things: accessible technology spuring different data requirements, and gaps in the data management market.</p>
+<p>Before we understand where Riak sits in the spectrum of databases, it&#39;s good to have a little front matter. The existence of databases like Riak is the culmination of two things: accessible technology spurring different data requirements, and gaps in the data management market.</p>
 
 <p>First, as we&#39;ve seen steady improvements in technology along with reductions in cost, vast amounts of computing power and storage are now within the grasp of nearly anyone. Along with our increasingly interconnected world caused by the web and shrinking, cheaper computers (like smartphones), this has catalyzed an exponential growth of data, and a demand for more predictability and speed by savvier users. In short, more data is being created on the front-end, while more data is being managed on the backend.</p>
 
@@ -151,7 +149,7 @@ facts are being verified, texts are being edited, jokes are being made funny.</e
 
 <p>Unlike relational databases, but similar to document and columnar stores, objects cannot be joined by Riak. Client code is responsible for accessing values and merging them, or by other code such as mapreduce.</p>
 
-<p>The ability to easily join data across physical servers is a tradeoff that seperates single node databases like relational and graph, from naturally partitionable systems like document, columnar, and key/value stores.</p>
+<p>The ability to easily join data across physical servers is a tradeoff that separates single node databases like relational and graph, from naturally partitionable systems like document, columnar, and key/value stores.</p>
 
 <p>This limitation changes how you model data. Relational normalization (organizing data to reduce redundancy) exists for systems that can cheaply join data together per request. However, the ability to spread data across multiple nodes requires a denormalized approach, where some data is duplicated, and computed values may be stored for the sake of performance.
 </aside></p>
@@ -165,7 +163,7 @@ occurs by more powerful hardware (vertical growth).</p>
 <p>Examples: <em>PostgreSQL</em>, <em>MySQL</em>, <em>Oracle</em></p></li>
 <li><p><strong>Graph</strong>. These exist for highly interconnected data. They excel in
 modeling complex relationships between nodes, and many implementations can
-handle multiple billions of nodes and relationships (or edges and vertices). I tend to include <em>triplestores</em> and <em>object DBs</em> to be specialized varients.</p>
+handle multiple billions of nodes and relationships (or edges and vertices). I tend to include <em>triplestores</em> and <em>object DBs</em> to be specialized variants.</p>
 
 <p>Examples: <em>Neo4j</em>, <em>Graphbase</em>, <em>InfiniteGraph</em></p></li>
 <li><p><strong>Document</strong>. Document datastores model hierarchical values called documents,
@@ -214,7 +212,7 @@ multi-datacenter distributed systems like <em>Riak Enterprise</em>.</p>
 
 <p>Successive requests for <code>favorite</code> will now return <code>cold pizza</code>.</p>
 
-<p>For convenience, we call a key/value pair an <em>object</em>. Together our <code>favorite</code>/<code>pizza</code> pair is refered to as the &quot;<code>favorite</code> object&quot;, rather than the more verbose &quot;<code>favorite</code> key and its value&quot;.</p>
+<p>For convenience, we call a key/value pair an <em>object</em>. Together our <code>favorite</code>/<code>pizza</code> pair is referred to as the &quot;<code>favorite</code> object&quot;, rather than the more verbose &quot;<code>favorite</code> key and its value&quot;.</p>
 
 <h3>Buckets</h3>
 
@@ -222,7 +220,7 @@ multi-datacenter distributed systems like <em>Riak Enterprise</em>.</p>
 
 <p>You can think of buckets as <a href="http://en.wikipedia.org/wiki/Namespace_(computer_science)">namespaces</a>.</p>
 
-<p>Using our <code>favorite</code> example from above, we can specify a favorite food, versus a favorite animal, by using the same key. Unless you&#39;re a midwest farm kid like me, these categories probably won&#39;t overlap much.</p>
+<p>Using our <code>favorite</code> example from above, we can specify a favorite food, versus a favorite animal, by using the same key. Unless you&#39;re a Midwest farm kid like me, these categories probably won&#39;t overlap much.</p>
 
 <pre><code class="javascript">food[&quot;favorite&quot;] = &quot;pizza&quot;
 animals[&quot;favorite&quot;] = &quot;red panda&quot;
@@ -268,11 +266,11 @@ animals[&quot;favorite&quot;] = &quot;red panda&quot;
 &quot;Zimbabwe&quot;:    &quot;Harare&quot;
 </code></pre>
 
-<p>The downside with replication is that you are multiplying the amount of storeage required for every duplicate. There is also some network overhead with this approach, since values must also be routed to all replicated nodes on write. But there is a more insidious problem with this approach which we will cover shortly.</p>
+<p>The downside with replication is that you are multiplying the amount of storage required for every duplicate. There is also some network overhead with this approach, since values must also be routed to all replicated nodes on write. But there is a more insidious problem with this approach, which we will cover shortly.</p>
 
 <h3>Partitions</h3>
 
-<p>A <strong>partition</strong> is how we divide a set of keys onto seperate physical servers. Rather than duplicate values, we pick one server to exclusively host a range of keys, and the other servers to host remaining non-overlaping ranges.</p>
+<p>A <strong>partition</strong> is how we divide a set of keys onto separate  physical servers. Rather than duplicate values, we pick one server to exclusively host a range of keys, and the other servers to host remaining non-overlapping ranges.</p>
 
 <p>With partitioning, our total capacity can increase without any big expensive hardware, just lots of cheap commodity servers. If we decided to partition our database into 1000 parts across 1000 nodes, we have (hypothetically) reduced the amount of work any particular server must do to 1/1000th.</p>
 
@@ -296,7 +294,7 @@ animals[&quot;favorite&quot;] = &quot;red panda&quot;
 &quot;Zimbabwe&quot;:    &quot;Harare&quot;
 </code></pre>
 
-<p>There is a bit of overhead the parition approach. Some service must keep track of what range of values live on which node. A requesting application must know that the key <code>Spain</code> will be routed to Node B, not Node A.</p>
+<p>There is a bit of overhead the partition approach. Some service must keep track of what range of values live on which node. A requesting application must know that the key <code>Spain</code> will be routed to Node B, not Node A.</p>
 
 <p>There&#39;s also another downside. Unlike replication, simple partitioning of data actually <em>decreases</em> uptime. If one node goes down, that entire partition of data is unavailable. This is why Riak combines both replication and partitioning.</p>
 
@@ -306,7 +304,7 @@ animals[&quot;favorite&quot;] = &quot;red panda&quot;
 
 <h3>Replication+Partitions</h3>
 
-<p>Since partitions allow us to increase capacity, and relication improves availability, Riak combines them. We partition data across multiple nodes, as well as replicate that data into multiple nodes.</p>
+<p>Since partitions allow us to increase capacity, and replication improves availability, Riak combines them. We partition data across multiple nodes, as well as replicate that data into multiple nodes.</p>
 
 <p>Where our previous example partitioned data into 2 nodes, we can replicate each of those partitions into 2 more nodes, for a total of 4.</p>
 
@@ -353,7 +351,7 @@ animals[&quot;favorite&quot;] = &quot;red panda&quot;
 
 <p>[IMAGE]</p>
 
-<p>You may have wondered, &quot;Didn&#39;t he say that Riak suggests a minimum of 5 nodes? How can we put 64 partitions on 5 nodes?&quot; We just give each node more than one partition, which Riak calls a vnode, or virtual node.</p>
+<p>You may have wondered, &quot;Didn&#39;t he say that Riak suggests a minimum of 5 nodes? How can we put 64 partitions on 5 nodes?&quot; We just give each node more than one partition, which Riak calls a <em>vnode</em>, or <em>virtual node</em>.</p>
 
 <p>We count around the ring of vnodes in order, assigning each node to the next available vnode, until all vnodes are accounted for. So partition/vnode 1 would be owned by Node A, vnode 2 owned by Node B, up to vnode 5 owned by Node E. Then we continue by giving Node A vnode 6, Node B vnode 7, and so on, until our vnodes have been exhausted, leaving us this list.</p>
 
@@ -369,7 +367,7 @@ animals[&quot;favorite&quot;] = &quot;red panda&quot;
 
 <p>So when we write our <code>favorite</code> object to vnode 3, it will be replicated to vnodes 4 and 5. This places the object in physical nodes C, D, and E. Once the write is complete, even if node C crashes, the value is still available on 2 other nodes. This is the secret of Riak&#39;s high availability.</p>
 
-<p>We can visualize the Ring with it&#39;s vnodes, managing nodes, and where <code>favorite</code> will go.</p>
+<p>We can visualize the Ring with its vnodes, managing nodes, and where <code>favorite</code> will go.</p>
 
 <p>[IMAGE]</p>
 
@@ -383,11 +381,11 @@ animals[&quot;favorite&quot;] = &quot;red panda&quot;
 
 <h3>CAP Theorem</h3>
 
-<p>Classic RDBMS databases are <em>write consistent</em>. Once a write is confirmed, successive reads are guarenteed to return the newest value. If I save the value <code>cold pizza</code> to my key <code>favorite</code>, every future read will consistently return <code>cold pizza</code> until I change it.</p>
+<p>Classic RDBMS databases are <em>write consistent</em>. Once a write is confirmed, successive reads are guaranteed to return the newest value. If I save the value <code>cold pizza</code> to my key <code>favorite</code>, every future read will consistently return <code>cold pizza</code> until I change it.</p>
 
 <!-- The very act of placing our data in multiple servers carries some inherent risk. -->
 
-<p>But when values are distributed, <em>consistency</em> might not be guarenteed. In the middle of an object&#39;s replication, two servers could have different results. When we update <code>favorite</code> to <code>cold pizza</code> on one node, another node might temporarily contain the older value <code>pizza</code>. If you request the value of <code>favorite</code> during this replication, two different results can be returned---the database is inconsistent.</p>
+<p>But when values are distributed, <em>consistency</em> might not be guaranteed. In the middle of an object&#39;s replication, two servers could have different results. When we update <code>favorite</code> to <code>cold pizza</code> on one node, another node might temporarily contain the older value <code>pizza</code>. If you request the value of <code>favorite</code> during this replication, two different results can be returned---the database is inconsistent.</p>
 
 <p>We do have an alternative choice. Rather than lose consistency, you could chose to lose <em>availability</em>. We may, for instance, decide to lock the entire database during a write, and simply refuse to serve requests until that value has been replicated to all relevant nodes. Even for that split second time, clients have to wait while their results can be brought into a consistent state (meaning, all replicas will return the same value). For many high-traffic read/write use-cases, like an online shopping cart where even minor delays will cause people to just shop elsewhere, this is not an acceptable sacrifice.</p>
 
@@ -437,7 +435,7 @@ Strictly speaking, Riak has a tunable latency-availability tradeoff, but the con
 
 <p>Vector clocks measure a sequence of events, just like a normal clock. But since we can&#39;t reasonably keep dozens, or hundreds, or thousands of servers in sync (without really exotic hardware, like geosynchronous atomic clocks), we instead keep track of how, and who, modifies an object. It&#39;s as easy as keeping a vector (or array) of which clients change an object in which order. That way we can tell if an object is being updated or if a write conflict has occurred.</p>
 
-<p>Let&#39;s use our <code>favorite</code> example again, but this time we have 3 people trying to come to a concensus on their favorite food: Aaron, Britney, and Carrie. We&#39;ll track the value each has chosen, and the relevant vector clock, or vclock.</p>
+<p>Let&#39;s use our <code>favorite</code> example again, but this time we have 3 people trying to come to a consensus on their favorite food: Aaron, Britney, and Carrie. We&#39;ll track the value each has chosen, and the relevant vector clock, or vclock.</p>
 
 <p>When Aaron sets the <code>favorite</code> object to <code>pizza</code>, a hypothetical vector clock could contain his name, and the number of updates he&#39;s performed.</p>
 
@@ -451,10 +449,10 @@ value:  pizza
 value:  cold pizza
 </code></pre>
 
-<p>At the same time as Britney, Carrie decides that pizza all around was a bad choice, and tried to change Aaron&#39;s value to <code>lasagne</code>.</p>
+<p>At the same time as Britney, Carrie decides that pizza all around was a bad choice, and tried to change Aaron&#39;s value to <code>lasagna</code>.</p>
 
 <pre><code>vclock: [Aaron: 1, Carrie: 1]
-value:  lasagne
+value:  lasagna
 </code></pre>
 
 <p>This presents a problem, because there are now two vector clocks in play that diverge after <code>[Aaron: 1]</code>. So Riak can store both values and both vclocks.</p>
@@ -465,7 +463,7 @@ value:  lasagne
 value:  cold pizza
 ---
 vclock: [Aaron: 1, Carrie: 1]
-value:  lasagne
+value:  lasagna
 </code></pre>
 
 <p>It&#39;s clear that a decision must be made. Since two people generally agreed on <code>pizza</code>, Britney resolves the conflict by deciding on Aaron&#39;s original <code>pizza</code> value, and updating with her vclock.</p>
@@ -482,9 +480,18 @@ value:  pizza
 
 <h3>Riak and ACID</h3>
 
+<p><aside id="acid" class="sidebar"><h3>Distributed Relational is Not Exempt</h3></p>
+
+<p>You may have wondered why we don&#39;t just distribute a standard relational database. After all, MySQL has the ability to cluster, and it&#39;s ACID, right? Yes and no.</p>
+
+<p>A single node in the cluster is ACID, but the entire cluster is not without a loss of availability, and often worse, increased latency. When you write to a primary node, and a secondary node is replicated to, a network partition can occur. To remain available, the secondary will not be in sync (eventually consistent). Have you ever lost data between a failure and a backup? Same idea.</p>
+
+<p>Or, the entire transaction can fail, making the whole cluster unavailable. Even ACID databases cannot escape the scourge of CAP.
+</aside></p>
+
 <p>Unlike single node databases like Neo4j or PostgreSQL, Riak does not support ACID transactions. Locking across multiple servers would kill write availability, and equally concerning, increase latency. While ACID transactions promise Atomicity, Consistency, Isolation, and Durability---Riak and other NoSQL databases follow BASE, or Basically Available, Soft state, Eventually consistent.</p>
 
-<p>The BASE acronym was meant as shorthand for the goals of non-ACID-transactional databases like Riak. It is an acceptance that distribution is never perfect (basically available), all data is in flux (soft state), and that true consistency is generally untennable (eventually consistent).</p>
+<p>The BASE acronym was meant as shorthand for the goals of non-ACID-transactional databases like Riak. It is an acceptance that distribution is never perfect (basically available), all data is in flux (soft state), and that true consistency is generally untenable (eventually consistent).</p>
 
 <p>Be wary if anyone has promised distributed ACID transactions---it&#39;s usually couched in some diminishing adjective or caveat like <em>row transactions</em>, or <em>per node transactions</em>, which basically mean <em>not transactional</em> in terms you would normally use to define it.</p>
 
@@ -492,7 +499,7 @@ value:  pizza
 
 <h2 id="toc_8">Wrapup</h2>
 
-<p>Riak is designed to bestow a range of real-world benefits, but equally, to handle the fallout of weidling such power. Consistent hashing and vnodes are an elegant solution to horizontally scaling across servers. N/R/W allows you to dance with the CAP theorem by fine-tuning against its constraints. And vector clocks allow another step closer to true consistency by allowing you to manage conflicts that will occur at high load.</p>
+<p>Riak is designed to bestow a range of real-world benefits, but equally, to handle the fallout of wielding such power. Consistent hashing and vnodes are an elegant solution to horizontally scaling across servers. N/R/W allows you to dance with the CAP theorem by fine-tuning against its constraints. And vector clocks allow another step closer to true consistency by allowing you to manage conflicts that will occur at high load.</p>
 
 <p>We&#39;ll cover other technical concepts as needed, like the gossip protocol or read-repair.</p>
 
@@ -503,12 +510,12 @@ value:  pizza
 
 <p>It&#39;s worth mentioning that I use the word &quot;node&quot; a lot. Realistically, this means a physical/virtual server, but really, the workhorses of Riak are vnodes. </p>
 
-<p>When you write to multiple vnodes, Riak will attempt to spread values to as many physical servers as possible. However, this isn&#39;t guarenteed (for example, if you have 64 vnodes, and only two physical ones, setting replication to 5 is perfectly fine, if not a bit redundant). You&#39;re safe conceptualizing nodes as Riak instances, and it&#39;s simpler than qualifying &quot;vnode&quot; all the time. If someting applies specifically to a vnode, I&#39;ll mention it.
+<p>When you write to multiple vnodes, Riak will attempt to spread values to as many physical servers as possible. However, this isn&#39;t guaranteed (for example, if you have 64 vnodes, and only two physical ones, setting replication to 5 is perfectly fine, if not a bit redundant). You&#39;re safe conceptualizing nodes as Riak instances, and it&#39;s simpler than qualifying &quot;vnode&quot; all the time. If something applies specifically to a vnode, I&#39;ll mention it.
 </aside></p>
 
 <p><em>We&#39;re going to hold off on the details of installing Riak at the moment. If you&#39;d like to follow along, it&#39;s easy enough to get started by following the documentation on the website. If not, this is a perfect section to read while you sit on a train without internet connection.</em></p>
 
-<p>Developing with a Riak database is quite easy to do, once you understand some of the finer points. It is a key/value store, in the technical sense (you associate values with keys, and retrieve them using the same keys) but it offers so much more. You can embed write hooks to fire before or after a write, or index data for quick retrieval. Riak has a SOLR-based search, and lets you run mapreduce functions to extract and aggregate data across a huge cluster with TB of data in a reletively short timespan. We&#39;ll show some of the bucket-specific settings developers can configure.</p>
+<p>Developing with a Riak database is quite easy to do, once you understand some of the finer points. It is a key/value store, in the technical sense (you associate values with keys, and retrieve them using the same keys) but it offers so much more. You can embed write hooks to fire before or after a write, or index data for quick retrieval. Riak has a SOLR-based search, and lets you run mapreduce functions to extract and aggregate data across a huge cluster with TB of data in a relatively short timespan. We&#39;ll show some of the bucket-specific settings developers can configure.</p>
 
 <h2 id="toc_10">Lookup</h2>
 
@@ -560,7 +567,7 @@ pizza
 HTTP/1.1 200 OK
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmdwZTImMfKcN3h1Um+LAA=
 Vary: Accept-Encoding
-Server: MochiWeb/1.1 WebMachine/1.9.0 (someone had painted it blue)
+Server: MochiWeb/1.1 WebMachine/1.9.0 (someone had painted...
 Link: &lt;/riak/food&gt;; rel=&quot;up&quot;
 Last-Modified: Wed, 10 Oct 2012 18:56:23 GMT
 ETag: &quot;1yHn7L0XMEoMVXRGp4gOom&quot;
@@ -575,7 +582,7 @@ pizza
 
 <h5>Status Codes</h5>
 
-<p>The first line gives the HTTP version 1.1 response code code <code>200 OK</code>. You may be familiar with the common website code <code>404 Not Found</code>. There are many kinds of <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html">HTTP status codes</a>, and the Riak HTTP interface stays true to their intent: <strong>1xx Informational</strong>, <strong>2xx Success</strong>, <strong>3xx Further Action</strong>, <strong>4xx Client Error</strong>, <strong>5xx Server Error</strong></p>
+<p>The first line gives the HTTP version 1.1 response code <code>200 OK</code>. You may be familiar with the common website code <code>404 Not Found</code>. There are many kinds of <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html">HTTP status codes</a>, and the Riak HTTP interface stays true to their intent: <strong>1xx Informational</strong>, <strong>2xx Success</strong>, <strong>3xx Further Action</strong>, <strong>4xx Client Error</strong>, <strong>5xx Server Error</strong></p>
 
 <p>Different actions can return different response/error codes. Complete lists can be found in the <a href="http://docs.basho.com/riak/latest/references/apis/">official API docs</a>.</p>
 
@@ -611,14 +618,14 @@ pizza
   -d &#39;{&quot;name&quot;:&quot;aaron&quot;}&#39;
 HTTP/1.1 201 Created
 Vary: Accept-Encoding
-Server: MochiWeb/1.1 WebMachine/1.9.2 (someone had painted it blue)
+Server: MochiWeb/1.1 WebMachine/1.9.2 (someone had painted...
 Location: /riak/people/DNQGJY0KtcHMirkidasA066yj5V
 Date: Wed, 10 Oct 2012 17:55:22 GMT
 Content-Type: application/json
 Content-Length: 0
 </code></pre>
 
-<p>You can extract this key from the <code>Location</code> value. Other than not being pretty, thiis key is just as if you defined your own key by a PUT.</p>
+<p>You can extract this key from the <code>Location</code> value. Other than not being pretty, this key is just as if you defined your own key by a PUT.</p>
 
 <h5>Body</h5>
 
@@ -630,7 +637,7 @@ Content-Length: 0
 HTTP/1.1 201 Created
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmdwZTImMfKkD3z10m+LAA=
 Vary: Accept-Encoding
-Server: MochiWeb/1.1 WebMachine/1.9.0 (someone had painted it blue)
+Server: MochiWeb/1.1 WebMachine/1.9.0 (someone had painted...
 Location: /riak/people/DnetI8GHiBK2yBFOEcj1EhHprss
 Link: &lt;/riak/people&gt;; rel=&quot;up&quot;
 Last-Modified: Tue, 23 Oct 2012 04:30:35 GMT
@@ -711,7 +718,7 @@ Content-Length: 16
 
 <p>N is the number of total nodes that a value should be replicated to, defaulting to 3. But we can set this <code>n_val</code> to any number fewer than the total number of nodes.</p>
 
-<p>Any bucket property, including <code>n_val</code>, can be set by sending a <code>props</code> value as a JSON object to the bucket url. Let&#39;s set the <code>n_val</code> to 5 nodes, meaning that objects written to <code>cart</code> will be replicated to 5 nodes.</p>
+<p>Any bucket property, including <code>n_val</code>, can be set by sending a <code>props</code> value as a JSON object to the bucket URL. Let&#39;s set the <code>n_val</code> to 5 nodes, meaning that objects written to <code>cart</code> will be replicated to 5 nodes.</p>
 
 <pre><code class="bash">curl -i -XPUT http://localhost:8098/riak/cart \
   -H &quot;Content-Type: application/json&quot; \
@@ -745,11 +752,11 @@ Content-Length: 16
 
 <h5>Symbolic Values</h5>
 
-<p>A <em>quorum</em> is a one more than half of all the total replicated nodes (floor(N/2) + 1). This is an important figure, since if more than half of all nodes are written to, and more than half of all nodes are read from, then you will get the most recent value (under normal circumstances).</p>
+<p>A <em>quorum</em> is a one more than half of all the total replicated nodes (<code>floor(N/2) + 1</code>). This is an important figure, since if more than half of all nodes are written to, and more than half of all nodes are read from, then you will get the most recent value (under normal circumstances).</p>
 
-<p>Here&#39;s an example with the above <code>n_val</code> of 5 ({A,B,C,D,E}). Your <code>w</code> is a quorum (which is <code>3</code>, or floor(5/2)+1), so a PUT may respond successfully after writing to {A,B,C} ({D,E} will eventually be replicated to). Immediately after, a read quorum may GET values from {C,D,E}. Even if D and E have older values, you have pulled a value from node C, meaning you will receive the most recent value.</p>
+<p>Here&#39;s an example with the above <code>n_val</code> of 5 ({A,B,C,D,E}). Your <code>w</code> is a quorum (which is <code>3</code>, or <code>floor(5/2)+1</code>), so a PUT may respond successfully after writing to {A,B,C} ({D,E} will eventually be replicated to). Immediately after, a read quorum may GET values from {C,D,E}. Even if D and E have older values, you have pulled a value from node C, meaning you will receive the most recent value.</p>
 
-<p>What&#39;s important is that your reads and writes <em>overlap</em>. As long as r+w &gt; n, you&#39;ll be able to get the newest values. In other words, you&#39;ll have consistency.</p>
+<p>What&#39;s important is that your reads and writes <em>overlap</em>. As long as <code>r+w &gt; n</code>, you&#39;ll be able to get the newest values. In other words, you&#39;ll have consistency.</p>
 
 <p>A <code>quorum</code> is an excellent default, since you&#39;re reading and writing from a balance of nodes. But if you have specific requirements, like a log that is often written to, but rarely read, you might find it make more sense to write to a single node, but read from all of them. This affords you an overlap </p>
 
@@ -770,7 +777,7 @@ Content-Length: 16
 
 <p><code>pr</code> and <code>pw</code> ensure that many <em>primary</em> nodes are available before a read or write. Riak will read or write from backup nodes if one is unavailable, because of network partition or some other server outage. This <code>p</code> prefix will ensure that only the primary nodes are used, <em>primary</em> meaning the vnode which matches the bucket plus N successive vnodes.</p>
 
-<p>Finally <code>dw</code> represents the minimal <em>durable</em> writes necessary for success. For a normal <code>w</code> write to count a write as successful, it merely needs to promise a write has started, even though that write is still in memory, with no guarentee that write has been written to disk, aka, is durable. The <code>dw</code> setting represents a minimum number of durable writes necessary to be considered a success. Although a high <code>dw</code> value is likely slower than a high <code>w</code> value, there are cases where this extra enforcement is good to have, such as dealing with financial data.</p>
+<p>Finally <code>dw</code> represents the minimal <em>durable</em> writes necessary for success. For a normal <code>w</code> write to count a write as successful, it merely needs to promise a write has started, even though that write is still in memory, with no guarantee that write has been written to disk, aka, is durable. The <code>dw</code> setting represents a minimum number of durable writes necessary to be considered a success. Although a high <code>dw</code> value is likely slower than a high <code>w</code> value, there are cases where this extra enforcement is good to have, such as dealing with financial data.</p>
 
 <h5>Per Request</h5>
 
@@ -799,7 +806,8 @@ Content-Length: 16
 %% Object size must be greater than 0 bytes
 value_exists(RiakObject) -&gt;
   case erlang:byte_size(riak_object:get_value(RiakObject)) of
-    Size when Size == 0 -&gt; {fail, &quot;A value sized greater than 0 is required&quot;};
+    Size when Size == 0 -&gt;
+      {fail, &quot;A value sized greater than 0 is required&quot;};
     _ -&gt; RiakObject
   end.
 </code></pre>
@@ -817,7 +825,7 @@ value_exists(RiakObject) -&gt;
 }
 </code></pre>
 
-<p>All you need to do is set the erlang module and function as a JSON value to the bucket&#39;s precommit array <code>{&quot;mod&quot;:&quot;my_validators&quot;,&quot;fun&quot;:&quot;value_exists&quot;}</code>.</p>
+<p>All you need to do is set the Erlang module and function as a JSON value to the bucket&#39;s precommit array <code>{&quot;mod&quot;:&quot;my_validators&quot;,&quot;fun&quot;:&quot;value_exists&quot;}</code>.</p>
 
 <pre><code class="bash">curl -i -XPUT http://localhost:8098/riak/cart \
   -H &quot;Content-Type:application/json&quot; \
@@ -837,7 +845,7 @@ A value sized greater than 0 is required
 
 <h2 id="toc_12">Entropy</h2>
 
-<p>Entropy is a biproduct of eventual consistency. In other words: although eventual consistency says a write will replicate to other nodes in time, there can be a bit of delay while all nodes do not contain the same value.</p>
+<p>Entropy is a byproduct of eventual consistency. In other words: although eventual consistency says a write will replicate to other nodes in time, there can be a bit of delay while all nodes do not contain the same value.</p>
 
 <p>That difference is <em>entropy</em>, and so Riak has created several <em>anti-entropy</em> strategies (also called <em>AE</em>). We&#39;ve already talked about how an R/W quorum can deal with differing values when write/read requests overlap at least one node. Riak can repair entropy, or allow you the option to do so yourself.</p>
 
@@ -888,7 +896,7 @@ A value sized greater than 0 is required
 HTTP/1.1 200 OK
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA=
 Vary: Accept-Encoding
-Server: MochiWeb/1.1 WebMachine/1.9.0 (someone had painted it blue)
+Server: MochiWeb/1.1 WebMachine/1.9.0 (someone had painted...
 Link: &lt;/riak/cart&gt;; rel=&quot;up&quot;
 Last-Modified: Thu, 01 Nov 2012 00:13:28 GMT
 ETag: &quot;2IGTrV8g1NXEfkPZ45WfAP&quot;
@@ -911,7 +919,7 @@ Content-Length: 28
 HTTP/1.1 200 OK
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmTwZTIlMfKcMaK7RRfFgA=
 Vary: Accept-Encoding
-Server: MochiWeb/1.1 WebMachine/1.9.0 (someone had painted it blue)
+Server: MochiWeb/1.1 WebMachine/1.9.0 (someone had painted...
 Link: &lt;/riak/cart&gt;; rel=&quot;up&quot;
 Last-Modified: Thu, 01 Nov 2012 00:14:04 GMT
 ETag: &quot;62NRijQH3mRYPRybFneZaY&quot;
@@ -943,7 +951,7 @@ Content-Length: 54
 HTTP/1.1 300 Multiple Choices
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmTwZTInMfKoG7LdoovCwA=
 Vary: Accept-Encoding
-Server: MochiWeb/1.1 WebMachine/1.9.0 (someone had painted it blue)
+Server: MochiWeb/1.1 WebMachine/1.9.0 (someone had painted...
 Last-Modified: Thu, 01 Nov 2012 00:24:07 GMT
 ETag: &quot;54Nx22W9M7JUKJnLBrRehj&quot;
 Date: Thu, 01 Nov 2012 00:24:07 GMT
@@ -968,13 +976,13 @@ Last-Modified: Thu, 01 Nov 2012 00:24:07 GMT
 --Ql3O0enxVdaMF3YlXFOdmO5bvrs--
 </code></pre>
 
-<p>Woah! What&#39;s all that?</p>
+<p>Whoa! What&#39;s all that?</p>
 
 <p>Since there was a conflict between what Mark and Andy both set the fridge value to be, Riak kept both values.</p>
 
 <h4>V-Tag</h4>
 
-<p>Since we&#39;re using the HTTP client, Riak returned a <code>300 Multiple Choices</code> code with a <code>multipart/mixed</code> mime type. It&#39;s up to you to seperate the results, however, you can request a specific value by it&#39;s Etag, also called a Vtag.</p>
+<p>Since we&#39;re using the HTTP client, Riak returned a <code>300 Multiple Choices</code> code with a <code>multipart/mixed</code> mime type. It&#39;s up to you to separate the results, however, you can request a specific value by it&#39;s Etag, also called a Vtag.</p>
 
 <p>Issuing a plain get on the <code>/cart/fridge-97207</code> key will also return the vtags of all siblings.</p>
 
@@ -1008,7 +1016,7 @@ Riak not to resolve this conflict automatically... we want this flexibility.
 
 <h4>Resolving Conflicts</h4>
 
-<p>With all of our options available, we want to resolve this conflict. Since the way of resolving this conflict is largely <em>use-case specific</em>, our application can decide how to preceed.</p>
+<p>With all of our options available, we want to resolve this conflict. Since the way of resolving this conflict is largely <em>use-case specific</em>, our application can decide how to proceed.</p>
 
 <p>Let&#39;s merge the values into a single result set, taking the larger <em>count</em> if the <em>item</em> is the same. Pass in the vclock of the multipart object, so Riak knows you&#39;re resolving the conflict, and you&#39;ll get back a new vector clock.</p>
 
@@ -1035,7 +1043,7 @@ Riak not to resolve this conflict automatically... we want this flexibility.
 
 <h3>Secondary Indexing (2i)</h3>
 
-<p>A <em>secondary index</em> (2i) is a datastructure that lowers the cost of
+<p>A <em>secondary index</em> (2i) is a data structure that lowers the cost of
 finding non-key values. Like many other databases, Riak has the
 ability to index data. However, since Riak has no real knowledge of
 the data it stores (they&#39;re just binary values), it uses metadata to
@@ -1075,17 +1083,17 @@ people under the ages of <code>32</code>, by searching between <code>0</code> an
 
 <h3>MapReduce/Link Walking</h3>
 
-<p>MapReduce is a method of aggregating large amounts of data by seperating the
+<p>MapReduce is a method of aggregating large amounts of data by separating the
 processing into two phases, map and reduce, that themselves are executed
 in parts. Map will be executed per object to convert/extract some value,
 then those mapped values will be reduced into some aggregate result. What
 do we gain from this structure? It&#39;s predicated on the idea that it&#39;s cheaper
-to move the algorithms to where the data lives, than to transfering massive 
+to move the algorithms to where the data lives, than to transferring massive 
 amounts of data to a single server to run a calculation.</p>
 
 <p>This method, popularized by Google, can be seen in a wide array of NoSQL
 databases. In Riak, you execute a mapreduce job on a single node, which
-then propogates to the other nodes. The results are mapped and reduced,
+then propagates to the other nodes. The results are mapped and reduced,
 then further reduced down to the calling node and returned.</p>
 
 <p>[IMAGE]</p>
@@ -1223,7 +1231,7 @@ using the HTTP header <code>Link</code>.</p>
 
 <p>With a Link in place, now it&#39;s time to walk it. Walking is like a normal
 request, but with the suffix of <code>/[bucket],[riaktag],[keep]</code>. In other words,
-the <em>bucket</em> a possble link points to, the value of a <em>riaktag</em>, and whether to
+the <em>bucket</em> a possible link points to, the value of a <em>riaktag</em>, and whether to
 <em>keep</em> the results of this phase (only useful when chaining link walks). Each
 of these values can be set to a wildcard _, meaning you don&#39;t care the value.</p>
 
@@ -1264,7 +1272,7 @@ case of mapreduce.</p>
 
 <p>There is another phase of a mapreduce query called &quot;link&quot;. Rather than
 executing a function, however, it only requires the same configuration
-that you pass through the shortcut url query.</p>
+that you pass through the shortcut URL query.</p>
 
 <pre><code class="json">    ...
     &quot;query&quot;:[{
@@ -1392,7 +1400,7 @@ value. All tagged values will be returned on matching results.</p>
 
 <h2 id="toc_14">Wrapup</h2>
 
-<p>Riak is a distributed datastore with several additions to improve upon the
+<p>Riak is a distributed data store with several additions to improve upon the
 standard key-value lookups, like specifying replication values. Since values
 in Riak are opaque, many of these methods either: require custom code to
 extract and give meaning to values,
@@ -1443,7 +1451,7 @@ partition, it starts over at the first one.</p>
 
 <p>Secondly, the Ring is also used as a shorthand for describing the state of the
 circular hash ring I just mentioned. This Ring (aka <em>Ring State</em>) is a
-datastructure that gets passed around between nodes, so they all know the state
+data structure that gets passed around between nodes, so each knows the state
 of the entire cluster. Which node manages which vnodes? If a node gets a
 request for an object managed by other nodes, it consults the Ring and forwards
 on the request to the proper nodes. It&#39;s a local copy of a contract that all of
@@ -1456,11 +1464,11 @@ a <em>gossip protocol</em>.</p>
 
 <h3>Gossip</h3>
 
-<p>The <em>gossip protocol</em> is Riak&#39;s method of keeping all nodes current on the state of the Ring. If a node goes up or down, that information is propgated to other nodes. Periodically, nodes will also send their status to a random peer for added consistency.</p>
+<p>The <em>gossip protocol</em> is Riak&#39;s method of keeping all nodes current on the state of the Ring. If a node goes up or down, that information is propagated to other nodes. Periodically, nodes will also send their status to a random peer for added consistency.</p>
 
 <p>[IMAGE]</p>
 
-<p>Propogating changes in Ring is an asynchronous operation, and can take a couple minutes depending on
+<p>Propagating changes in Ring is an asynchronous operation, and can take a couple minutes depending on
 Ring size.</p>
 
 <!-- Transfers will not start while a gossip is in progress. -->
@@ -1548,7 +1556,7 @@ down the list N times. If we set N=3, then the <code>food/favorite</code> object
 the <code>D@10.0.1.4</code> node&#39;s partition <code>5480631...</code> (I truncated the number here),
 <code>A@10.0.1.1</code> partition <code>7307508...</code>, and <code>B@10.0.1.2</code> partition <code>9134385...</code>.</p>
 
-<p>If something has happend to one of those nodes, like a network split
+<p>If something has happened to one of those nodes, like a network split
 (confusingly also called a partition---the &quot;P&quot; in &quot;CAP&quot;), the remaining
 active nodes in the list become candidates to hold the data.</p>
 
@@ -1564,15 +1572,15 @@ a node is unavailable, by simply trying the next available node in the list.</p>
 <h3>Hinted Handoff</h3>
 
 <p>When a node goes down data is replicated to a backup node. But this is not a solution, merely a
-bandaid. So Riak will periodically trigger vnodes to check if they reside on the correct node
+band aid. So Riak will periodically trigger vnodes to check if they reside on the correct node
 (according to the Ring). If not, the managing process will attempt to connect with the home
 node, and if that node responds, will hand off any data it hold back to proper node.</p>
 
 <p>As long as the temporary node cannot connect to the primary, it will continue to access writes
-and reads on behalf of its incapacitated bretheren.</p>
+and reads on behalf of its incapacitated brethren.</p>
 
 <p>High availability is not the only purpose of hinted handoff. In the case where the ring changes,
-because a node was added or removed, data must be transfered to its new home. In this case,
+because a node was added or removed, data must be transferred to its new home. In this case,
 the same thing will happen: a vnode checks if it&#39;s in the correct place, and if not, attempts
 to transfer its data to its new home node.</p>
 
@@ -1596,9 +1604,9 @@ do, in fact, I didn&#39;t bother discussing it for most of this book.</p>
 
 <h3>Command Line</h3>
 
-<p>Most Riak operations can be performed though the command line. We&#39;ll concern outselves with two: <code>riak</code> and <code>riak-admin</code>.</p>
+<p>Most Riak operations can be performed though the command line. We&#39;ll concern ourselves with two: <code>riak</code> and <code>riak-admin</code>.</p>
 
-<h4>`riak`</h4>
+<h4>riak</h4>
 
 <p>Simply typing the <code>riak</code> command will give a useage list, although not a
 terribly descriptive one.</p>
@@ -1628,7 +1636,7 @@ dev/dev1/bin/riak-admin cluster commit
 You should now have a 5 node cluster running locally.
 -->
 
-<h4>`riak-admin`</h4>
+<h4>riak-admin</h4>
 
 <p>The <code>riak-admin</code> command is the meat operations, the tool you&#39;ll use most often. This is where you&#39;ll join nodes to the Ring, diagnose issues, check status, and trigger backups.</p>
 
@@ -1670,7 +1678,7 @@ but they instead must be informed by either <code>js-reload</code> or <code>erl-
 to a node, which I find useful for testing a client&#39;s ability to connect, and the node&#39;s
 ability to write.</p>
 
-<p>Finally, <code>top</code> is an analysis command checking the Erlang details of a partitular node in
+<p>Finally, <code>top</code> is an analysis command checking the Erlang details of a particular node in
 real time. Different processes have different process ids (Pids), use varying amounts of memory,
 queue up so many messages at a time (MsgQ), and so on. This is useful for advanced diagnostics,
 and is especially useful if you know Erlang, or seek help from other users, the Riak team, or
@@ -1791,7 +1799,7 @@ Cluster changes committed
 </code></pre>
 
 <p>Without any data, adding a node to a cluster is a quick operation. However, with large amounts of
-data to be transfered to a new node, it can take quite a while before the service is available.</p>
+data to be transferred to a new node, it can take quite a while before the service is available.</p>
 
 <h3>Status Options</h3>
 
@@ -1981,7 +1989,7 @@ partitioned keyspace, launching and supervising vnodes, preference list
 building, hinted handoff, and things that aren&#39;t related specifically to
 client interfaces, handling requests, or storage.</p>
 
-<p>Riak Core, like any project, has some hard coded values (for exmaple, how
+<p>Riak Core, like any project, has some hard coded values (for example, how
 protocol buffer messages are encoded in binary). However, many values
 can be modified to fit your use-case. The majority of this configuration
 occurs under <code>app.config</code>. This file is Erlang code, so commented lines
@@ -2042,7 +2050,7 @@ in the cluster (<code>ring_creation_size</code>), and several port options.</p>
 <p>Riak KV is the Key/Value implementation of Riak Core. This is where the magic
 happens, such as handling requests, coordinating them for redundancy and read
 repair. It&#39;s what makes the Riak, as we know it, a KV store rather than something
-else like a Cassandra-style columnar datastore.</p>
+else like a Cassandra-style columnar data store.</p>
 
 <!-- When configuring KV, you may scratch your head about about when a setting belongs
 under `riak_kv` versus `riak_core`. For example, if `http` is under core, why
@@ -2050,8 +2058,8 @@ is raw_name under riak. -->
 
 <p>HTTP access to KV defaults to the <code>/riak</code> path as we&#39;ve seen in examples
 throughout the book. This prefix is editable via <code>raw_name</code>. Many of the
-other KV settings are concerned with backward compatability modes,
-backend settings, mapreduce, and javascript integration.</p>
+other KV settings are concerned with backward compatibility  modes,
+backend settings, mapreduce, and Javascript integration.</p>
 
 <pre><code class="erlang">%% Riak KV config
 {riak_kv, [
@@ -2234,7 +2242,7 @@ the following options.</p>
 ]},
 </code></pre>
 
-<p>With the Multi backend, you can even choose different different backends
+<p>With the Multi backend, you can even choose different backends
 for different buckets. This can make sense, as one bucket may hold
 user information that you wish to index (use eleveldb), while another
 bucket holds volatile session information that you may prefer to simply
@@ -2281,14 +2289,14 @@ by just setting its <code>backend</code> property.</p>
 is the front door. <em>In a perfect world</em>, the API would manage two implementations:
 Protocol buffers (PB), an efficient binary protocol framework designed by Google;
 and HTTP. Unfortunately the HTTP client interface is not yet ported, leaving only
-PB for now---though I like to cosider this as a mere implementation detail, to be
+PB for now---though I like to consider this as a mere implementation detail, to be
 unraveled from KV soon.</p>
 
-<p>But because they are not yet seperated, only PB is configured under <code>riak_api</code>,
+<p>But because they are not yet separated, only PB is configured under <code>riak_api</code>,
 while HTTP still remains under KV.</p>
 
 <p>In any case, Riak API represents the client facing aspect of Riak. Implementations
-handle how data is encoded and transfered, and this project handles the services
+handle how data is encoded and transferred, and this project handles the services
 for presenting those interfaces, managing connections, providing entry points.</p>
 
 <pre><code class="erlang">%% Riak Client APIs config
@@ -2365,7 +2373,7 @@ docs</p>
 ]},
 </code></pre>
 
-<h3>Backward Incompatability</h3>
+<h3>Backward Incompatibility</h3>
 
 <p>Riak is a project in evolution. And as such, it has a lot of projects that have
 been created, but over time are being replaced with newer versions. Obviously
@@ -2391,7 +2399,7 @@ you run across deprecated configuration, or documentation.</p>
 an installation to discover potential problems. If it finds any, it also
 recommends potential resolutions.</p>
 
-<p>Riaknostic exists seperately from the core project, but is meant to be
+<p>Riaknostic exists separately from the core project, but is meant to be
 downloaded and integrated with an installation.</p>
 
 <p><a href="http://riaknostic.basho.com/">http://riaknostic.basho.com/</a></p>
@@ -2524,14 +2532,14 @@ you can sleep (do you remember what that was?), and fix it in the morning.</p>
 
 <h2 id="toc_22">A Short Note on MDC</h2>
 
-<p>MDC, or Multi Data Center, is a commercial extention to Riak provided by Basho.
+<p><em>MDC</em>, or Multi Data Center, is a commercial extension to Riak provided by Basho.
 While the documentation is freely available, the source code is not. If you get
 the scale where keeping multiple Riak cluster in sync across the globe is 
 necessary, I would recommend considering this option.</p>
 
 <h2 id="toc_23">A Short Note on RiakCS</h2>
 
-<p>RiakCS is Basho&#39;s commercial extension to Riak to allow your cluster to act as
+<p><em>RiakCS</em> is Basho&#39;s commercial extension to Riak to allow your cluster to act as
 a remote storage mechanism, comparable to (and compatible with) Amazon&#39;s
 S3. There are several reasons you may wish to host your own cloud storage mechanism
 (security, legal reasons, you already own lots of hardware, cheaper at scale).</p>
