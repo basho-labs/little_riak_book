@@ -45,7 +45,7 @@ curl -XPUT 'http://localhost:8098/riak/food/favorite' \
   -d 'pizza'
 ```
 
-I threw a few curveballs in there. The `-d` flag denotes the next string will be the value. We've kept things simple with the string `pizza`, declaring it as text with the proceeeding line `-H 'Content-Type:text/plain'`. This defined the HTTP MIME type of this value as plain text. We could have set any value at all, be it XML or JSON---even an image or a video. Any HTTP MIME type is valid content (which is anything, really).
+I threw a few curveballs in there. The `-d` flag denotes the next string will be the value. We've kept things simple with the string `pizza`, declaring it as text with the proceeding line `-H 'Content-Type:text/plain'`. This defined the HTTP MIME type of this value as plain text. We could have set any value at all, be it XML or JSON---even an image or a video. Any HTTP MIME type is valid content (which is anything, really).
 
 <h4>GET</h4>
 
@@ -298,7 +298,7 @@ This is a consistent write, since if a single node is not available the write wi
 
 Another utility of buckets are their ability to enforce behaviors on writes by way of hooks. You can attach functions to run either before, or after, a value is committed to a bucket.
 
-Functions that run before a write is called pre-commit, and has the ability to cancel a write altogether if the incoming data is considered bad in some way. A simple precommit hook it to check if a value exists at all.
+Functions that run before a write is called pre-commit, and has the ability to cancel a write altogether if the incoming data is considered bad in some way. A simple pre-commit hook is to check if a value exists at all.
 
 I put my custom files under the riak installation `./custom/my_validators.erl`.
 
@@ -330,7 +330,7 @@ Install the file by informing the Riak installation of your new code in `app.con
 }
 ```
 
-All you need to do is set the Erlang module and function as a JSON value to the bucket's precommit array `{"mod":"my_validators","fun":"value_exists"}`.
+All you need to do is set the Erlang module and function as a JSON value to the bucket's pre-commit array `{"mod":"my_validators","fun":"value_exists"}`.
 
 ```bash
 curl -i -XPUT http://localhost:8098/riak/cart \
