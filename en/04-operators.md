@@ -201,7 +201,7 @@ Most Riak operations can be performed though the command line. We'll concern our
 
 <h4>riak</h4>
 
-Simply typing the `riak` command will give a useage list, although not a
+Simply typing the `riak` command will give a usage list, although not a
 terribly descriptive one.
 
 ```bash
@@ -210,7 +210,7 @@ Usage: riak {start|stop|restart|reboot|ping|console|attach|chkconfig|escript|ver
 
 Most of these commands are self explanatory, once you know what they mean. `start` and `stop` are simple enough. `restart` means to stop the running node and restart it inside of the same Erlang VM (virtual machine), while `reboot` will take down the Erlang VM and restart everything.
 
-You can print the current running `version`. `ping` will return `pong` if the server is in good shap, otherwise you'll get the *just-similar-enough-to-be-annoying* response `pang` (with an *a*), or a simple `Node *X* not responding to pings` if it's not running at all.
+You can print the current running `version`. `ping` will return `pong` if the server is in good shape, otherwise you'll get the *just-similar-enough-to-be-annoying* response `pang` (with an *a*), or a simple `Node *X* not responding to pings` if it's not running at all.
 
 `chkconfig` is useful if you want to ensure your `etc/app.config` is not broken
 (that is to say, it's parsable). I mentioned `attach` briefly above, when
@@ -750,7 +750,7 @@ path, you can also change HTTP from `/mapred` to a custom path.
 
 Though not implemented in pipe, Riak KV's mapreduce implementation is the
 primary user of the Spidermonkey JavaScript engine---the second use is
-precommit hooks.
+pre-commit hooks.
 
 ```erlang
 %% Riak KV config
