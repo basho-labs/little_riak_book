@@ -146,7 +146,7 @@ The downside with replication is that you are multiplying the amount of storeage
 
 <h3>Partitions</h3>
 
-A **partition** is how we divide a set of keys onto seperate physical servers. Rather than duplicate values, we pick one server to exclusively host a range of keys, and the other servers to host remaining non-overlaping ranges.
+A **partition** is how we divide a set of keys onto seperate physical servers. Rather than duplicate values, we pick one server to exclusively host a range of keys, and the other servers to host remaining non-overlapping ranges.
 
 With partitioning, our total capacity can increase without any big expensive hardware, just lots of cheap commodity servers. If we decided to partition our database into 1000 parts across 1000 nodes, we have (hypothetically) reduced the amount of work any particular server must do to 1/1000th.
 
