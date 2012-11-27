@@ -47,6 +47,7 @@ end
 
 language = ARGV[0] || "en"
 formats = %w{pdf mobi epub}
+formats = ['pdf']
 
 html_file = gen_html(language)
 formats.each do |format|

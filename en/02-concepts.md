@@ -141,6 +141,8 @@ For example, imagine you have a list of country keys, whose values contain those
 "Zimbabwe":    "Harare"
 ```
 
+![Replication](../assets/replication.svg)
+
 The downside with replication is that you are multiplying the amount of storage required for every duplicate. There is also some network overhead with this approach, since values must also be routed to all replicated nodes on write. But there is a more insidious problem with this approach, which we will cover shortly.
 
 
@@ -176,8 +178,7 @@ There is a bit of overhead the partition approach. Some service must keep track 
 
 There's also another downside. Unlike replication, simple partitioning of data actually *decreases* uptime. If one node goes down, that entire partition of data is unavailable. This is why Riak combines both replication and partitioning.
 
-<!-- (diagram the various server setups) -->
-[IMAGE]
+![Partitions](../assets/partitions.svg)
 
 <h3>Replication+Partitions</h3>
 
@@ -209,6 +210,7 @@ Our server count has increased, but so has our capacity and reliability. If you'
 
 The Riak team suggests a minimum of 5 nodes for a Riak cluster, and replicating to 3 nodes (this setting is called `n_val`, for the number of *nodes* on which to replicate each object).
 
+![Replication Partitions](../assets/replpart.svg)
 
 <!-- If the odds of a node going down on any day is 1%, then the odds of any server going down each day when you have 100 of them is about (1-(0.99^100)) 63%. For sufficiently large systems, servers going down are no longer edge-cases. They become regular cases that must be planned for, and designed into your system.
 -->
@@ -228,7 +230,7 @@ We won't do all of the math, but trust me when I say `favorite` falls within the
 
 If we visualize our 64 partitions as a ring, `favorite` falls here.
 
-[IMAGE]
+![Riak Ring](../assets/ring0.svg)
 
 You may have wondered, "Didn't he say that Riak suggests a minimum of 5 nodes? How can we put 64 partitions on 5 nodes?" We just give each node more than one partition, which Riak calls a *vnode*, or *virtual node*.
 
@@ -246,7 +248,7 @@ So when we write our `favorite` object to vnode 3, it will be replicated to vnod
 
 We can visualize the Ring with its vnodes, managing nodes, and where `favorite` will go.
 
-[IMAGE]
+![Riak Ring](../assets/ring1.svg)
 
 The Ring is more than just a circular array of hash partitions. It's also a system of metadata that gets copied to every node. Each node is aware of every other node in the cluster, which nodes own which vnodes, and other system data.
 
