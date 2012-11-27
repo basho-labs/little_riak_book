@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+require "rubygems"
 require 'redcarpet'
 
 OUTPUT_DIR = 'rendered'
