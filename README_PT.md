@@ -13,5 +13,5 @@ bundle install
 O texto está todo em *markdown*. Para compilar o livro, tem que instalar o [calibre](http://manual.calibre-ebook.com/cli/cli-index.html).
 
 ```
-bookgen.rb
+bookgen.rb pt
 ```
