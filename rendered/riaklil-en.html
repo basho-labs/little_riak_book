@@ -266,6 +266,8 @@ animals[&quot;favorite&quot;] = &quot;red panda&quot;
 &quot;Zimbabwe&quot;:    &quot;Harare&quot;
 </code></pre>
 
+<p><img src="../assets/replication.svg" alt="Replication"></p>
+
 <p>The downside with replication is that you are multiplying the amount of storage required for every duplicate. There is also some network overhead with this approach, since values must also be routed to all replicated nodes on write. But there is a more insidious problem with this approach, which we will cover shortly.</p>
 
 <h3>Partitions</h3>
@@ -298,9 +300,7 @@ animals[&quot;favorite&quot;] = &quot;red panda&quot;
 
 <p>There&#39;s also another downside. Unlike replication, simple partitioning of data actually <em>decreases</em> uptime. If one node goes down, that entire partition of data is unavailable. This is why Riak combines both replication and partitioning.</p>
 
-<!-- (diagram the various server setups) -->
-
-<p>[IMAGE]</p>
+<p><img src="../assets/partitions.svg" alt="Partitions"></p>
 
 <h3>Replication+Partitions</h3>
 
@@ -330,6 +330,8 @@ animals[&quot;favorite&quot;] = &quot;red panda&quot;
 
 <p>The Riak team suggests a minimum of 5 nodes for a Riak cluster, and replicating to 3 nodes (this setting is called <code>n_val</code>, for the number of <em>nodes</em> on which to replicate each object).</p>
 
+<p><img src="../assets/replpart.svg" alt="Replication Partitions"></p>
+
 <!-- If the odds of a node going down on any day is 1%, then the odds of any server going down each day when you have 100 of them is about (1-(0.99^100)) 63%. For sufficiently large systems, servers going down are no longer edge-cases. They become regular cases that must be planned for, and designed into your system.
 -->
 
@@ -349,7 +351,7 @@ animals[&quot;favorite&quot;] = &quot;red panda&quot;
 
 <p>If we visualize our 64 partitions as a ring, <code>favorite</code> falls here.</p>
 
-<p>[IMAGE]</p>
+<p><img src="../assets/ring0.svg" alt="Riak Ring"></p>
 
 <p>You may have wondered, &quot;Didn&#39;t he say that Riak suggests a minimum of 5 nodes? How can we put 64 partitions on 5 nodes?&quot; We just give each node more than one partition, which Riak calls a <em>vnode</em>, or <em>virtual node</em>.</p>
 
@@ -369,7 +371,7 @@ animals[&quot;favorite&quot;] = &quot;red panda&quot;
 
 <p>We can visualize the Ring with its vnodes, managing nodes, and where <code>favorite</code> will go.</p>
 
-<p>[IMAGE]</p>
+<p><img src="../assets/ring1.svg" alt="Riak Ring"></p>
 
 <p>The Ring is more than just a circular array of hash partitions. It&#39;s also a system of metadata that gets copied to every node. Each node is aware of every other node in the cluster, which nodes own which vnodes, and other system data.</p>
 
