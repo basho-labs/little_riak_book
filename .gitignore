@@ -2,3 +2,9 @@
 tmp/*
 *~
 .*
+rendered/*.tex
+rendered/*.aux
+rendered/*.log
+rendered/*.out
+rendered/*.toc
+texput.log

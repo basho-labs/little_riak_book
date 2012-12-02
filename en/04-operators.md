@@ -54,7 +54,7 @@ a *gossip protocol*.
 
 The *gossip protocol* is Riak's method of keeping all nodes current on the state of the Ring. If a node goes up or down, that information is propagated to other nodes. Periodically, nodes will also send their status to a random peer for added consistency.
 
-[IMAGE]
+<!-- ![Figure 8. IMAGE] -->
 
 Propagating changes in Ring is an asynchronous operation, and can take a couple minutes depending on
 Ring size.
@@ -280,7 +280,7 @@ queue up so many messages at a time (MsgQ), and so on. This is useful for advanc
 and is especially useful if you know Erlang, or seek help from other users, the Riak team, or
 Basho.
 
-![Top](../assets/top.svg)
+![Figure 1. Top](../assets/top.svg)
 
 <h3>Making a Cluster</h3>
 
@@ -527,14 +527,14 @@ before, Riak is built on Erlang, but that's not the whole story. It's more corre
 to say Riak is fundamentally Erlang, with some pluggable native C code components
 (like leveldb), Java (Yokozuna), and even JavaScript (for Mapreduce or commit hooks).
 
-![Tech Stack](../assets/riak-stack.svg)
+![Figure 2. Tech Stack](../assets/riak-stack.svg)
 
 The way Riak stacks technologies is a good thing to keep in mind, in order to make
 sense of how to configure it properly.
 
 <h3>Erlang</h3>
 
-<img src="../assets/riak-stack-erlang.svg" style="float:right" />
+![Figure 3. Tech Stack](../assets/riak-stack-erlang.svg)
 
 When you fire up a Riak node, it also starts up an Erlang VM (virtual machine) to run
 and manage Riak's processes. These include vnodes, process messages, gossips, resource
@@ -589,7 +589,7 @@ some optional SSL encryption settings.
 
 <h3>riak_core</h3>
 
-<img src="../assets/riak-stack-core.svg" style="float:right" />
+![Figure 4. Tech Stack](../assets/riak-stack-core.svg)
 
 If any single component deserves the title of "Riak proper", it would be
 *Riak Core*. Core, and implementations are responsible for managing the
@@ -654,7 +654,7 @@ in the cluster (`ring_creation_size`), and several port options.
 
 <h3>riak_kv</h3>
 
-<img src="../assets/riak-stack-kv.svg" style="float:right" />
+![Figure 5. Tech Stack](../assets/riak-stack-kv.svg)
 
 Riak KV is the Key/Value implementation of Riak Core. This is where the magic
 happens, such as handling requests, coordinating them for redundancy and read
@@ -700,7 +700,7 @@ backend settings, mapreduce, and Javascript integration.
 
 <h3>riak_pipe</h3>
 
-<img src="../assets/riak-stack-pipe.svg" style="float:right" />
+![Figure 6. Tech Stack](../assets/riak-stack-pipe.svg)
 
 Riak pipe is an input/output messaging system that forms the basis of Riak's
 mapreduce. This was not always the case, and MR used to be a dedicated
@@ -783,7 +783,7 @@ pre-commit hooks.
 
 <h3>yokozuna</h3>
 
-<img src="../assets/riak-stack-yokozuna.svg" style="float:right" />
+![Figure 7. Tech Stack](../assets/riak-stack-yokozuna.svg)
 
 Yokozuna is the newest addition to the Riak ecosystem. It's an integration of
 the distributed Solr search engine into Riak, and provides some extensions
@@ -801,7 +801,7 @@ it, you can choose which `solr_port` will be used.
 
 <h3>bitcask, eleveldb, memory, multi</h3>
 
-<img src="../assets/riak-stack-backend.svg" style="float:right" />
+![Figure 8. Tech Stack](../assets/riak-stack-backend.svg)
 
 Several modern databases have swappable backends, and Riak is no different in that
 respect. Riak currently supports three different storage engines---*Bitcask*,
@@ -899,7 +899,7 @@ $ curl -XPUT http://riaknode:8098/riak/session_data \
 
 <h3>riak_api</h3>
 
-<img src="../assets/riak-stack-api.svg" style="float:right" />
+![Figure 9. Tech Stack](../assets/riak-stack-api.svg)
 
 So far, all of the components we've seen have been inside the Riak house. The API
 is the front door. *In a perfect world*, the API would manage two implementations:
@@ -1123,7 +1123,7 @@ With Control in place, restart your node and connect via a browser (note you're 
 `https`) `https://localhost:8069/admin`. After you log in using the user you set, you
 should see a snapshot page, which communicates the health of your cluster.
 
-![Snapshot View](../assets/control-snapshot.png)
+![Figure 10. Snapshot View](../assets/control-snapshot.png)
 
 If something is wrong, you'll see a huge red "X" instead of the green check mark, along
 with a list of what the trouble is.
@@ -1131,7 +1131,7 @@ with a list of what the trouble is.
 From here you can drill down into a view the cluster's nodes, with details on memory usage,
 partition distribution, and other status. You can also add and configure and these nodes.
 
-![Cluster View](../assets/control-cluster.png)
+![Figure 11. Cluster View](../assets/control-cluster.png)
 
 There is more in line for Riak Control, like performing mapreduce queries, stats views,
 graphs, and more coming down the pipe. It's not a universal toolkit quite yet,
