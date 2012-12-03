@@ -333,6 +333,7 @@ Success: staged join request for 'C@10.0.1.3' to 'A@10.0.1.1'
 ```
 
 <aside class="sidebar"><h3>Don't Wait Too Long</h3>
+
 You should always keep in mind the general pattern Riak
 follows when you make a change to the cluster:
 
