@@ -54,7 +54,7 @@ a *gossip protocol*.
 
 The *gossip protocol* is Riak's method of keeping all nodes current on the state of the Ring. If a node goes up or down, that information is propagated to other nodes. Periodically, nodes will also send their status to a random peer for added consistency.
 
-<!-- ![Figure 8. IMAGE] -->
+<!-- ![IMAGE] -->
 
 Propagating changes in Ring is an asynchronous operation, and can take a couple minutes depending on
 Ring size.
@@ -78,7 +78,7 @@ though I'll try and be more precise here.
 Let's start with Riak configured to have 8 vnodes/partitions, which are set via `ring_creation_size`
 in the `etc/app.config` file (we'll dig deeper into this file later).
 
-```erlang
+```bash
  %% Riak Core config
  {riak_core, [
                ...
@@ -141,8 +141,6 @@ we loop around and continue to exhaust the list.
  {182687704666362864775460604089535377456991567872, 'B@10.0.1.2'},
  {365375409332725729550921208179070754913983135744, 'C@10.0.1.3'}]
 ```
-
-`Ctrl^D`
 
 So what does all this have to do with replication? With the above list, we simply replicate a write
 down the list N times. If we set N=3, then the `food/favorite` object will be written to
@@ -280,7 +278,7 @@ queue up so many messages at a time (MsgQ), and so on. This is useful for advanc
 and is especially useful if you know Erlang, or seek help from other users, the Riak team, or
 Basho.
 
-![Figure 1. Top](../assets/top.svg)
+![Top](../assets/top.svg)
 
 <h3>Making a Cluster</h3>
 
@@ -527,14 +525,14 @@ before, Riak is built on Erlang, but that's not the whole story. It's more corre
 to say Riak is fundamentally Erlang, with some pluggable native C code components
 (like leveldb), Java (Yokozuna), and even JavaScript (for Mapreduce or commit hooks).
 
-![Figure 2. Tech Stack](../assets/riak-stack.svg)
+![Tech Stack](../assets/riak-stack.svg)
 
 The way Riak stacks technologies is a good thing to keep in mind, in order to make
 sense of how to configure it properly.
 
 <h3>Erlang</h3>
 
-![Figure 3. Tech Stack](../assets/riak-stack-erlang.svg)
+![Tech Stack](../assets/riak-stack-erlang.svg)
 
 When you fire up a Riak node, it also starts up an Erlang VM (virtual machine) to run
 and manage Riak's processes. These include vnodes, process messages, gossips, resource
@@ -589,7 +587,7 @@ some optional SSL encryption settings.
 
 <h3>riak_core</h3>
 
-![Figure 4. Tech Stack](../assets/riak-stack-core.svg)
+![Tech Stack](../assets/riak-stack-core.svg)
 
 If any single component deserves the title of "Riak proper", it would be
 *Riak Core*. Core, and implementations are responsible for managing the
@@ -608,7 +606,7 @@ this project. This handles basic settings, like files/directories where
 values are stored or to be written to, the number of partitions/vnodes
 in the cluster (`ring_creation_size`), and several port options.
 
-```erlang
+```bash
 %% Riak Core config
 {riak_core, [
     %% Default location of ringstate
@@ -654,7 +652,7 @@ in the cluster (`ring_creation_size`), and several port options.
 
 <h3>riak_kv</h3>
 
-![Figure 5. Tech Stack](../assets/riak-stack-kv.svg)
+![Tech Stack](../assets/riak-stack-kv.svg)
 
 Riak KV is the Key/Value implementation of Riak Core. This is where the magic
 happens, such as handling requests, coordinating them for redundancy and read
@@ -670,7 +668,7 @@ throughout the book. This prefix is editable via `raw_name`. Many of the
 other KV settings are concerned with backward compatibility  modes,
 backend settings, mapreduce, and Javascript integration.
 
-```erlang
+```bash
 %% Riak KV config
 {riak_kv, [
   %% raw_name is the first part of all URLS used by the Riak raw HTTP
@@ -700,14 +698,14 @@ backend settings, mapreduce, and Javascript integration.
 
 <h3>riak_pipe</h3>
 
-![Figure 6. Tech Stack](../assets/riak-stack-pipe.svg)
+![Tech Stack](../assets/riak-stack-pipe.svg)
 
 Riak pipe is an input/output messaging system that forms the basis of Riak's
 mapreduce. This was not always the case, and MR used to be a dedicated
 implementation, hence some legacy options. Like the ability to alter the KV
 path, you can also change HTTP from `/mapred` to a custom path.
 
-```erlang
+```bash
 %% Riak KV config
 {riak_kv, [
   %% mapred_name is URL used to submit map/reduce requests to Riak.
@@ -752,7 +750,7 @@ Though not implemented in pipe, Riak KV's mapreduce implementation is the
 primary user of the Spidermonkey JavaScript engine---the second use is
 pre-commit hooks.
 
-```erlang
+```bash
 %% Riak KV config
 {riak_kv, [
   ...
@@ -783,7 +781,7 @@ pre-commit hooks.
 
 <h3>yokozuna</h3>
 
-![Figure 7. Tech Stack](../assets/riak-stack-yokozuna.svg)
+![Tech Stack](../assets/riak-stack-yokozuna.svg)
 
 Yokozuna is the newest addition to the Riak ecosystem. It's an integration of
 the distributed Solr search engine into Riak, and provides some extensions
@@ -791,7 +789,7 @@ for extracting, indexing, and tagging documents. The Solr server runs its
 own HTTP interface, and though your Riak users should never have to access
 it, you can choose which `solr_port` will be used.
 
-```erlang
+```bash
 %% Yokozuna Search
 {yokozuna, [
   {solr_port, "8093"},
@@ -801,7 +799,7 @@ it, you can choose which `solr_port` will be used.
 
 <h3>bitcask, eleveldb, memory, multi</h3>
 
-![Figure 8. Tech Stack](../assets/riak-stack-backend.svg)
+![Tech Stack](../assets/riak-stack-backend.svg)
 
 Several modern databases have swappable backends, and Riak is no different in that
 respect. Riak currently supports three different storage engines---*Bitcask*,
@@ -820,7 +818,7 @@ Using a backend is simply a matter of setting the `storage_backend` with one of 
   basis.
 
 
-```erlang
+```bash
 %% Riak KV config
 {riak_kv, [
   %% Storage_backend specifies the Erlang module defining
@@ -832,7 +830,7 @@ Using a backend is simply a matter of setting the `storage_backend` with one of 
 Then, with the exception of Multi, each memory configuration is under one of
 the following options.
 
-```erlang 
+```bash 
 %% Memory Config
 {memory_backend, [
   {max_memory, 4096}, %% 4GB in megabytes
@@ -862,7 +860,7 @@ user information that you wish to index (use eleveldb), while another
 bucket holds volatile session information that you may prefer to simply
 remain resident (use memory).
 
-```erlang
+```bash
 %% Riak KV config
 {riak_kv, [
   ...
@@ -899,7 +897,7 @@ $ curl -XPUT http://riaknode:8098/riak/session_data \
 
 <h3>riak_api</h3>
 
-![Figure 9. Tech Stack](../assets/riak-stack-api.svg)
+![Tech Stack](../assets/riak-stack-api.svg)
 
 So far, all of the components we've seen have been inside the Riak house. The API
 is the front door. *In a perfect world*, the API would manage two implementations:
@@ -916,7 +914,7 @@ handle how data is encoded and transferred, and this project handles the service
 for presenting those interfaces, managing connections, providing entry points.
 
 
-```erlang
+```bash
 %% Riak Client APIs config
 {riak_api, [
   %% pb_backlog is the maximum length to which the queue of pending
@@ -947,7 +945,7 @@ docs
 * [https://github.com/basho/lager](https://github.com/basho/lager)
 * [https://github.com/basho/riak_sysmon](https://github.com/basho/riak_sysmon)
 
-```erlang
+```bash
 %% Lager Config
 {lager, [
   %% What handlers to install with what arguments
@@ -972,7 +970,7 @@ docs
 ]},
 ```
 
-```erlang
+```bash
 %% riak_sysmon config
 {riak_sysmon, [
   %% To disable forwarding events of a particular type, set 0
@@ -1075,7 +1073,7 @@ You can just uncomment these lines, set the `https` port to `8069`, and point
 the `certfile` and `keyfile` to your SSL certificate. If you have an
 intermediate authority, add the `cacertfile` too.
 
-```erlang
+```bash
 %% Riak Core config
 {riak_core, [
     %% https is a list of IP addresses and TCP ports that the Riak
@@ -1096,7 +1094,7 @@ Note that the user password is plain text. Yeah it sucks, so be careful to not
 open your Control web access to the rest of the world, or you risk giving away
 the keys to the kingdom.
 
-```erlang
+```bash
 %% riak_control config
 {riak_control, [
   %% Set to false to disable the admin panel.
@@ -1123,7 +1121,7 @@ With Control in place, restart your node and connect via a browser (note you're 
 `https`) `https://localhost:8069/admin`. After you log in using the user you set, you
 should see a snapshot page, which communicates the health of your cluster.
 
-![Figure 10. Snapshot View](../assets/control-snapshot.png)
+![Snapshot View](../assets/control-snapshot.png)
 
 If something is wrong, you'll see a huge red "X" instead of the green check mark, along
 with a list of what the trouble is.
@@ -1131,7 +1129,7 @@ with a list of what the trouble is.
 From here you can drill down into a view the cluster's nodes, with details on memory usage,
 partition distribution, and other status. You can also add and configure and these nodes.
 
-![Figure 11. Cluster View](../assets/control-cluster.png)
+![Cluster View](../assets/control-cluster.png)
 
 There is more in line for Riak Control, like performing mapreduce queries, stats views,
 graphs, and more coming down the pipe. It's not a universal toolkit quite yet,

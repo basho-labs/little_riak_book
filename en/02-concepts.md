@@ -141,7 +141,7 @@ For example, imagine you have a list of country keys, whose values contain those
 "Zimbabwe":    "Harare"
 ```
 
-![Figure 1. Replication](../assets/replication.svg)
+![Replication](../assets/replication.svg)
 
 The downside with replication is that you are multiplying the amount of storage required for every duplicate. There is also some network overhead with this approach, since values must also be routed to all replicated nodes on write. But there is a more insidious problem with this approach, which we will cover shortly.
 
@@ -178,7 +178,7 @@ There is a bit of overhead the partition approach. Some service must keep track 
 
 There's also another downside. Unlike replication, simple partitioning of data actually *decreases* uptime. If one node goes down, that entire partition of data is unavailable. This is why Riak combines both replication and partitioning.
 
-![Figure 2. Partitions](../assets/partitions.svg)
+![Partitions](../assets/partitions.svg)
 
 <h3>Replication+Partitions</h3>
 
@@ -210,7 +210,7 @@ Our server count has increased, but so has our capacity and reliability. If you'
 
 The Riak team suggests a minimum of 5 nodes for a Riak cluster, and replicating to 3 nodes (this setting is called `n_val`, for the number of *nodes* on which to replicate each object).
 
-![Figure 3. Replication Partitions](../assets/replpart.svg)
+![Replication Partitions](../assets/replpart.svg)
 
 <!-- If the odds of a node going down on any day is 1%, then the odds of any server going down each day when you have 100 of them is about (1-(0.99^100)) 63%. For sufficiently large systems, servers going down are no longer edge-cases. They become regular cases that must be planned for, and designed into your system.
 -->
@@ -230,7 +230,7 @@ We won't do all of the math, but trust me when I say `favorite` falls within the
 
 If we visualize our 64 partitions as a ring, `favorite` falls here.
 
-![Figure 4. Riak Ring](../assets/ring0.svg)
+![Riak Ring](../assets/ring0.svg)
 
 You may have wondered, "Didn't he say that Riak suggests a minimum of 5 nodes? How can we put 64 partitions on 5 nodes?" We just give each node more than one partition, which Riak calls a *vnode*, or *virtual node*.
 
@@ -248,7 +248,7 @@ So when we write our `favorite` object to vnode 3, it will be replicated to vnod
 
 We can visualize the Ring with its vnodes, managing nodes, and where `favorite` will go.
 
-![Figure 5. Riak Ring](../assets/ring1.svg)
+![Riak Ring](../assets/ring1.svg)
 
 The Ring is more than just a circular array of hash partitions. It's also a system of metadata that gets copied to every node. Each node is aware of every other node in the cluster, which nodes own which vnodes, and other system data.
 
@@ -272,7 +272,8 @@ This tradeoff is known as Brewer's CAP theorem. CAP loosely states that you can 
 
 <!-- A fourth concept not covered by the CAP theorem, latency, is especially important here. -->
 
-<aside class="sidebar"><h3>Not Quite "C"</h3>
+<aside class="sidebar"><h3>Not Quite C</h3>
+
 Strictly speaking, Riak has a tunable latency-availability tradeoff, but the concession is similar. To decrease read/write latency effectively improves the odds of consistency, by making requests unavailable in certain circumstances in the way a CP system would.
 
 Currently, no setting can make Riak CP in the general case, but a feature for a few strict cases is being researched.
@@ -304,7 +305,7 @@ The same goes for reading. To ensure you have the most recent value, you can rea
 
 In general terms, the N/R/W values are Riak's way of allowing you to trade less consistency for more availability.
 
-<!-- ![Figure 6. IMAGE] -->
+<!-- ![IMAGE] -->
 
 <!-- (create a diagram explaining CAP, with the various types of server setups) -->
 

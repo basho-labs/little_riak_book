@@ -29,7 +29,7 @@ The most basic structure of a Riak request is setting a value, reading it,
 and maybe eventually deleting it. The actions are related to HTTP methods
 (PUT, GET, POST, DELETE).
 
-```bash
+```
 PUT    /riak/bucket/key
 GET    /riak/bucket/key
 DELETE /riak/bucket/key
@@ -302,7 +302,7 @@ Functions that run before a write is called pre-commit, and has the ability to c
 
 I put my custom files under the riak installation `./custom/my_validators.erl`.
 
-```erlang
+```bash
 -module(my_validators).
 -export([value_exists/1]).
 
@@ -323,7 +323,7 @@ erlc my_validators.erl
 
 Install the file by informing the Riak installation of your new code in `app.config` (restart Riak).
 
-```erlang
+```bash
 {riak_kv,
   ...
   {add_paths, ["./custom"]}
@@ -611,7 +611,7 @@ databases. In Riak, you execute a mapreduce job on a single node, which
 then propagates to the other nodes. The results are mapped and reduced,
 then further reduced down to the calling node and returned.
 
-<!-- ![Figure 7. IMAGE] -->
+<!-- ![IMAGE] -->
 
 Let's assume we have a bucket for log values that stores messages
 prefixed by either INFO or ERROR. We want to count the number of INFO

@@ -14,6 +14,8 @@
 \usepackage{indentfirst}
 \usepackage{framed,color}
 \usepackage{fancyvrb}
+\usepackage{mdframed}
+\usepackage{caption}
 
 \definecolor{shadecolor}{gray}{0.90}
 
@@ -165,6 +167,13 @@
 \setcounter{secnumdepth}{0}
 
 % \EndDefineVerbatimEnvironment{Highlighting}
+
+\newenvironment{aside}
+  {\begin{mdframed}[style=0,%
+      leftline=false,rightline=false,leftmargin=2em,rightmargin=2em,%
+          innerleftmargin=0pt,innerrightmargin=0pt,linewidth=0.75pt,%
+      skipabove=7pt,skipbelow=7pt]\small}
+  {\end{mdframed}}
 
 \linespread{1.3}
 

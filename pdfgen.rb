@@ -7,8 +7,6 @@ require 'yaml'
 
 include FileUtils
 
-Abort = Class.new(Exception)
-
 $here = File.expand_path(File.dirname(__FILE__))
 $root = $here #File.join($here, '..')
 $outDir = File.join($root, 'pdf')
@@ -88,6 +86,13 @@ def pre_pandoc(string, config)
     # be careful to try to match the longest sharp string first
     s %r{\#\#\#\#\# (.*?)$}, 'PARAGRAPH: \1'
     s %r{\#\#\#\# (.*?)$}, 'SUBSUBSECTION: \1'
+    s %r{\#\#\# (.*?)$}, 'SUBSECTION: \1'
+    s %r{\<h5\>(.*?)\<\/h5\>}, 'PARAGRAPH: \1'
+    s %r{\<h4\>(.*?)\<\/h4\>}, 'SUBSUBSECTION: \1'
+    s %r{\<h3\>(.*?)\<\/h3\>}, 'SUBSECTION: \1'
+
+    # s %r{\<aside.*?\>.*?\<h3\>(.+?)\<\/h3\>(.+?)\<\/aside\>}im, "ASIDE: \\1\n\\2\nENDASIDE"
+    s %r{\<aside.*?\>(.+?)\<\/aside\>}im, "ASIDE: \\1\n:ENDASIDE"
 
     # Turns URLs into clickable links
     s %r{\`(http:\/\/[A-Za-z0-9\/\%\&\=\-\_\\\.]+)\`}, '<\1>'
@@ -95,7 +100,7 @@ def pre_pandoc(string, config)
 
     # Process figures
     # s /Insert\s18333fig\d+\.png\s*\n.*?\d{1,2}-\d{1,2}\. (.*)/, 'FIG: \1'
-    s /^\!\[(.*?)\]\((.*?)\)/, 'Insert \1 FIG: \2'
+    s /^\!\[(.*?)\]\((.*?)\)/, 'FIG: \1'
   end
 end
 
@@ -107,7 +112,12 @@ def post_pandoc(string, config)
     s '\section', '\chap'
     s '\sub', '\\'
     s /SUBSUBSECTION: (.*)/, '\subsubsection{\1}'
+    s /SUBSECTION: (.*)/, '\subsection{\1}'
     s /PARAGRAPH: (.*)/, '\paragraph{\1}'
+
+    # replace asides
+    # s /\<aside.*?\>\s*\<h3\>(.+?)\<\/h3\>(.+?)\<\/aside\>/, "\\begin{aside}\n\\begin{center}\n\\emph{\1}\n\\end{center}\n\2\n\\end{aside}"
+    s /ASIDE: (.+?)\:ENDASIDE/m, "\\begin{aside}\n\\1\\end{aside}"
 
     # Enable proper cross-reference
     s /#{config['fig'].gsub(space, '\s')}\s*(\d+)\-\-(\d+)/, '\imgref{\1.\2}'
@@ -155,10 +165,6 @@ def post_pandoc(string, config)
   end
 end
 
-# ARGV.delete_if{|arg| $DEBUG = true if arg == '-d' or arg == '--debug'}
-# languages = ARGV.select{|arg| File.directory?("#$root/#{arg}")}
-# usage if languages.empty?
-
 languages = [ARGV[0] || "en"]
 
 $config = YAML.load_file("#$here/tex.yml")
@@ -196,7 +202,6 @@ figures do
     puts "done"
 
     abort = false
-
     puts "\tRunning XeTeX:"
     # cd($root)
     3.times do |i|
@@ -215,28 +220,5 @@ figures do
       break if abort
       puts "done"
     end
-
-    # puts "\tRunning XeTeX:"
-    # # begin
-    # abort = false
-    # 3.times do |i|
-    #   print "\t\tPass #{i + 1}... "
-    #   IO.popen("xelatex -output-directory=\"#{dir}\" \"#{dir}/riaklil-#{lang}.tex\" 2>&1") do |pipe|
-    #     unless $DEBUG
-    #       if $_[0..1]=='! '
-    #         puts "failed with:\n\t\t\t#{$_.strip}"
-    #         puts "\tConsider running this again with --debug."
-    #         # raise Abort
-    #         abort = true
-    #       end while !abort or pipe.gets
-    #     else
-    #       STDERR.print while pipe.gets rescue abort = true #(raise Abort)
-    #     end
-    #   end
-    #   puts "done"
-    # end
-    # rescue Abort => e
-    #   puts "aborted"
-    # end
   end
 end
