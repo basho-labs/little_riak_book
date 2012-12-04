@@ -292,6 +292,8 @@ Riak allows you to choose how many nodes you want to replicate an object to, and
 
 A thought experiment might help clarify.
 
+![NRW](../assets/nrw.svg)
+
 <h4>N</h4>
 
 With our 5 node cluster, having an `n_val=3` means values will eventually replicate to 3 nodes, as we've discussed above. This is the *N value*. You can set the other values to be all `n_val` nodes with the shorthand `all`.
@@ -307,10 +309,6 @@ In other words, setting `w=all` would help ensure your system was more likely to
 The same goes for reading. To ensure you have the most recent value, you can read from all 3 nodes containing objects (`r=all`). Even if only 1 of 3 nodes has the most recent value, we can compare all nodes against each other and choose the latest one, thus ensuring some consistency. Remember when I mentioned that RDBMS databases were *write consistent*? This is close to *read consistency*. Just like `w=all`, however, the read will fail unless 3 nodes are available to be read. Finally, if you only want to quickly read any value, `r=1` has low latency, and is likely consistent if `w=all`.
 
 In general terms, the N/R/W values are Riak's way of allowing you to trade less consistency for more availability.
-
-<!-- ![IMAGE] -->
-
-<!-- (create a diagram explaining CAP, with the various types of server setups) -->
 
 <h3>Vector Clock</h3>
 

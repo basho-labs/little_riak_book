@@ -54,8 +54,6 @@ a *gossip protocol*.
 
 The *gossip protocol* is Riak's method of keeping all nodes current on the state of the Ring. If a node goes up or down, that information is propagated to other nodes. Periodically, nodes will also send their status to a random peer for added consistency.
 
-<!-- ![IMAGE] -->
-
 Propagating changes in Ring is an asynchronous operation, and can take a couple minutes depending on
 Ring size.
 
@@ -533,7 +531,7 @@ sense of how to configure it properly.
 
 <h3>Erlang</h3>
 
-![Tech Stack](../assets/riak-stack-erlang.svg)
+![Tech Stack Erlang](../assets/riak-stack-erlang.svg)
 
 When you fire up a Riak node, it also starts up an Erlang VM (virtual machine) to run
 and manage Riak's processes. These include vnodes, process messages, gossips, resource
@@ -588,7 +586,7 @@ some optional SSL encryption settings.
 
 <h3>riak_core</h3>
 
-![Tech Stack](../assets/riak-stack-core.svg)
+![Tech Stack Core](../assets/riak-stack-core.svg)
 
 If any single component deserves the title of "Riak proper", it would be
 *Riak Core*. Core, and implementations are responsible for managing the
@@ -653,7 +651,7 @@ in the cluster (`ring_creation_size`), and several port options.
 
 <h3>riak_kv</h3>
 
-![Tech Stack](../assets/riak-stack-kv.svg)
+![Tech Stack KV](../assets/riak-stack-kv.svg)
 
 Riak KV is the Key/Value implementation of Riak Core. This is where the magic
 happens, such as handling requests, coordinating them for redundancy and read
@@ -699,7 +697,7 @@ backend settings, mapreduce, and Javascript integration.
 
 <h3>riak_pipe</h3>
 
-![Tech Stack](../assets/riak-stack-pipe.svg)
+![Tech Stack Pipe](../assets/riak-stack-pipe.svg)
 
 Riak pipe is an input/output messaging system that forms the basis of Riak's
 mapreduce. This was not always the case, and MR used to be a dedicated
@@ -782,7 +780,7 @@ pre-commit hooks.
 
 <h3>yokozuna</h3>
 
-![Tech Stack](../assets/riak-stack-yokozuna.svg)
+![Tech Stack Yokozuna](../assets/riak-stack-yokozuna.svg)
 
 Yokozuna is the newest addition to the Riak ecosystem. It's an integration of
 the distributed Solr search engine into Riak, and provides some extensions
@@ -800,7 +798,7 @@ it, you can choose which `solr_port` will be used.
 
 <h3>bitcask, eleveldb, memory, multi</h3>
 
-![Tech Stack](../assets/riak-stack-backend.svg)
+![Tech Stack Backend](../assets/riak-stack-backend.svg)
 
 Several modern databases have swappable backends, and Riak is no different in that
 respect. Riak currently supports three different storage engines---*Bitcask*,
@@ -898,7 +896,7 @@ $ curl -XPUT http://riaknode:8098/riak/session_data \
 
 <h3>riak_api</h3>
 
-![Tech Stack](../assets/riak-stack-api.svg)
+![Tech Stack API](../assets/riak-stack-api.svg)
 
 So far, all of the components we've seen have been inside the Riak house. The API
 is the front door. *In a perfect world*, the API would manage two implementations:

@@ -415,6 +415,8 @@ animals[&quot;favorite&quot;] = &quot;red panda&quot;
 
 <p>A thought experiment might help clarify.</p>
 
+<p><img src="../assets/nrw.svg" alt="NRW"></p>
+
 <h4>N</h4>
 
 <p>With our 5 node cluster, having an <code>n_val=3</code> means values will eventually replicate to 3 nodes, as we&#39;ve discussed above. This is the <em>N value</em>. You can set the other values to be all <code>n_val</code> nodes with the shorthand <code>all</code>.</p>
@@ -430,10 +432,6 @@ animals[&quot;favorite&quot;] = &quot;red panda&quot;
 <p>The same goes for reading. To ensure you have the most recent value, you can read from all 3 nodes containing objects (<code>r=all</code>). Even if only 1 of 3 nodes has the most recent value, we can compare all nodes against each other and choose the latest one, thus ensuring some consistency. Remember when I mentioned that RDBMS databases were <em>write consistent</em>? This is close to <em>read consistency</em>. Just like <code>w=all</code>, however, the read will fail unless 3 nodes are available to be read. Finally, if you only want to quickly read any value, <code>r=1</code> has low latency, and is likely consistent if <code>w=all</code>.</p>
 
 <p>In general terms, the N/R/W values are Riak&#39;s way of allowing you to trade less consistency for more availability.</p>
-
-<!-- ![IMAGE] -->
-
-<!-- (create a diagram explaining CAP, with the various types of server setups) -->
 
 <h3>Vector Clock</h3>
 
@@ -1107,7 +1105,7 @@ databases. In Riak, you execute a mapreduce job on a single node, which
 then propagates to the other nodes. The results are mapped and reduced,
 then further reduced down to the calling node and returned.</p>
 
-<!-- ![IMAGE] -->
+<p><img src="../assets/mapreduce.svg" alt="MapReduce Returning Name Char Count"></p>
 
 <p>Let&#39;s assume we have a bucket for log values that stores messages
 prefixed by either INFO or ERROR. We want to count the number of INFO
@@ -1476,8 +1474,6 @@ a <em>gossip protocol</em>.</p>
 <h3>Gossip</h3>
 
 <p>The <em>gossip protocol</em> is Riak&#39;s method of keeping all nodes current on the state of the Ring. If a node goes up or down, that information is propagated to other nodes. Periodically, nodes will also send their status to a random peer for added consistency.</p>
-
-<!-- ![IMAGE] -->
 
 <p>Propagating changes in Ring is an asynchronous operation, and can take a couple minutes depending on
 Ring size.</p>
@@ -1938,7 +1934,7 @@ sense of how to configure it properly.</p>
 
 <h3>Erlang</h3>
 
-<p><img src="../assets/riak-stack-erlang.svg" alt="Tech Stack"></p>
+<p><img src="../assets/riak-stack-erlang.svg" alt="Tech Stack Erlang"></p>
 
 <p>When you fire up a Riak node, it also starts up an Erlang VM (virtual machine) to run
 and manage Riak&#39;s processes. These include vnodes, process messages, gossips, resource
@@ -1991,7 +1987,7 @@ some optional SSL encryption settings.</p>
 
 <h3>riak_core</h3>
 
-<p><img src="../assets/riak-stack-core.svg" alt="Tech Stack"></p>
+<p><img src="../assets/riak-stack-core.svg" alt="Tech Stack Core"></p>
 
 <p>If any single component deserves the title of &quot;Riak proper&quot;, it would be
 <em>Riak Core</em>. Core, and implementations are responsible for managing the
@@ -2055,7 +2051,7 @@ in the cluster (<code>ring_creation_size</code>), and several port options.</p>
 
 <h3>riak_kv</h3>
 
-<p><img src="../assets/riak-stack-kv.svg" alt="Tech Stack"></p>
+<p><img src="../assets/riak-stack-kv.svg" alt="Tech Stack KV"></p>
 
 <p>Riak KV is the Key/Value implementation of Riak Core. This is where the magic
 happens, such as handling requests, coordinating them for redundancy and read
@@ -2100,7 +2096,7 @@ backend settings, mapreduce, and Javascript integration.</p>
 
 <h3>riak_pipe</h3>
 
-<p><img src="../assets/riak-stack-pipe.svg" alt="Tech Stack"></p>
+<p><img src="../assets/riak-stack-pipe.svg" alt="Tech Stack Pipe"></p>
 
 <p>Riak pipe is an input/output messaging system that forms the basis of Riak&#39;s
 mapreduce. This was not always the case, and MR used to be a dedicated
@@ -2181,7 +2177,7 @@ pre-commit hooks.</p>
 
 <h3>yokozuna</h3>
 
-<p><img src="../assets/riak-stack-yokozuna.svg" alt="Tech Stack"></p>
+<p><img src="../assets/riak-stack-yokozuna.svg" alt="Tech Stack Yokozuna"></p>
 
 <p>Yokozuna is the newest addition to the Riak ecosystem. It&#39;s an integration of
 the distributed Solr search engine into Riak, and provides some extensions
@@ -2198,7 +2194,7 @@ it, you can choose which <code>solr_port</code> will be used.</p>
 
 <h3>bitcask, eleveldb, memory, multi</h3>
 
-<p><img src="../assets/riak-stack-backend.svg" alt="Tech Stack"></p>
+<p><img src="../assets/riak-stack-backend.svg" alt="Tech Stack Backend"></p>
 
 <p>Several modern databases have swappable backends, and Riak is no different in that
 respect. Riak currently supports three different storage engines---*Bitcask*,
@@ -2293,7 +2289,7 @@ by just setting its <code>backend</code> property.</p>
 
 <h3>riak_api</h3>
 
-<p><img src="../assets/riak-stack-api.svg" alt="Tech Stack"></p>
+<p><img src="../assets/riak-stack-api.svg" alt="Tech Stack API"></p>
 
 <p>So far, all of the components we&#39;ve seen have been inside the Riak house. The API
 is the front door. <em>In a perfect world</em>, the API would manage two implementations:
