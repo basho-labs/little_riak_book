@@ -16,6 +16,7 @@
 \usepackage{fancyvrb}
 \usepackage{mdframed}
 \usepackage{caption}
+\usepackage{pdfpages}
 
 \definecolor{shadecolor}{gray}{0.90}
 
@@ -40,7 +41,7 @@
 
 \title{\textbf{\savedtitle}}
 \author{\textbf{\savedauthor}\thanks{<%= config['thanks'] %>}}
-\def\w3cdtfymd{\the\year-\ifnum\month<10 0\fi\the\month-\ifnum\day<10 0\fi\the\day}
+\def\w3cdtfymd{1.0 Beta \the\year-\ifnum\month<10 0\fi\the\month-\ifnum\day<10 0\fi\the\day}
 \date{\w3cdtfymd}
 \renewcommand{\thefootnote}{\fnsymbol{footnote}}
 
@@ -179,6 +180,7 @@
 
 \begin{document}
 \frontmatter
+\includepdf{assets/cover.pdf}
 \maketitle
 \thispagestyle{empty}
 \setcounter{tocdepth}{4}
