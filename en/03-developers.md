@@ -280,13 +280,13 @@ Some other values you may have noticed in the bucket's `props` object are `pw`, 
 
 `pr` and `pw` ensure that many *primary* nodes are available before a read or write. Riak will read or write from backup nodes if one is unavailable, because of network partition or some other server outage. This `p` prefix will ensure that only the primary nodes are used, *primary* meaning the vnode which matches the bucket plus N successive vnodes.
 
-Finally `dw` represents the minimal *durable* writes necessary for success. For a normal `w` write to count a write as successful, it merely needs to promise a write has started, even though that write is still in memory, with no guarantee that write has been written to disk, aka, is durable. The `dw` setting represents a minimum number of durable writes necessary to be considered a success. Although a high `dw` value is likely slower than a high `w` value, there are cases where this extra enforcement is good to have, such as dealing with financial data.
+Finally `dw` represents the minimal *durable* writes necessary for success. For a normal `w` write to count a write as successful, a vnode need only promise a write has started, with no guarantee that write has been written to disk, aka, is durable. The `dw` setting means the backend service (for example Bitcask) has agreed to write the value. Although a high `dw` value is slower than a high `w` value, there are cases where this extra enforcement is good to have, such as dealing with financial data.
 
 <h5>Per Request</h5>
 
 It's worth noting that these values (except for `n_val`) are not actually bound to the bucket, but are instead are just defaults for the bucket. R/W values actually apply *per request*. This is an important distinction, since it allows us to override these values on an as-needed basis: `r`, `pr`, `w`, `pw`, `dw`, `rw`.
 
-Consider you have data that you find very important (say, credit card checkout), and want to be certain that it is written to every node's disk before success. You could add `?dw=all` to the end of your write.
+Consider you have data that you find very important (say, credit card checkout), and want to help ensure it will be written to every node's disk before success. You could add `?dw=all` to the end of your write.
 
 ```bash
 curl -i -XPUT http://localhost:8098/riak/cart/cart1?dw=all \
