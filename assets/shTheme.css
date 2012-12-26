@@ -1,0 +1,202 @@
+/************************************
+ * Default Syntax Highlighter theme.
+ * 
+ * Interface elements.
+ ************************************/
+.syntaxhighlighter,
+.syntaxhighlighter div,
+.syntaxhighlighter code,
+.syntaxhighlighter span
+{
+	font-family: "consolas",monospace !important;
+	font-size: 14px !important;
+}
+
+.syntaxhighlighter
+{
+	background-color: #E7E5DC !important;
+	width: 95% !important;
+}
+.syntaxhighlighter div.lines {
+	padding: 0.2em 0 0.1em 0!important;
+	background: #eee !important;
+}
+
+/* Highlighed line number */
+.syntaxhighlighter .line.highlighted .number
+{
+	background-color: #6CE26C !important;
+	color: black !important;
+}
+
+/* Highlighed line */
+.syntaxhighlighter .line.highlighted.alt1 .content,
+.syntaxhighlighter .line.highlighted.alt2 .content
+{
+	background-color: #6CE26C !important;
+}
+
+/* Gutter line numbers */
+.syntaxhighlighter .line .number
+{
+	color: #5C5C5C !important;
+}
+
+/* Add border to the lines */
+.syntaxhighlighter .line .content
+{
+	border-left: 3px solid #6CE26C !important;
+	color: #000 !important;
+}
+
+.syntaxhighlighter.printing .line .content 
+{
+	border: 0 !important;
+}
+
+/* First line */
+.syntaxhighlighter .line.alt1 .content
+{
+	background-color: #ffd !important;
+	background-color: #eee !important;
+}
+
+/* Second line */
+.syntaxhighlighter .line.alt2 .content
+{
+	background-color: #ffd !important;
+	background-color: #eee !important;
+}
+
+.syntaxhighlighter .line .content .block
+{
+	background: url(wrapping.png) 0 1.1em no-repeat !important;
+}
+
+.syntaxhighlighter .ruler
+{
+	color: silver !important;
+	background-color: #F8F8F8 !important;
+	border-left: 3px solid #6CE26C !important;
+}
+
+.syntaxhighlighter.nogutter .ruler
+{
+	border: 0 !important;
+}
+
+.syntaxhighlighter .toolbar
+{
+	background-color: #F8F8F8 !important;
+	border: #E7E5DC solid 1px !important;
+}
+
+.syntaxhighlighter .toolbar a
+{
+	color: #a0a0a0 !important;
+}
+
+.syntaxhighlighter .toolbar a:hover
+{
+	color: red !important;
+}
+
+/************************************
+ * Actual syntax highlighter colors.
+ ************************************/
+.syntaxhighlighter .plain,
+.syntaxhighlighter .plain a
+{ 
+	color: #000 !important;
+}
+
+.syntaxhighlighter .comments,
+.syntaxhighlighter .comments a
+{ 
+	color: #3465a4 !important;
+    font-style: italic !important;
+}
+
+.syntaxhighlighter .errors,
+.syntaxhighlighter .errors a
+{ 
+	color: #4e9a06 !important; 
+}
+
+.syntaxhighlighter .string,
+.syntaxhighlighter .string a
+{
+	color: #c00 !important; 
+}
+
+.syntaxhighlighter .numerics {
+    color: #c00 !important;
+}
+
+.syntaxhighlighter .keyword
+{ 
+	color: #d1b430 !important; 
+	font-weight: bold !important; 
+}
+
+.syntaxhighlighter .symbols {
+    color: #778744 !important;
+	font-weight: bold !important; 
+}
+
+.syntaxhighlighter .atoms {
+    color: #227 !important;
+}
+
+.syntaxhighlighter .preprocessor 
+{ 
+	color: #4e9a06 !important; 
+}
+
+.syntaxhighlighter .variable 
+{ 
+	color: #a70 !important; 
+}
+
+.syntaxhighlighter .value
+{ 
+	color: #090 !important; 
+}
+
+.syntaxhighlighter .functions
+{ 
+    color: #556522 !important;
+}
+
+.syntaxhighlighter .constants
+{ 
+	color: #0066CC !important; 
+}
+
+.syntaxhighlighter .shell_output{
+    color: #666 !important;
+    font-style: italic !important;
+}
+
+.syntaxhighlighter .script
+{ 
+	background-color: yellow !important;
+}
+
+.syntaxhighlighter .color1,
+.syntaxhighlighter .color1 a
+{ 
+	color: #808080 !important; 
+}
+
+.syntaxhighlighter .color2,
+.syntaxhighlighter .color2 a
+{ 
+	color: #ff1493 !important; 
+}
+
+.syntaxhighlighter .color3,
+.syntaxhighlighter .color3 a
+{ 
+	color: red !important; 
+}
