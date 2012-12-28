@@ -1,6 +1,8 @@
 # Concepts
 
-Believe me, dear reader, when I suggest that thinking in a distributed fashion is awkward. When I had first encountered Riak, I was not prepared for some of its more preternatural concepts. Our brains just aren't hardwired to think in a distributed, asynchronous manner. Richard Dawkins coined the term *Middle World*---the serial, rote land humans encounter every day, which exists between the extremes of the very small strangeness of quarks and the vastness of outer space. We don't consider these extremes clearly because we don't encounter them on a daily basis, just like distributed computations and storage. So we create models and tools to bring the physical act of scattered parallel resources in line, on our more ordinary synchronous terms. Where Riak takes great pains to simplify the hard parts, it does not pretend that they don't exist. Just like you can never hope to program at an expert level without any knowledge of memory or CPU management, so too can you never safely develop a highly available clusters without a firm grasp of a few underlying concepts.
+Believe me, dear reader, when I suggest that thinking in a distributed fashion is awkward. When I had first encountered Riak, I was not prepared for some of its more preternatural concepts. Our brains just aren't hardwired to think in a distributed, asynchronous manner. Richard Dawkins coined the term *Middle World*---the serial, rote land humans encounter every day, which exists between the extremes of the very small strangeness of quarks and the vastness of outer space. We don't consider these extremes clearly because we don't encounter them on a daily basis, just like distributed computations and storage. So we create models and tools to bring the physical act of scattered parallel resources in line to our more ordinary synchronous terms. While Riak takes great pains to simplify the hard parts, it does not pretend that they don't exist. Just like you can never hope to program at an expert level without any knowledge of memory or CPU management, so too can you never safely develop a highly available clusters without a firm grasp of a few underlying concepts.
+
+<!-- image: caveman confused by a bunch of atoms -->
 
 ## The Landscape
 
@@ -24,6 +26,8 @@ The ability to easily join data across physical servers is a tradeoff that separ
 
 This limitation changes how you model data. Relational normalization (organizing data to reduce redundancy) exists for systems that can cheaply join data together per request. However, the ability to spread data across multiple nodes requires a denormalized approach, where some data is duplicated, and computed values may be stored for the sake of performance.
 </aside>
+
+<!-- image: icons for each of these types -->
 
   1. **Relational**. Traditional databases usually use SQL to model and query data.
     They are useful for data which can be stored in a highly structured schema, yet
@@ -67,7 +71,7 @@ One detour in the land of distributed databases is to understand the condition t
 7. Transport cost is zero.
 8. The network is homogeneous.
 
-I always recommend to initiates to take the time to grock this list. Keeping these points in the back of your mind can save days of pain and expense in the future.
+I always recommend that initiates take the time to grock this list. Keeping these points everpresent in your mind can save days of pain and expense in the future.
 
 ## Riak Components
 
@@ -79,7 +83,7 @@ Riak functions similarly to a very large hashtable. Depending on your background
 
 <h3>Key and Value</h3>
 
-<!-- replace with an image -->
+<!-- image: address metaphore -->
 
 If Riak were a variable that functioned as a hashtable, you might set the value of your favorite food using the *key* `favorite`.
 
@@ -105,6 +109,8 @@ Successive requests for `favorite` will now return `cold pizza`.
 For convenience, we call a key/value pair an *object*. Together our `favorite`/`pizza` pair is referred to as the "`favorite` object", rather than the more verbose "`favorite` key and its value".
 
 <h3>Buckets</h3>
+
+<!-- image: address streets metaphore -->
 
 *Buckets* are how Riak allows you to categorizes objects. You can group multiple objects into logical collections, where identical keys will not overlap between buckets.
 
@@ -135,6 +141,7 @@ The obvious benefit of replication is that if one node goes down, nodes that con
 
 For example, imagine you have a list of country keys, whose values contain those countries' capitals. If all you do is replicate that data to 2 servers, you would have 2 duplicate databases.
 
+<!--
 <h5>Node A</h5>
 
 ```javascript
@@ -158,6 +165,7 @@ For example, imagine you have a list of country keys, whose values contain those
 "Zambia":      "Lusaka"
 "Zimbabwe":    "Harare"
 ```
+-->
 
 ![Replication](../assets/replication.svg)
 
@@ -172,6 +180,7 @@ With partitioning, our total capacity can increase without any big expensive har
 
 For example, if we partition our countries into 2 servers, we might put all countries beginning with letters A-N into Node A, and O-Z into Node B.
 
+<!--
 <h5>Node A</h5>
 
 ```javascript
@@ -191,6 +200,7 @@ For example, if we partition our countries into 2 servers, we might put all coun
 "Zambia":      "Lusaka"
 "Zimbabwe":    "Harare"
 ```
+-->
 
 There is a bit of overhead the partition approach. Some service must keep track of what range of values live on which node. A requesting application must know that the key `Spain` will be routed to Node B, not Node A.
 
@@ -204,6 +214,7 @@ Since partitions allow us to increase capacity, and replication improves availab
 
 Where our previous example partitioned data into 2 nodes, we can replicate each of those partitions into 2 more nodes, for a total of 4.
 
+<!--
 <h5>Nodes A & C</h5>
 
 ```javascript
@@ -223,6 +234,7 @@ Where our previous example partitioned data into 2 nodes, we can replicate each 
 "Zambia":      "Lusaka"
 "Zimbabwe":    "Harare"
 ```
+-->
 
 Our server count has increased, but so has our capacity and reliability. If you're designing a horizontally scalable system by partitioning data, you must deal with replicating those partitions.
 
@@ -305,7 +317,7 @@ Riak's solution is based on Amazon Dynamo's novel approach of a *tunable* AP sys
 
 Riak allows you to choose how many nodes you want to replicate an object to, and how many nodes must be written to or read from per request. These values are settings labeled `n_val` (the number of nodes to replicate to), `r` (the number of nodes read from before returning), and `w` (the number of nodes written to before considered successful).
 
-A thought experiment might help clarify.
+A thought experiment may help clarify things.
 
 ![NRW](../assets/nrw.svg)
 

@@ -134,7 +134,9 @@ facts are being verified, texts are being edited, jokes are being made funny.</e
 <p>In my opinion, the most important section of this book is the <a href="#concepts">concepts chapter</a>. If you already have a little knowledge it may start slow, but it picks up in a hurry. After laying the theoretical groundwork, we&#39;ll move onto helping <a href="#developers">developers</a> use Riak, by learning how to query it and tinker with some settings. Finally, we&#39;ll go over the basic details that <a href="#operators">operators</a> should know, such as how to set up a Riak cluster, configure some values, use optional tools, and more.</p>
 <h1 id="toc_3">Concepts</h1>
 
-<p>Believe me, dear reader, when I suggest that thinking in a distributed fashion is awkward. When I had first encountered Riak, I was not prepared for some of its more preternatural concepts. Our brains just aren&#39;t hardwired to think in a distributed, asynchronous manner. Richard Dawkins coined the term <em>Middle World</em>---the serial, rote land humans encounter every day, which exists between the extremes of the very small strangeness of quarks and the vastness of outer space. We don&#39;t consider these extremes clearly because we don&#39;t encounter them on a daily basis, just like distributed computations and storage. So we create models and tools to bring the physical act of scattered parallel resources in line, on our more ordinary synchronous terms. Where Riak takes great pains to simplify the hard parts, it does not pretend that they don&#39;t exist. Just like you can never hope to program at an expert level without any knowledge of memory or CPU management, so too can you never safely develop a highly available clusters without a firm grasp of a few underlying concepts.</p>
+<p>Believe me, dear reader, when I suggest that thinking in a distributed fashion is awkward. When I had first encountered Riak, I was not prepared for some of its more preternatural concepts. Our brains just aren&#39;t hardwired to think in a distributed, asynchronous manner. Richard Dawkins coined the term <em>Middle World</em>---the serial, rote land humans encounter every day, which exists between the extremes of the very small strangeness of quarks and the vastness of outer space. We don&#39;t consider these extremes clearly because we don&#39;t encounter them on a daily basis, just like distributed computations and storage. So we create models and tools to bring the physical act of scattered parallel resources in line to our more ordinary synchronous terms. While Riak takes great pains to simplify the hard parts, it does not pretend that they don&#39;t exist. Just like you can never hope to program at an expert level without any knowledge of memory or CPU management, so too can you never safely develop a highly available clusters without a firm grasp of a few underlying concepts.</p>
+
+<!-- image: caveman confused by a bunch of atoms -->
 
 <h2 id="toc_4">The Landscape</h2>
 
@@ -158,6 +160,8 @@ facts are being verified, texts are being edited, jokes are being made funny.</e
 
 <p>This limitation changes how you model data. Relational normalization (organizing data to reduce redundancy) exists for systems that can cheaply join data together per request. However, the ability to spread data across multiple nodes requires a denormalized approach, where some data is duplicated, and computed values may be stored for the sake of performance.
 </aside></p>
+
+<!-- image: icons for each of these types -->
 
 <ol>
 <li><p><strong>Relational</strong>. Traditional databases usually use SQL to model and query data.
@@ -192,7 +196,7 @@ multi-datacenter distributed systems like <em>Riak Enterprise</em>.</p>
 
 <h3 id="toc_5">The Fallacies of Distributed Computing</h3>
 
-<p>One detour in the land of distributed databases is the condition that they are distributed systems replete with their benefits and handicaps. Engineers at Sun Microsystems created this list of <a href="http://www.rgoarchitects.com/Files/fallacies.pdf">eight fallacies</a> that engineers new to distributed systems aften fall victim to. They still apply today, even when operating a database like Riak.</p>
+<p>One detour in the land of distributed databases is to understand the condition that they are distributed systems replete with their benefits and handicaps. Engineers at Sun Microsystems created this list of <a href="http://www.rgoarchitects.com/Files/fallacies.pdf">eight fallacies</a> that engineers new to distributed systems aften fall victim to. They still apply today, even when operating a database like Riak.</p>
 
 <ol>
 <li>The network is reliable.</li>
@@ -205,7 +209,7 @@ multi-datacenter distributed systems like <em>Riak Enterprise</em>.</p>
 <li>The network is homogeneous.</li>
 </ol>
 
-<p>I always recommend to initiates to take the time to grock this list. Keeping these points in the back of your mind can save days of pain and expense in the future.</p>
+<p>I always recommend that initiates take the time to grock this list. Keeping these points everpresent in your mind can save days of pain and expense in the future.</p>
 
 <h2 id="toc_6">Riak Components</h2>
 
@@ -217,7 +221,7 @@ multi-datacenter distributed systems like <em>Riak Enterprise</em>.</p>
 
 <h3>Key and Value</h3>
 
-<!-- replace with an image -->
+<!-- image: address metaphore -->
 
 <p>If Riak were a variable that functioned as a hashtable, you might set the value of your favorite food using the <em>key</em> <code>favorite</code>.</p>
 
@@ -240,6 +244,8 @@ food == &quot;pizza&quot;
 <p>For convenience, we call a key/value pair an <em>object</em>. Together our <code>favorite</code>/<code>pizza</code> pair is referred to as the &quot;<code>favorite</code> object&quot;, rather than the more verbose &quot;<code>favorite</code> key and its value&quot;.</p>
 
 <h3>Buckets</h3>
+
+<!-- image: address streets metaphore -->
 
 <p><em>Buckets</em> are how Riak allows you to categorizes objects. You can group multiple objects into logical collections, where identical keys will not overlap between buckets.</p>
 
@@ -269,27 +275,31 @@ animals[&quot;favorite&quot;] = &quot;red panda&quot;
 
 <p>For example, imagine you have a list of country keys, whose values contain those countries&#39; capitals. If all you do is replicate that data to 2 servers, you would have 2 duplicate databases.</p>
 
+<!--
 <h5>Node A</h5>
 
-<pre><code class="javascript">&quot;Afghanistan&quot;: &quot;Kabul&quot;
-&quot;Albania&quot;:     &quot;Tirana&quot;
-&quot;Algeria&quot;:     &quot;Algiers&quot;
+```javascript
+"Afghanistan": "Kabul"
+"Albania":     "Tirana"
+"Algeria":     "Algiers"
 ...
-&quot;Yemen&quot;:       &quot;Sanaa&quot;
-&quot;Zambia&quot;:      &quot;Lusaka&quot;
-&quot;Zimbabwe&quot;:    &quot;Harare&quot;
-</code></pre>
+"Yemen":       "Sanaa"
+"Zambia":      "Lusaka"
+"Zimbabwe":    "Harare"
+```
 
 <h5>Node B</h5>
 
-<pre><code class="javascript">&quot;Afghanistan&quot;: &quot;Kabul&quot;
-&quot;Albania&quot;:     &quot;Tirana&quot;
-&quot;Algeria&quot;:     &quot;Algiers&quot;
+```javascript
+"Afghanistan": "Kabul"
+"Albania":     "Tirana"
+"Algeria":     "Algiers"
 ...
-&quot;Yemen&quot;:       &quot;Sanaa&quot;
-&quot;Zambia&quot;:      &quot;Lusaka&quot;
-&quot;Zimbabwe&quot;:    &quot;Harare&quot;
-</code></pre>
+"Yemen":       "Sanaa"
+"Zambia":      "Lusaka"
+"Zimbabwe":    "Harare"
+```
+-->
 
 <p><img src="../assets/replication.svg" alt="Replication"></p>
 
@@ -303,23 +313,27 @@ animals[&quot;favorite&quot;] = &quot;red panda&quot;
 
 <p>For example, if we partition our countries into 2 servers, we might put all countries beginning with letters A-N into Node A, and O-Z into Node B.</p>
 
+<!--
 <h5>Node A</h5>
 
-<pre><code class="javascript">&quot;Afghanistan&quot;: &quot;Kabul&quot;
-&quot;Albania&quot;:     &quot;Tirana&quot;
-&quot;Algeria&quot;:     &quot;Algiers&quot;
+```javascript
+"Afghanistan": "Kabul"
+"Albania":     "Tirana"
+"Algeria":     "Algiers"
 ...
-&quot;Norway&quot;:      &quot;Oslo&quot;
-</code></pre>
+"Norway":      "Oslo"
+```
 
 <h5>Node B</h5>
 
-<pre><code class="javascript">&quot;Oman&quot;:        &quot;Muscat&quot;
+```javascript
+"Oman":        "Muscat"
 ...
-&quot;Yemen&quot;:       &quot;Sanaa&quot;
-&quot;Zambia&quot;:      &quot;Lusaka&quot;
-&quot;Zimbabwe&quot;:    &quot;Harare&quot;
-</code></pre>
+"Yemen":       "Sanaa"
+"Zambia":      "Lusaka"
+"Zimbabwe":    "Harare"
+```
+-->
 
 <p>There is a bit of overhead the partition approach. Some service must keep track of what range of values live on which node. A requesting application must know that the key <code>Spain</code> will be routed to Node B, not Node A.</p>
 
@@ -333,23 +347,27 @@ animals[&quot;favorite&quot;] = &quot;red panda&quot;
 
 <p>Where our previous example partitioned data into 2 nodes, we can replicate each of those partitions into 2 more nodes, for a total of 4.</p>
 
+<!--
 <h5>Nodes A & C</h5>
 
-<pre><code class="javascript">&quot;Afghanistan&quot;: &quot;Kabul&quot;
-&quot;Albania&quot;:     &quot;Tirana&quot;
-&quot;Algeria&quot;:     &quot;Algiers&quot;
+```javascript
+"Afghanistan": "Kabul"
+"Albania":     "Tirana"
+"Algeria":     "Algiers"
 ...
-&quot;Norway&quot;:      &quot;Oslo&quot;
-</code></pre>
+"Norway":      "Oslo"
+```
 
 <h5>Nodes B & D</h5>
 
-<pre><code class="javascript">&quot;Oman&quot;:        &quot;Muscat&quot;
+```javascript
+"Oman":        "Muscat"
 ...
-&quot;Yemen&quot;:       &quot;Sanaa&quot;
-&quot;Zambia&quot;:      &quot;Lusaka&quot;
-&quot;Zimbabwe&quot;:    &quot;Harare&quot;
-</code></pre>
+"Yemen":       "Sanaa"
+"Zambia":      "Lusaka"
+"Zimbabwe":    "Harare"
+```
+-->
 
 <p>Our server count has increased, but so has our capacity and reliability. If you&#39;re designing a horizontally scalable system by partitioning data, you must deal with replicating those partitions.</p>
 
@@ -435,7 +453,7 @@ animals[&quot;favorite&quot;] = &quot;red panda&quot;
 
 <p>Riak allows you to choose how many nodes you want to replicate an object to, and how many nodes must be written to or read from per request. These values are settings labeled <code>n_val</code> (the number of nodes to replicate to), <code>r</code> (the number of nodes read from before returning), and <code>w</code> (the number of nodes written to before considered successful).</p>
 
-<p>A thought experiment might help clarify.</p>
+<p>A thought experiment may help clarify things.</p>
 
 <p><img src="../assets/nrw.svg" alt="NRW"></p>
 
@@ -921,8 +939,8 @@ A value sized greater than 0 is required
 <p>Casey writes <code>[{&quot;item&quot;:&quot;kale&quot;,&quot;count&quot;:10}]</code>.</p>
 
 <pre><code class="bash">curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
-  -H &#39;Content-Type:application/json&#39; \
-  -H &#39;X-Riak-ClientId:casey&#39; \
+  -H &quot;Content-Type:application/json&quot; \
+  -H &quot;X-Riak-ClientId:casey&quot; \
   -d &#39;[{&quot;item&quot;:&quot;kale&quot;,&quot;count&quot;:20}]&#39;
 HTTP/1.1 200 OK
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA=
@@ -943,9 +961,9 @@ Content-Length: 28
 <p>Mark writes <code>[{&quot;item&quot;:&quot;kale&quot;,&quot;count&quot;:10},{&quot;item&quot;:&quot;milk&quot;,&quot;count&quot;:1}]</code>.</p>
 
 <pre><code class="bash">curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
-  -H &#39;Content-Type:application/json&#39; \
-  -H &#39;X-Riak-ClientId:mark&#39; \
-  -H &#39;X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA=&#39; \
+  -H &quot;Content-Type:application/json&quot; \
+  -H &quot;X-Riak-ClientId:mark&quot; \
+  -H &quot;X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA=&quot;&quot; \
   -d &#39;[{&quot;item&quot;:&quot;kale&quot;,&quot;count&quot;:20},{&quot;item&quot;:&quot;milk&quot;,&quot;count&quot;:1}]&#39;
 HTTP/1.1 200 OK
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmTwZTIlMfKcMaK7RRfFgA=
@@ -975,9 +993,9 @@ Content-Length: 54
 <p>Andy writes <code>[{&quot;item&quot;:&quot;kale&quot;,&quot;count&quot;:10},{&quot;item&quot;:&quot;almonds&quot;,&quot;count&quot;:12}]</code>.</p>
 
 <pre><code class="bash">curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
-  -H &#39;Content-Type:application/json&#39; \
-  -H &#39;X-Riak-ClientId:andy&#39; \
-  -H &#39;X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA=&#39; \
+  -H &quot;Content-Type:application/json&quot; \
+  -H &quot;X-Riak-ClientId:andy&quot; \
+  -H &quot;X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA=&quot;&quot; \
   -d &#39;[{&quot;item&quot;:&quot;kale&quot;,&quot;count&quot;:20},{&quot;item&quot;:&quot;almonds&quot;,&quot;count&quot;:12}]&#39;
 HTTP/1.1 300 Multiple Choices
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmTwZTInMfKoG7LdoovCwA=
@@ -1032,7 +1050,7 @@ Siblings:
 <p>If you want to retrieve all sibling data, tell Riak that you&#39;ll accept the multipart message by adding <code>-H &quot;Accept:multipart/mixed&quot;</code>.</p>
 
 <pre><code class="bash">curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207 \
-  -H &#39;Accept:multipart/mixed&#39;
+  -H &quot;Accept:multipart/mixed&quot;
 </code></pre>
 
 <p><aside class="sidebar"><h3>Use-Case Specific?</h3></p>
@@ -1054,8 +1072,8 @@ Riak not to resolve this conflict automatically... we want this flexibility.
 <p>Successive reads will receive a single (merged) result.</p>
 
 <pre><code class="bash">curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
-  -H &#39;Content-Type:application/json&#39; \
-  -H &#39;X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTInMfKoG7LdoovCwA=&#39; \
+  -H &quot;Content-Type:application/json&quot; \
+  -H &quot;X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTInMfKoG7LdoovCwA=&quot; \
   -d &#39;[{&quot;item&quot;:&quot;kale&quot;,&quot;count&quot;:20},{&quot;item&quot;:&quot;milk&quot;,&quot;count&quot;:1},{&quot;item&quot;:&quot;almonds&quot;,&quot;count&quot;:12}]&#39;
 </code></pre>
 
@@ -1086,9 +1104,9 @@ provided it&#39;s prefixed by <code>X-Riak-Index-</code> and suffixed by <code>_
 integer, or <code>_bin</code> for a string.</p>
 
 <pre><code class="bash">curl -i -XPUT http://localhost:8098/riak/people/casey \
-  -H &#39;Content-Type:application/json&#39; \
-  -H &#39;X-Riak-Index-age_int:31&#39; \
-  -H &#39;X-Riak-Index-fridge_bin:fridge-97207&#39; \
+  -H &quot;Content-Type:application/json&quot; \
+  -H &quot;X-Riak-Index-age_int:31&quot; \
+  -H &quot;X-Riak-Index-fridge_bin:fridge-97207&quot; \
   -d &#39;{&quot;work&quot;:&quot;rodeo clown&quot;}&#39;
 </code></pre>
 
@@ -1133,10 +1151,10 @@ then further reduced down to the calling node and returned.</p>
 prefixed by either INFO or ERROR. We want to count the number of INFO
 logs that contain the word &quot;cart&quot;.</p>
 
-<pre><code class="bash">curl -XPOST http://localhost:8098/riak/logs -d &#39;INFO: New user added&#39;
-curl -XPOST http://localhost:8098/riak/logs -d &#39;INFO: Kale added to shopping cart&#39;
-curl -XPOST http://localhost:8098/riak/logs -d &#39;INFO: Milk added to shopping cart&#39;
-curl -XPOST http://localhost:8098/riak/logs -d &#39;ERROR: shopping cart cancelled&#39;
+<pre><code class="bash">curl -XPOST http://localhost:8098/riak/logs -d &quot;INFO: New user added&quot;
+curl -XPOST http://localhost:8098/riak/logs -d &quot;INFO: Kale added to shopping cart&quot;
+curl -XPOST http://localhost:8098/riak/logs -d &quot;INFO: Milk added to shopping cart&quot;
+curl -XPOST http://localhost:8098/riak/logs -d &quot;ERROR: shopping cart cancelled&quot;
 </code></pre>
 
 <p>MapReduce jobs can be either Erlang or Javascript code. This time we&#39;ll go the
@@ -1144,7 +1162,7 @@ easy route and write Javascript. You execute mapreduce by posting JSON to the
 <code>/mapred</code> path.</p>
 
 <pre><code class="bash">curl -XPOST http://localhost:8098/mapred \
-  -H &#39;Content-Type: application/json&#39; \
+  -H &quot;Content-Type: application/json&quot; \
   -d @- \
 &lt;&lt;EOF
 {
@@ -1205,7 +1223,7 @@ that number to be greater than 97000.</p>
 special attention to the <code>map</code> function, and lack of <code>reduce</code>.</p>
 
 <pre><code class="bash">curl -XPOST http://localhost:8098/mapred \
-  -H &#39;Content-Type: application/json&#39; \
+  -H &quot;Content-Type: application/json&quot; \
   -d @- \
 &lt;&lt;EOF
 {
@@ -1256,8 +1274,8 @@ with the object linked from.</p>
 using the HTTP header <code>Link</code>.</p>
 
 <pre><code class="bash">curl -XPUT http://localhost:8098/riak/people/mark \
-  -H &#39;Content-Type:application/json&#39; \
-  -H &#39;Link: &lt;/riak/people/casey&gt;; riaktag=&quot;brother&quot;&#39;
+  -H &quot;Content-Type:application/json&quot; \
+  -H &quot;Link: &lt;/riak/people/casey&gt;; riaktag=\&quot;brother\&quot;&quot;
 </code></pre>
 
 <p>With a Link in place, now it&#39;s time to walk it. Walking is like a normal
@@ -1351,8 +1369,8 @@ up with an index (these details can be found in the next chapter).</p>
 <code>people</code> table (with a default index).</p>
 
 <pre><code class="bash">curl -XPUT http://localhost:8091/riak/people/ryan \
-  -H &#39;Content-Type:text/plain&#39; \
-  -d &#39;Ryan Zezeski&#39;
+  -H &quot;Content-Type:text/plain&quot; \
+  -d &quot;Ryan Zezeski&quot;
 </code></pre>
 
 <p>To execute a search, request <code>/search/[bucket]</code> along with any distributed <a href="http://wiki.apache.org/solr/CommonQueryParameters">Solr parameters</a>. Here we
@@ -1360,7 +1378,7 @@ query for documents that contain a word starting with <code>zez</code>, request 
 results to be in json format (<code>wt=json</code>), only return the Riak key
 (<code>fl=_yz_rk</code>).</p>
 
-<pre><code class="bash">curl &#39;http://localhost:8091/search/people?wt=json&amp;omitHeader=true&amp;fl=_yz_rk&amp;q=zez*&#39; | jsonpp
+<pre><code class="bash">curl &quot;http://localhost:8091/search/people?wt=json&amp;omitHeader=true&amp;fl=_yz_rk&amp;q=zez*&quot; | jsonpp
 {
   &quot;response&quot;: {
     &quot;numFound&quot;: 1,
@@ -1393,10 +1411,10 @@ requires all tagged values begin with <code>X-Riak-Meta</code>, and be listed un
 a special header named <code>X-Riak-Meta-yz-tags</code>.</p>
 
 <pre><code class="bash">curl -XPUT http://localhost:8091/riak/people/dave \
-  -H &#39;Content-Type:text/plain&#39; \
-  -H &#39;X-Riak-Meta-yz-tags: X-Riak-Meta-nickname_s&#39; \
-  -H &#39;X-Riak-Meta-nickname_s:dizzy&#39; \
-  -d &#39;Dave Smith&#39;
+  -H &quot;Content-Type:text/plain&quot; \
+  -H &quot;X-Riak-Meta-yz-tags: X-Riak-Meta-nickname_s&quot; \
+  -H &quot;X-Riak-Meta-nickname_s:dizzy&quot; \
+  -d &quot;Dave Smith&quot;
 </code></pre>
 
 <p>To search by the <code>nickname_s</code> tag, just prefix the query string followed
