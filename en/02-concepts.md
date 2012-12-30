@@ -1,16 +1,18 @@
 # Concepts
 
-When I first encountered Riak, I found a few concepts daunting. But understanding these theories made me appreciate the difficulty of the distributed database problem space, and the elegant solutions provided by Riak.
+Believe me, dear reader, when I suggest that thinking in a distributed fashion is awkward. When I had first encountered Riak, I was not prepared for some of its more preternatural concepts. Our brains just aren't hardwired to think in a distributed, asynchronous manner. Richard Dawkins coined the term *Middle World*---the serial, rote land humans encounter every day, which exists between the extremes of the very small strangeness of quarks and the vastness of outer space. We don't consider these extremes clearly because we don't encounter them on a daily basis, just like distributed computations and storage. So we create models and tools to bring the physical act of scattered parallel resources in line to our more ordinary synchronous terms. While Riak takes great pains to simplify the hard parts, it does not pretend that they don't exist. Just like you can never hope to program at an expert level without any knowledge of memory or CPU management, so too can you never safely develop a highly available clusters without a firm grasp of a few underlying concepts.
+
+<!-- image: caveman confused by a bunch of atoms -->
 
 ## The Landscape
 
-Before we understand where Riak sits in the spectrum of databases, it's good to have a little front matter. The existence of databases like Riak is the culmination of two things: accessible technology spurring different data requirements, and gaps in the data management market.
+The existence of databases like Riak is the culmination of two basic trends: accessible technology spurring different data requirements, and gaps in the data management market.
 
 First, as we've seen steady improvements in technology along with reductions in cost, vast amounts of computing power and storage are now within the grasp of nearly anyone. Along with our increasingly interconnected world caused by the web and shrinking, cheaper computers (like smartphones), this has catalyzed an exponential growth of data, and a demand for more predictability and speed by savvier users. In other words, more data is being created on the front-end, while more data is being managed on the backend.
 
 Second, relational database management systems (RDBMS) have become focused over the years for a standard set of use-cases, like business intelligence. They were also technically tuned for squeezing performance out of single larger servers, like optimizing disk access, even while cheap commodity (and virtualized) servers made horizontal growth increasingly attractive. As cracks in relational implementations became apparent, custom implementations arose in response to specific problems not originally envisioned by the relational DBs.
 
-These new databases are loosely called NoSQL, and Riak is of its ilk.
+These new databases are collected under the moniker *NoSQL*, and Riak is of its ilk.
 
 <h3>Database Models</h3>
 
@@ -24,6 +26,8 @@ The ability to easily join data across physical servers is a tradeoff that separ
 
 This limitation changes how you model data. Relational normalization (organizing data to reduce redundancy) exists for systems that can cheaply join data together per request. However, the ability to spread data across multiple nodes requires a denormalized approach, where some data is duplicated, and computed values may be stored for the sake of performance.
 </aside>
+
+<!-- image: icons for each of these types -->
 
   1. **Relational**. Traditional databases usually use SQL to model and query data.
     They are useful for data which can be stored in a highly structured schema, yet
@@ -54,6 +58,21 @@ This limitation changes how you model data. Relational normalization (organizing
     
     Examples: *Riak*, *Redis*, *Voldemort*
 
+### The Fallacies of Distributed Computing
+
+One detour in the land of distributed databases is to understand the condition that they are distributed systems replete with their benefits and handicaps. Engineers at Sun Microsystems created this list of [eight fallacies](http://www.rgoarchitects.com/Files/fallacies.pdf) that engineers new to distributed systems aften fall victim to. They still apply today, even when operating a database like Riak.
+
+1. The network is reliable.
+2. Latency is zero.
+3. Bandwidth is infinite.
+4. The network is secure.
+5. Topology doesn't change.
+6. There is one administrator.
+7. Transport cost is zero.
+8. The network is homogeneous.
+
+I always recommend that initiates take the time to grock this list. Keeping these points everpresent in your mind can save days of pain and expense in the future.
+
 ## Riak Components
 
 Riak is a Key/Value (KV) database, built from the ground up to safely distribute data across a cluster of physical servers, called nodes. A Riak cluster is also known as a Ring (we'll cover why later).
@@ -64,7 +83,7 @@ Riak functions similarly to a very large hashtable. Depending on your background
 
 <h3>Key and Value</h3>
 
-<!-- replace with an image -->
+<!-- image: address metaphore -->
 
 If Riak were a variable that functioned as a hashtable, you might set the value of your favorite food using the *key* `favorite`.
 
@@ -90,6 +109,8 @@ Successive requests for `favorite` will now return `cold pizza`.
 For convenience, we call a key/value pair an *object*. Together our `favorite`/`pizza` pair is referred to as the "`favorite` object", rather than the more verbose "`favorite` key and its value".
 
 <h3>Buckets</h3>
+
+<!-- image: address streets metaphore -->
 
 *Buckets* are how Riak allows you to categorizes objects. You can group multiple objects into logical collections, where identical keys will not overlap between buckets.
 
@@ -120,6 +141,7 @@ The obvious benefit of replication is that if one node goes down, nodes that con
 
 For example, imagine you have a list of country keys, whose values contain those countries' capitals. If all you do is replicate that data to 2 servers, you would have 2 duplicate databases.
 
+<!--
 <h5>Node A</h5>
 
 ```javascript
@@ -143,6 +165,7 @@ For example, imagine you have a list of country keys, whose values contain those
 "Zambia":      "Lusaka"
 "Zimbabwe":    "Harare"
 ```
+-->
 
 ![Replication](../assets/replication.svg)
 
@@ -157,6 +180,7 @@ With partitioning, our total capacity can increase without any big expensive har
 
 For example, if we partition our countries into 2 servers, we might put all countries beginning with letters A-N into Node A, and O-Z into Node B.
 
+<!--
 <h5>Node A</h5>
 
 ```javascript
@@ -176,6 +200,7 @@ For example, if we partition our countries into 2 servers, we might put all coun
 "Zambia":      "Lusaka"
 "Zimbabwe":    "Harare"
 ```
+-->
 
 There is a bit of overhead the partition approach. Some service must keep track of what range of values live on which node. A requesting application must know that the key `Spain` will be routed to Node B, not Node A.
 
@@ -189,6 +214,7 @@ Since partitions allow us to increase capacity, and replication improves availab
 
 Where our previous example partitioned data into 2 nodes, we can replicate each of those partitions into 2 more nodes, for a total of 4.
 
+<!--
 <h5>Nodes A & C</h5>
 
 ```javascript
@@ -208,6 +234,7 @@ Where our previous example partitioned data into 2 nodes, we can replicate each 
 "Zambia":      "Lusaka"
 "Zimbabwe":    "Harare"
 ```
+-->
 
 Our server count has increased, but so has our capacity and reliability. If you're designing a horizontally scalable system by partitioning data, you must deal with replicating those partitions.
 
@@ -290,7 +317,7 @@ Riak's solution is based on Amazon Dynamo's novel approach of a *tunable* AP sys
 
 Riak allows you to choose how many nodes you want to replicate an object to, and how many nodes must be written to or read from per request. These values are settings labeled `n_val` (the number of nodes to replicate to), `r` (the number of nodes read from before returning), and `w` (the number of nodes written to before considered successful).
 
-A thought experiment might help clarify.
+A thought experiment may help clarify things.
 
 ![NRW](../assets/nrw.svg)
 

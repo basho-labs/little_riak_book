@@ -280,13 +280,13 @@ Some other values you may have noticed in the bucket's `props` object are `pw`, 
 
 `pr` and `pw` ensure that many *primary* nodes are available before a read or write. Riak will read or write from backup nodes if one is unavailable, because of network partition or some other server outage. This `p` prefix will ensure that only the primary nodes are used, *primary* meaning the vnode which matches the bucket plus N successive vnodes.
 
-Finally `dw` represents the minimal *durable* writes necessary for success. For a normal `w` write to count a write as successful, it merely needs to promise a write has started, even though that write is still in memory, with no guarantee that write has been written to disk, aka, is durable. The `dw` setting represents a minimum number of durable writes necessary to be considered a success. Although a high `dw` value is likely slower than a high `w` value, there are cases where this extra enforcement is good to have, such as dealing with financial data.
+Finally `dw` represents the minimal *durable* writes necessary for success. For a normal `w` write to count a write as successful, a vnode need only promise a write has started, with no guarantee that write has been written to disk, aka, is durable. The `dw` setting means the backend service (for example Bitcask) has agreed to write the value. Although a high `dw` value is slower than a high `w` value, there are cases where this extra enforcement is good to have, such as dealing with financial data.
 
 <h5>Per Request</h5>
 
 It's worth noting that these values (except for `n_val`) are not actually bound to the bucket, but are instead are just defaults for the bucket. R/W values actually apply *per request*. This is an important distinction, since it allows us to override these values on an as-needed basis: `r`, `pr`, `w`, `pw`, `dw`, `rw`.
 
-Consider you have data that you find very important (say, credit card checkout), and want to be certain that it is written to every node's disk before success. You could add `?dw=all` to the end of your write.
+Consider you have data that you find very important (say, credit card checkout), and want to help ensure it will be written to every node's disk before success. You could add `?dw=all` to the end of your write.
 
 ```bash
 curl -i -XPUT http://localhost:8098/riak/cart/cart1?dw=all \
@@ -399,8 +399,8 @@ Casey writes `[{"item":"kale","count":10}]`.
 
 ```bash
 curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
-  -H 'Content-Type:application/json' \
-  -H 'X-Riak-ClientId:casey' \
+  -H "Content-Type:application/json" \
+  -H "X-Riak-ClientId:casey" \
   -d '[{"item":"kale","count":20}]'
 HTTP/1.1 200 OK
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA=
@@ -422,9 +422,9 @@ Mark writes `[{"item":"kale","count":10},{"item":"milk","count":1}]`.
 
 ```bash
 curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
-  -H 'Content-Type:application/json' \
-  -H 'X-Riak-ClientId:mark' \
-  -H 'X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA=' \
+  -H "Content-Type:application/json" \
+  -H "X-Riak-ClientId:mark" \
+  -H "X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA="" \
   -d '[{"item":"kale","count":20},{"item":"milk","count":1}]'
 HTTP/1.1 200 OK
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmTwZTIlMfKcMaK7RRfFgA=
@@ -453,9 +453,9 @@ Andy writes `[{"item":"kale","count":10},{"item":"almonds","count":12}]`.
 
 ```bash
 curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
-  -H 'Content-Type:application/json' \
-  -H 'X-Riak-ClientId:andy' \
-  -H 'X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA=' \
+  -H "Content-Type:application/json" \
+  -H "X-Riak-ClientId:andy" \
+  -H "X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA="" \
   -d '[{"item":"kale","count":20},{"item":"almonds","count":12}]'
 HTTP/1.1 300 Multiple Choices
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmTwZTInMfKoG7LdoovCwA=
@@ -513,7 +513,7 @@ If you want to retrieve all sibling data, tell Riak that you'll accept the multi
 
 ```bash
 curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207 \
-  -H 'Accept:multipart/mixed'
+  -H "Accept:multipart/mixed"
 ```
 
 <aside class="sidebar"><h3>Use-Case Specific?</h3>
@@ -536,8 +536,8 @@ Successive reads will receive a single (merged) result.
 
 ```bash
 curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
-  -H 'Content-Type:application/json' \
-  -H 'X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTInMfKoG7LdoovCwA=' \
+  -H "Content-Type:application/json" \
+  -H "X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTInMfKoG7LdoovCwA=" \
   -d '[{"item":"kale","count":20},{"item":"milk","count":1},{"item":"almonds","count":12}]'
 ```
 
@@ -570,9 +570,9 @@ integer, or `_bin` for a string.
 
 ```bash
 curl -i -XPUT http://localhost:8098/riak/people/casey \
-  -H 'Content-Type:application/json' \
-  -H 'X-Riak-Index-age_int:31' \
-  -H 'X-Riak-Index-fridge_bin:fridge-97207' \
+  -H "Content-Type:application/json" \
+  -H "X-Riak-Index-age_int:31" \
+  -H "X-Riak-Index-fridge_bin:fridge-97207" \
   -d '{"work":"rodeo clown"}'
 ```
 
@@ -620,10 +620,10 @@ prefixed by either INFO or ERROR. We want to count the number of INFO
 logs that contain the word "cart".
 
 ```bash
-curl -XPOST http://localhost:8098/riak/logs -d 'INFO: New user added'
-curl -XPOST http://localhost:8098/riak/logs -d 'INFO: Kale added to shopping cart'
-curl -XPOST http://localhost:8098/riak/logs -d 'INFO: Milk added to shopping cart'
-curl -XPOST http://localhost:8098/riak/logs -d 'ERROR: shopping cart cancelled'
+curl -XPOST http://localhost:8098/riak/logs -d "INFO: New user added"
+curl -XPOST http://localhost:8098/riak/logs -d "INFO: Kale added to shopping cart"
+curl -XPOST http://localhost:8098/riak/logs -d "INFO: Milk added to shopping cart"
+curl -XPOST http://localhost:8098/riak/logs -d "ERROR: shopping cart cancelled"
 ```
 
 MapReduce jobs can be either Erlang or Javascript code. This time we'll go the
@@ -632,7 +632,7 @@ easy route and write Javascript. You execute mapreduce by posting JSON to the
 
 ```bash
 curl -XPOST http://localhost:8098/mapred \
-  -H 'Content-Type: application/json' \
+  -H "Content-Type: application/json" \
   -d @- \
 <<EOF
 {
@@ -695,7 +695,7 @@ special attention to the `map` function, and lack of `reduce`.
 
 ```bash
 curl -XPOST http://localhost:8098/mapred \
-  -H 'Content-Type: application/json' \
+  -H "Content-Type: application/json" \
   -d @- \
 <<EOF
 {
@@ -748,8 +748,8 @@ using the HTTP header `Link`.
 
 ```bash
 curl -XPUT http://localhost:8098/riak/people/mark \
-  -H 'Content-Type:application/json' \
-  -H 'Link: </riak/people/casey>; riaktag="brother"'
+  -H "Content-Type:application/json" \
+  -H "Link: </riak/people/casey>; riaktag=\"brother\""
 ```
 
 With a Link in place, now it's time to walk it. Walking is like a normal
@@ -848,8 +848,8 @@ The simplest example is a full-text search. Here we add `ryan` to the
 
 ```bash
 curl -XPUT http://localhost:8091/riak/people/ryan \
-  -H 'Content-Type:text/plain' \
-  -d 'Ryan Zezeski'
+  -H "Content-Type:text/plain" \
+  -d "Ryan Zezeski"
 ```
 
 To execute a search, request `/search/[bucket]` along with any distributed [Solr parameters](http://wiki.apache.org/solr/CommonQueryParameters). Here we
@@ -858,7 +858,7 @@ results to be in json format (`wt=json`), only return the Riak key
 (`fl=_yz_rk`).
 
 ```bash
-curl 'http://localhost:8091/search/people?wt=json&omitHeader=true&fl=_yz_rk&q=zez*' | jsonpp
+curl "http://localhost:8091/search/people?wt=json&omitHeader=true&fl=_yz_rk&q=zez*" | jsonpp
 {
   "response": {
     "numFound": 1,
@@ -893,10 +893,10 @@ a special header named `X-Riak-Meta-yz-tags`.
 
 ```bash
 curl -XPUT http://localhost:8091/riak/people/dave \
-  -H 'Content-Type:text/plain' \
-  -H 'X-Riak-Meta-yz-tags: X-Riak-Meta-nickname_s' \
-  -H 'X-Riak-Meta-nickname_s:dizzy' \
-  -d 'Dave Smith'
+  -H "Content-Type:text/plain" \
+  -H "X-Riak-Meta-yz-tags: X-Riak-Meta-nickname_s" \
+  -H "X-Riak-Meta-nickname_s:dizzy" \
+  -d "Dave Smith"
 ```
 
 To search by the `nickname_s` tag, just prefix the query string followed

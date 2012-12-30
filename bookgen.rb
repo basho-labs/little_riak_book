@@ -252,7 +252,7 @@ def gen_book(language, html_file, format)
     '--language', language,
     '--authors', 'Eric Redmond',
     '--comments', "Licensed under the Creative-Commons Attribution-Noncommercial-Share Alike 3.0 Unported",
-    '--cover', 'assets/cover.jpg',
+    '--cover', 'assets/cover.png',
     '--extra-css', 'assets/style.css',
     '--tags', 'riak,free',
     '--level1-toc', '//h:h1',
