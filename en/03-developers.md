@@ -4,12 +4,12 @@
 
 It's worth mentioning that I use the word "node" a lot. Realistically, this means a physical/virtual server, but really, the workhorses of Riak are vnodes. 
 
-When you write to multiple vnodes, Riak will attempt to spread values to as many physical servers as possible. However, this isn't guaranteed (for example, if you have 64 vnodes, and only two physical ones, setting replication to 5 is perfectly fine, if not a bit redundant). You're safe conceptualizing nodes as Riak instances, and it's simpler than qualifying "vnode" all the time. If something applies specifically to a vnode, I'll mention it.
+When you write to multiple vnodes, Riak will attempt to spread values to as many physical servers as possible. However, this isn't guaranteed (for example, if you have 64 vnodes, and only 2 physical ones, setting replication to 5 is perfectly fine, if not a bit silly). You're safe conceptualizing nodes as Riak instances, and it's simpler than qualifying "vnode" all the time. If something applies specifically to a vnode, I'll mention it.
 </aside>
 
-_We're going to hold off on the details of installing Riak at the moment. If you'd like to follow along, it's easy enough to get started by following the documentation on the website. If not, this is a perfect section to read while you sit on a train without internet connection._
+_We're going to hold off on the details of installing Riak at the moment. If you'd like to follow along, it's easy enough to get started by following the [install documentation](http://docs.basho.com/riak/latest/) on the website. If not, this is a perfect section to read while you sit on a train without internet connection._
 
-Developing with a Riak database is quite easy to do, once you understand some of the finer points. It is a key/value store, in the technical sense (you associate values with keys, and retrieve them using the same keys) but it offers so much more. You can embed write hooks to fire before or after a write, or index data for quick retrieval. Riak has a SOLR-based search, and lets you run mapreduce functions to extract and aggregate data across a huge cluster with TB of data in a relatively short timespan. We'll show some of the bucket-specific settings developers can configure.
+Developing with a Riak database is quite easy to do, once you understand some of the finer points. It is a key/value store, in the technical sense (you associate values with keys, and retrieve them using the same keys) but it offers so much more. You can embed write hooks to fire before or after a write, or index data for quick retrieval. Riak has a SOLR-based search, and lets you run mapreduce functions to extract and aggregate data across a huge cluster in a relatively short timespan. We'll show some of the bucket-specific settings developers can configure.
 
 ## Lookup
 
@@ -25,11 +25,11 @@ There are also dozens of other [project-specific addons](http://docs.basho.com/r
 
 Since Riak is a KV database, the most basic commands are setting and getting values. We'll use the HTTP interface, via curl, but we could just as easily use Erlang, Ruby, Java, or any other supported language.
 
-The most basic structure of a Riak request is setting a value, reading it,
+The basic structure of a Riak request is setting a value, reading it,
 and maybe eventually deleting it. The actions are related to HTTP methods
 (PUT, GET, POST, DELETE).
 
-```bash
+```
 PUT    /riak/bucket/key
 GET    /riak/bucket/key
 DELETE /riak/bucket/key
@@ -37,7 +37,7 @@ DELETE /riak/bucket/key
 
 <h4>PUT</h4>
 
-The simplest write command in Riak is putting a value. It requires a key, value, and a bucket. In curl, all HTTP methods are prefixed with `-X`. Putting the value `pizza` into the key `favorite` under the `food` bucket is like so:
+The simplest write command in Riak is putting a value. It requires a key, value, and a bucket. In curl, all HTTP methods are prefixed with `-X`. Putting the value `pizza` into the key `favorite` under the `food` bucket is done like this:
 
 ```bash
 curl -XPUT 'http://localhost:8098/riak/food/favorite' \
@@ -56,9 +56,9 @@ curl -XGET 'http://localhost:8098/riak/food/favorite'
 pizza
 ```
 
-This is the simplest form of read, responding with only the value. Riak contains much more information that you can access, if you read the entire response, including the HTTP header.
+This is the simplest form of read, responding with only the value. Riak contains much more information, which you can access if you read the entire response, including the HTTP header.
 
-In `curl` you can access the full response by way of the `-i` flag. Let's perform the above query again, adding that flag.
+In `curl` you can access a full response by way of the `-i` flag. Let's perform the above query again, adding that flag.
 
 ```bash
 curl -i -XGET 'http://localhost:8098/riak/food/favorite'
@@ -91,7 +91,7 @@ A block of headers represents different timings for the object or the request.
 * **Last-Modified** - The last time this object was modified (created or updated).
 * **ETag** - An *[entity tag](http://en.wikipedia.org/wiki/HTTP_ETag)* which can be used for cache validation by a client.
 * **Date** - The time of the request.
-
+* **X-Riak-Vclock** - A logical clock which we'll cover in more detail later.
 
 <h5>Content</h5>
 
@@ -100,7 +100,7 @@ These describe the HTTP body of the message (in Riak's terms, the *value*).
 * **Content-Type** - The type of value, such as `text/xml`.
 * **Content-Length** - The length, in bytes, of the message body.
 
-The other headers like `X-Riak-Vclock` and `Link`, will be covered later in this chapter.
+Some other headers like `Link` will be covered later in this chapter.
 
 
 <h4>POST</h4>
@@ -122,7 +122,7 @@ Content-Type: application/json
 Content-Length: 0
 ```
 
-You can extract this key from the `Location` value. Other than not being pretty, this key is just as if you defined your own key by a PUT.
+You can extract this key from the `Location` value. Other than not being pretty, this key is just as if you defined your own key via PUT.
 
 <h5>Body</h5>
 
@@ -162,7 +162,7 @@ A deleted object in Riak is internally marked as deleted, by writing a marker kn
 This detail isn't normally important, except to understand two things:
 
 1. In Riak, a *delete* is actually a *write*, and should be considered as such.
-2. Checking for the existence of a key is not enough to know if an object exists. You be reading a key between a delete and a reap---you must read for tombstones.
+2. Checking for the existence of a key is not enough to know if an object exists. You might be reading a key between a delete and a reap. You must read for tombstones.
 
 <h4>Lists</h4>
 
@@ -202,7 +202,7 @@ curl -v 'http://localhost:8098/riak/food?list=stream'
 
 <!-- Transfer-Encoding -->
 
-You should note that none of these list actions should be used in production (they're really expensive operations). But they are useful for development, investigations, or for running occasional analytics.
+You should note that list actions should *not* be used in production (they're really expensive operations). But they are useful for development, investigations, or for running occasional analytics at off-peak hours.
 
 ## Buckets
 
@@ -213,6 +213,8 @@ Different use-cases will dictate whether a bucket is heavily written to, or larg
 <h3>Quorum</h3>
 
 The basis of Riak's availability and tolerance is that it can read from, or write to, multiple nodes. Riak allows you to adjust these N/R/W values (which we covered under [Concepts](#practical-tradeoffs)) on a per-bucket basis.
+
+<!-- Sloppy Quorum -->
 
 <h4>N/R/W</h4>
 
@@ -302,7 +304,7 @@ Functions that run before a write is called pre-commit, and has the ability to c
 
 I put my custom files under the riak installation `./custom/my_validators.erl`.
 
-```erlang
+```bash
 -module(my_validators).
 -export([value_exists/1]).
 
@@ -323,7 +325,7 @@ erlc my_validators.erl
 
 Install the file by informing the Riak installation of your new code in `app.config` (restart Riak).
 
-```erlang
+```bash
 {riak_kv,
   ...
   {add_paths, ["./custom"]}
@@ -611,7 +613,7 @@ databases. In Riak, you execute a mapreduce job on a single node, which
 then propagates to the other nodes. The results are mapped and reduced,
 then further reduced down to the calling node and returned.
 
-[IMAGE]
+![MapReduce Returning Name Char Count](../assets/mapreduce.svg)
 
 Let's assume we have a bucket for log values that stores messages
 prefixed by either INFO or ERROR. We want to count the number of INFO
