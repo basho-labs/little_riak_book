@@ -6,7 +6,7 @@ Picture a roulette wheel in a casino, where any particular number has a 1 in 37 
 
 ![Gambling With Uptime](../assets/roulette.png)
 
-Now imagine you could bet again, but only win if the wheel made sequential 100 spins in your favor. Would you still play? Winning a single bet can be easy, but over many trials you learn to respect probabilities.
+Now imagine you could bet again, but only win if the wheel made a sequential 100 spins in your favor, otherwise you lose. Would you still play? Winning a single bet might be easy, but over many trials the odds are not in your favor.
 
 People make these sorts of bets with data all of the time. A single server has a good chance of remaining available. When you run a cluster with thousands of servers, or billions of requests, the odds of any one breaking down becomes the rule. Even a once-in-a-million disaster is commonplace in light of a billion opportunities.
 

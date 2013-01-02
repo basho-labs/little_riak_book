@@ -117,7 +117,7 @@ facts are being verified, texts are being edited, jokes are being made funny.</e
 
 <p><img src="../assets/roulette.png" alt="Gambling With Uptime"></p>
 
-<p>Now imagine you could bet again, but only win if the wheel made sequential 100 spins in your favor. Would you still play? Winning a single bet can be easy, but over many trials you learn to respect probabilities.</p>
+<p>Now imagine you could bet again, but only win if the wheel made a sequential 100 spins in your favor, otherwise you lose. Would you still play? Winning a single bet might be easy, but over many trials the odds are not in your favor.</p>
 
 <p>People make these sorts of bets with data all of the time. A single server has a good chance of remaining available. When you run a cluster with thousands of servers, or billions of requests, the odds of any one breaking down becomes the rule. Even a once-in-a-million disaster is commonplace in light of a billion opportunities.</p>
 
@@ -241,13 +241,13 @@ multi-datacenter distributed systems like <em>Riak Enterprise</em>.</p>
 
 <p>Riak is a Key/Value (KV) database, built from the ground up to safely distribute data across a cluster of physical servers, called nodes. A Riak cluster is also known as a Ring (we&#39;ll cover why later).</p>
 
-<p>For now, we&#39;ll only consider the concepts required to be a Riak users, and cover operations later.</p>
+<!-- For now, we'll only consider the concepts required to be a Riak users, and cover operations later. -->
 
 <p>Riak functions similarly to a very large hash space. Depending on your background, you may call it hashtable, a map, a dictionary, or an object. But the idea is the same: you store a value with an immutable key, and retrieve it later.</p>
 
 <h3>Key and Value</h3>
 
-<p>Key/value is the most basic construct in all of computerdom. You can think of a key like a unique home address, such as Bob&#39;s House with the unique key 5124, while the value would be maybe Bob and his stuff.</p>
+<p>Key/value is the most basic construct in all of computerdom. You can think of a key like a home address, such as Bob&#39;s house with the unique key 5124, while the value would be maybe Bob (and his stuff).</p>
 
 <p><img src="../assets/addresses.png" alt="A Key is an Address"></p>
 
@@ -259,7 +259,7 @@ multi-datacenter distributed systems like <em>Riak Enterprise</em>.</p>
 <pre><code class="javascript">bob = hashtable[&quot;5124&quot;]
 </code></pre>
 
-<p>Let&#39;s say that poor old Bob died, and Claire moved into this house. The address remains the same, but the contents have changed.</p>
+<p>Let&#39;s say that poor old Bob dies, and Claire moves into this house. The address remains the same, but the contents have changed.</p>
 
 <pre><code class="javascript">hashtable[&quot;5124&quot;] = &quot;Claire&quot;
 </code></pre>
