@@ -10,6 +10,8 @@ Acredite-me, caro leitor, quando eu sugiro que pensar de forma distribuída é e
 
 A existência de bases de dados como Riak é o culminar de duas coisas: tecnologia acessível que estimulou diferentes requisitos para os dados, e as lacunas no mercado de gestão de dados.
 
+<!-- image: landscape -->
+
 Primeiro, como temos visto melhorias tecnológicas constantes, juntamente com reduções de custo, grandes quantidades de poder de computação e armazenamento estão agora ao alcance de quase todos. Junto com o nosso mundo cada vez mais interligado por causa da web e pelos computadores cada vez mais pequenos e baratos (como os smartphones), isto causou um crescimento exponencial de dados, e uma exigência de maior previsibilidade e velocidade pelos utilizadores mais tecnológicos. Em suma, mais dados estão a ser criados pelos utilizadores, enquanto mais dados estão a ser geridos nos servidores.
 
 Em segundo lugar, os sistemas de gestão de base de dados relacionais (RDBMS) especializaram-se ao longo dos anos num conjunto de cenários como *business intelligence*. Eles também foram tecnicamente ajustados para tirar o maior desempenho possível de grandes servidores individuais, como como otimização de acessos a disco, mesmo enquanto servidores uso pessoal (ou virtualizado) a custos acessíveis se tornavam cada vez mais atraentes para crescer e escalar horizontalmente. Enquanto as falhas das base de dados relacionas se tornavam aparentes, implementações personalizadas surgiram em resposta a problemas específicos não originalmente previstos pela BDs relacionais.
@@ -72,54 +74,51 @@ Eu recomendo vivamente aos iniciados a perder algum tempo a mentalizar esta list
 
 Riak é uma BD chave/valor(CV), construído a partir do zero para distribuir com segurança os dados num cluster de servidores físicos, chamados de nós. Um cluster do Riak também é conhecido como um Anel (vamos falar sobre o porquê mais tarde).
 
-Por agora, vamos apenas considerar os conceitos necessários para ser um utilizador do Riak, e mais tarde a sua operação e manutenção.
+<!--Por agora, vamos apenas considerar os conceitos necessários para ser um utilizador do Riak, e mais tarde a sua operação e manutenção.-->
 
 O Riak funciona de forma semelhante a uma tabela de hash muito grande. Dependendo do seu conhecimento, pode também chamá-lo de mapa, ou dicionário, ou objeto. Mas a ideia é a mesma: você armazena um valor com uma chave imutável, e recupera-o mais tarde.
 
 <h3>Chave e o Valor</h3>
 
-<!-- image: address metaphore -->
+Chave/valor é a construção mais básica de todas na informática. Você pode pensar numa chave como um endereço de uma casa, como por exemplo, a casa do Bob com a chave única de 5124, enquanto o valor seria talvez Bob (e o seu material).
 
-Se o Riak fosse uma variável que funcionasse como uma tabela de hash, você podia definir o valor do seu alimento favorito usando a *chave* `favorito`.
-
-```javascript
-hashtable["favorito"] = "pizza"
-```
-
-E recuparar o *valor* `pizza` usando a mesma chave.
+![Uma Chave é um Endereço](../assets/addresses.png)
 
 ```javascript
-alimento = hashtable["favorito"]
-alimento == "pizza"
+hashtable["5124"] = "Bob"
 ```
-Um dia você queima o céu da boca. Com a raiva, você decidiu que a sua comida favorita é agora `pizza fria`.
+E recuparar o Bob é tão fácil como ir à sua casa.
 
 ```javascript
-hashtable["favorito"] = "pizza fria"
+bob = hashtable["5124"]
 ```
-Pedidos subsequentes por `favorito` vão agora devolver `pizza fria`.
+Vamos dizer que o pobre do Bob morre, e a Claire se move para esta casa. O endereço permanece o mesmo, mas o conteúdo mudou.
 
-Por conveniência, nós chamamos um par chave/valor de *objeto*. Juntos, o nosso par `favorito`/`pizza` é chamado de "objeto` favorito`", ao invés da versão mais detalhada "a chave `favorito` e seu valor".
+```javascript
+hashtable["5124"] = "Claire"
+```
+Pedidos subsequentes por `5124` vão devolver agora `Claire`.
 
 <h3>Buckets (Baldes)</h3>
 
 <!-- image: address streets metaphore -->
 
-*Buckets* (ou baldes) são a maneira de categorizar objetos no Riak. Você pode agrupar logicamente vários objetos num, onde chaves idênticas não se sobrepõem entre buckets.
+Os endereços em "Riakville" são mais do que o número de casa, são também o endereço de uma rua. Podia haver outro 5124 noutra rua, então a forma de podemos garantir a exclusividade de um endereço é exigindo ambos, como por exemplo *5124, Rua Principal*.
 
-Você pode pensar nos buckets como um [espaço de nomes](http://pt.wikipedia.org/wiki/Espa%C3%A7o_de_nomes_(ci%C3%AAncia_da_computa%C3%A7%C3%A3o\)).
+*Buckets* (ou baldes) são como estas ruas. Mas ao invés de mera geografia, você pode agrupar múltiplos chave/valor logicamente em [espaço de nomes](http://pt.wikipedia.org/wiki/Espa%C3%A7o_de_nomes_(ci%C3%AAncia_da_computa%C3%A7%C3%A3o\)) (como ruas residenciais, ruas industriais, ruas comerciais, etc), onde chaves idênticas não se sobrepõem entre baldes.
 
-Usando o nosso exemplo de cima, podemos especificar um alimento favorito, contra um animal favorito, usando a mesma chave. A menos que você seja um rapaz do campo do Midwest como eu, estas categorias provavelmente não se vão sobrepor muito.
+Por exemplo, enquanto Alice pode viver na *5122, Rua Principal*, pode haver um posto de gasolina na *5122, Rua Boavista*.
 
 ```javascript
-alimento["favorito"] = "pizza"
-animais["favorito"] = "panda vermelho"
+principal["5122"] = "Alice"
+boavista["5122"] = "Gas"
 ```
-Você podia apenas ter chamado as chaves de `alimento_favorito` e `animal_favorito`, mas os *buckets* permitem a nomeação de chaves mais limpa, e tem outros benefícios adicionais que vão ser descritos mais tarde.
 
-Os *buckets* são tão úteis no Riak que todas as chaves têm que pertencer a um, ou seja, não há um espaço de chaves global.
+Claro que você podia ter chamado as chaves de `principal_5122` e `boavista_5122`, mas os *buckets* permitem a nomeação de chaves mais limpa, e tem outros benefícios adicionais que vão ser descritos mais tarde.
 
-De fato, no Riak, a verdadeira definição de uma chave de um objeto é `bucket/chave` (balde/chave).
+Os *buckets* são tão úteis no Riak que todas as chaves têm que pertencer a um, ou seja, não há um espaço de chaves global. A verdadeira definição de uma chave única no Riak é na verdade `bucket/chave`.
+
+Por conveniência, nós chamamos um par *bucket/chave + valor* de *objeto*, poupando-nos a verbosidade de "chave X no balde Y e seu valor".
 
 ## Replicação e Partições
 
@@ -133,32 +132,6 @@ A vantagem óbvia da replicação é que se um nó falhar, os nós que contêm o
 
 Por exemplo, imagine que tem uma lista de chaves de países, cujos valores são as capitais dos mesmos. Se tudo o que você fizer for replicar os dados para dois servidores, você teria duas base de dados duplicadas.
 
-<!--
-<h5>Nó A</h5>
-
-```javascript
-"Afghanistan": "Kabul"
-"Albania":     "Tirana"
-"Algeria":     "Algiers"
-...
-"Yemen":       "Sanaa"
-"Zambia":      "Lusaka"
-"Zimbabwe":    "Harare"
-```
-
-<h5>Nó B</h5>
-
-```javascript
-"Afghanistan": "Kabul"
-"Albania":     "Tirana"
-"Algeria":     "Algiers"
-...
-"Yemen":       "Sanaa"
-"Zambia":      "Lusaka"
-"Zimbabwe":    "Harare"
-```
--->
-
 ![Replicação](../assets/replication.svg)
 
 A desvantagem com a replicação é que está-se a multiplicar a quantidade de armazenamento necessário para cada réplica. Há também alguma sobrecarga da rede com esta abordagem, já que os valores também devem ser encaminhados para todos os nós replicados, nas escritas. Mas há um problema mais insidioso com esta abordagem, que será coberto em breve.
@@ -171,34 +144,11 @@ Com o particionamento, a nossa capacidade total pode aumentar sem qualquer hardw
 
 Por exemplo, se nós particionarmos os nossos países em dois servidores, podemos colocar todos os países que começam com letras A-N no nó A, e O-Z no nó B.
 
-
-<!--
-<h5>Nó A</h5>
-
-```javascript
-"Afghanistan": "Kabul"
-"Albania":     "Tirana"
-"Algeria":     "Algiers"
-...
-"Norway":      "Oslo"
-```
-
-<h5>Nó B</h5>
-
-```javascript
-"Oman":        "Muscat"
-...
-"Yemen":       "Sanaa"
-"Zambia":      "Lusaka"
-"Zimbabwe":    "Harare"
-```
--->
+![Partições](../assets/partitions.svg)
 
 Há um pouco de sobrecarga usando esta abordagem. Tem que haver um serviço que saiba a correspondência entre os intervalos de chaves e os respetivos nós. Uma aplicação que solicite o valor da chave `Portugal` deverá ser encaminhado para o nó A e não para o nó B.
 
 Há também outro aspeto negativo. Ao contrário de replicação, o simples particionamento dos dados realmente *diminui* o uptime. Se um nó falhar, essa partição de dados inteira ficará indisponível. É por isso que o Riak usa tanto a replicação como o particionamento.
-
-![Partições](../assets/partitions.svg)
 
 
 <h3>Replicação + Partições</h3>
@@ -206,28 +156,6 @@ Há também outro aspeto negativo. Ao contrário de replicação, o simples part
 Já que as partições nos permitem aumentar a capacidade, e a replicação melhora a disponibilidade, o Riak combina-os. Particiona e replica os dados em vários nós.
 
 Onde no nosso exemplo anterior particionamos os dados em 2 nós, podemos agora replicar cada uma dessas partições em mais 2 nós, para um total de 4.
-
-<!--
-<h5>Nós A & C</h5>
-
-```javascript
-"Afghanistan": "Kabul"
-"Albania":     "Tirana"
-"Algeria":     "Algiers"
-...
-"Norway":      "Oslo"
-```
-
-<h5>Nós B & D</h5>
-
-```javascript
-"Oman":        "Muscat"
-...
-"Yemen":       "Sanaa"
-"Zambia":      "Lusaka"
-"Zimbabwe":    "Harare"
-```
--->
 
 O nosso número de servidores aumentou, mas também a nossa capacidade e confiabilidade. Se estiver a projetar um sistema horizontalmente escalável usando particionamento de dados, deve lidar com a replicação dessas partições.
 

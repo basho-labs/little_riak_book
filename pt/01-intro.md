@@ -1,10 +1,22 @@
 # Introdução
 
+## Roleta da Inatividade
+
+Imagine uma roleta num casino, onde qualquer número tem a probabilidade de 1 em 37 de sair. Imagine agora que você poderia apostar que um determinado número *não* ia sair (97,3% de hipóteses a seu favor), e ganhando pagaria 10 vezes a sua aposta. Você faria essa aposta? Eu pegava na minha carteira tão rápido que o meu polegar iniciava um incêndio no meu bolso.
+
+![Apostas com o Uptime](../assets/roulette.png)
+
+Agora imagine que podia apostar de novo, mas só ganha se a roda fizer 100 rotações seguidas em seu favor, senão perde. Será que você ainda joga? Ganhar uma aposta simples pode ser fácil, mas ao longo de várias tentativas as probabilidades não são favoráveis.
+
+As pessoas estão sempre a fazer este tipo de apostas com os dados. Um único servidor tem boas hipóteses de continuar disponível. Mas quando você administra um cluster com milhares de servidores, ou biliões de pedidos, as hipóteses de qualquer um falhar tornam-se muito grandes. Mesmo um desastre de uma-vez-num-milhão é comum à luz de um bilião de oportunidades.
+
 ## O que é o Riak?
 
 O Riak é uma base de dados distribuída de código aberto que oferece alta disponibilidade, tolerância a falhas e escalabilidade quase linear. Basicamente, significa que o Riak raramente tem falhas de serviço e que cresce com o sistema.
 
-Num mundo cada vez mais interligado, grandes mudanças ocorreram na gestão de dados. A web e os dispositivos com conectividade provocaram uma explosão tanto na recolha como no acesso a dados, inédito na história moderna. A quantidade de dados que estão a ser armazenados e geridos cresceu a um ritmo vertiginoso, e em paralelo, mais pessoas que nunca precisam de acesso rápido e confiável a esses dados. É isto que é geralmente se chama de *Big Data*.
+<!-- image: phone with 1/0's flying from it to a disk array -->
+
+À medida que o mundo moderno que interliga com ligações cada vez mais complexas, grandes mudanças estão a ocorrer na gestão de dados. A web e os dispositivos com conectividade provocaram uma explosão tanto na recolha como no acesso a dados, inédito na história moderna. A magnitude de dados que estão a ser armazenados e geridos cresceu a um ritmo vertiginoso, e em paralelo, mais pessoas que nunca precisam de acesso rápido e confiável a esses dados. É isto que é geralmente se chama de *Big Data*.
 
 
 <aside id="big-data" class="sidebar"><h3>Então o que é o <em>Big Data?</em></h3>
@@ -13,9 +25,13 @@ Há muita discussão em torno do que constitui o <em>Big Data</em>.
 
 Eu tenho 6 Terabytes em minha casa para guarar vídeos e outros backups. Isso conta? Por outro lado, o CERN armazenou cerca de [200 Petabytes](http://www.itbusinessedge.com/cm/blogs/lawson/the-big-data-software-problem-behind-cerns-higgs-boson-hunt/?cs=50736) na procura do *Higgs Boson*.
 
+<!-- image: raid box -->
+
 É um número difícil de definir, porque Big Data é uma figura pessoal. O que é grande para uma pessoa pode ser pequeno para outra. É por isso que muitas definições não se referem a tamanhos em específico, mas a valores relativos. Uma razoável, embora extensa, [definição de Big Data](http://www.gartner.com/DisplayDocument?ref=clientFriendlyUrl&id=2057415) é dado pela Gartner.
 
 <blockquote>Big Data é informação de elevado volume, de alta velocidade, e/ou de grande variedade, que exigem novas formas de processamento para permitir tomar decisões inteligentes, compreender os dados e otimizar processos.</blockquote></aside>
+
+### Conte sempre com o Riak
 
 O cenário ideal para usar o Riak é com um elevado volume de dados (que estão disponíveis para ler e escrever quando for preciso), a alta velocidade (responde facilmente ao crescimento) e com grande variedade (pode armazenar qualquer tipo de dados como um valor).
 
