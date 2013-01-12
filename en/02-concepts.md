@@ -8,6 +8,8 @@ Believe me, dear reader, when I suggest that thinking in a distributed fashion i
 
 The existence of databases like Riak is the culmination of two basic trends: accessible technology spurring different data requirements, and gaps in the data management market.
 
+<!-- image: landscape -->
+
 First, as we've seen steady improvements in technology along with reductions in cost, vast amounts of computing power and storage are now within the grasp of nearly anyone. Along with our increasingly interconnected world caused by the web and shrinking, cheaper computers (like smartphones), this has catalyzed an exponential growth of data, and a demand for more predictability and speed by savvier users. In other words, more data is being created on the front-end, while more data is being managed on the backend.
 
 Second, relational database management systems (RDBMS) have become focused over the years for a standard set of use-cases, like business intelligence. They were also technically tuned for squeezing performance out of single larger servers, like optimizing disk access, even while cheap commodity (and virtualized) servers made horizontal growth increasingly attractive. As cracks in relational implementations became apparent, custom implementations arose in response to specific problems not originally envisioned by the relational DBs.
@@ -77,57 +79,54 @@ I always recommend that initiates take the time to grock this list. Keeping thes
 
 Riak is a Key/Value (KV) database, built from the ground up to safely distribute data across a cluster of physical servers, called nodes. A Riak cluster is also known as a Ring (we'll cover why later).
 
-For now, we'll only consider the concepts required to be a Riak users, and cover operations later.
+<!-- For now, we'll only consider the concepts required to be a Riak users, and cover operations later. -->
 
-Riak functions similarly to a very large hashtable. Depending on your background, you may instead call it a map, or dictionary, or object. But the idea is the same: you store a value with an immutable key, and retrieve it later.
+Riak functions similarly to a very large hash space. Depending on your background, you may call it hashtable, a map, a dictionary, or an object. But the idea is the same: you store a value with an immutable key, and retrieve it later.
 
 <h3>Key and Value</h3>
 
-<!-- image: address metaphore -->
+Key/value is the most basic construct in all of computerdom. You can think of a key like a home address, such as Bob's house with the unique key 5124, while the value would be maybe Bob (and his stuff).
 
-If Riak were a variable that functioned as a hashtable, you might set the value of your favorite food using the *key* `favorite`.
-
-```javascript
-hashtable["favorite"] = "pizza"
-```
-
-And retrieve the *value* `pizza` by using the same key as before.
+![A Key is an Address](../assets/addresses.png)
 
 ```javascript
-food = hashtable["favorite"]
-food == "pizza"
+hashtable["5124"] = "Bob"
 ```
 
-One day you burn the roof of your mouth. In anger, you decided your favorite food is now `cold pizza`.
+Retrieving Bob is as easy as going to his house.
 
 ```javascript
-hashtable["favorite"] = "cold pizza"
+bob = hashtable["5124"]
 ```
 
-Successive requests for `favorite` will now return `cold pizza`.
+Let's say that poor old Bob dies, and Claire moves into this house. The address remains the same, but the contents have changed.
 
-For convenience, we call a key/value pair an *object*. Together our `favorite`/`pizza` pair is referred to as the "`favorite` object", rather than the more verbose "`favorite` key and its value".
+```javascript
+hashtable["5124"] = "Claire"
+```
+
+Successive requests for `5124` will now return `Claire`.
 
 <h3>Buckets</h3>
 
 <!-- image: address streets metaphore -->
 
-*Buckets* are how Riak allows you to categorizes objects. You can group multiple objects into logical collections, where identical keys will not overlap between buckets.
+Addresses in Riakville are more than a house number, but also a street. There could be another 5124 on another street, so the way we can ensure a unique address is by requiring both, as in *5124 Main Street*.
 
-You can think of buckets as [namespaces](http://en.wikipedia.org/wiki/Namespace_(computer_science\)).
+*Buckets* are like streets in Riak. But rather than mere geography, you can group multiple key/values into logical [namespaces](http://en.wikipedia.org/wiki/Namespace_(computer_science\)) (like residential streets, industrial streets, commercial streets, etc), where identical keys will not overlap between buckets.
 
-Using our `favorite` example from above, we can specify a favorite food, versus a favorite animal, by using the same key. Unless you're a Midwest farm kid like me, these categories probably won't overlap much.
+For example, while Alice may live at *5122 Main Street*, there may be a gas station at *5122 Bagshot Row*.
 
 ```javascript
-food["favorite"] = "pizza"
-animals["favorite"] = "red panda"
+main["5122"] = "Alice"
+bagshot["5122"] = "Gas"
 ```
 
-You could have just named your keys `edible_favorite` and `animal_favorite`, but buckets allow for cleaner key naming, and has other added benefits that I'll outline later.
+Certainly you could have just named your keys `main_5122` and `bywater_5122`, but buckets allow for cleaner key naming, and have other benefits that I'll outline later.
 
-Buckets are so useful in Riak that all keys must belong to a bucket. There is no global namespace.
+Buckets are so useful in Riak that all keys must belong to a bucket. There is no global namespace. The true definition of a unique key in Riak is actually `bucket/key`.
 
-In fact in Riak, the true definition of an object key is actually `bucket/key`.
+For convenience, we call a *bucket/key + value* pair an *object*, sparing ourselves the verbosity of "X key in the Y bucket and its value".
 
 ## Replication and Partitions
 
@@ -140,32 +139,6 @@ Distributing data across several nodes is how Riak is able to remain highly avai
 The obvious benefit of replication is that if one node goes down, nodes that contain replicated data remain available to serve requests. In other words, the system remains *available*.
 
 For example, imagine you have a list of country keys, whose values contain those countries' capitals. If all you do is replicate that data to 2 servers, you would have 2 duplicate databases.
-
-<!--
-<h5>Node A</h5>
-
-```javascript
-"Afghanistan": "Kabul"
-"Albania":     "Tirana"
-"Algeria":     "Algiers"
-...
-"Yemen":       "Sanaa"
-"Zambia":      "Lusaka"
-"Zimbabwe":    "Harare"
-```
-
-<h5>Node B</h5>
-
-```javascript
-"Afghanistan": "Kabul"
-"Albania":     "Tirana"
-"Algeria":     "Algiers"
-...
-"Yemen":       "Sanaa"
-"Zambia":      "Lusaka"
-"Zimbabwe":    "Harare"
-```
--->
 
 ![Replication](../assets/replication.svg)
 
@@ -180,61 +153,17 @@ With partitioning, our total capacity can increase without any big expensive har
 
 For example, if we partition our countries into 2 servers, we might put all countries beginning with letters A-N into Node A, and O-Z into Node B.
 
-<!--
-<h5>Node A</h5>
-
-```javascript
-"Afghanistan": "Kabul"
-"Albania":     "Tirana"
-"Algeria":     "Algiers"
-...
-"Norway":      "Oslo"
-```
-
-<h5>Node B</h5>
-
-```javascript
-"Oman":        "Muscat"
-...
-"Yemen":       "Sanaa"
-"Zambia":      "Lusaka"
-"Zimbabwe":    "Harare"
-```
--->
+![Partitions](../assets/partitions.svg)
 
 There is a bit of overhead the partition approach. Some service must keep track of what range of values live on which node. A requesting application must know that the key `Spain` will be routed to Node B, not Node A.
 
 There's also another downside. Unlike replication, simple partitioning of data actually *decreases* uptime. If one node goes down, that entire partition of data is unavailable. This is why Riak uses both replication and partitioning.
-
-![Partitions](../assets/partitions.svg)
 
 <h3>Replication+Partitions</h3>
 
 Since partitions allow us to increase capacity, and replication improves availability, Riak combines them. We partition data across multiple nodes, as well as replicate that data into multiple nodes.
 
 Where our previous example partitioned data into 2 nodes, we can replicate each of those partitions into 2 more nodes, for a total of 4.
-
-<!--
-<h5>Nodes A & C</h5>
-
-```javascript
-"Afghanistan": "Kabul"
-"Albania":     "Tirana"
-"Algeria":     "Algiers"
-...
-"Norway":      "Oslo"
-```
-
-<h5>Nodes B & D</h5>
-
-```javascript
-"Oman":        "Muscat"
-...
-"Yemen":       "Sanaa"
-"Zambia":      "Lusaka"
-"Zimbabwe":    "Harare"
-```
--->
 
 Our server count has increased, but so has our capacity and reliability. If you're designing a horizontally scalable system by partitioning data, you must deal with replicating those partitions.
 
