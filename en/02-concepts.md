@@ -73,7 +73,7 @@ One detour in the land of distributed databases is to understand the condition t
 7. Transport cost is zero.
 8. The network is homogeneous.
 
-I always recommend that initiates take the time to grock this list. Keeping these points everpresent in your mind can save days of pain and expense in the future.
+I always recommend that initiates take the time to grok this list. Keeping these points ever present in your mind can save days of pain and expense in the future.
 
 ## Riak Components
 
