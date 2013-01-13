@@ -122,7 +122,7 @@ main["5122"] = "Alice"
 bagshot["5122"] = "Gas"
 ```
 
-Certainly you could have just named your keys `main_5122` and `bywater_5122`, but buckets allow for cleaner key naming, and have other benefits that I'll outline later.
+Certainly you could have just named your keys `main_5122` and `bagshot_5122`, but buckets allow for cleaner key naming, and have other benefits that I'll outline later.
 
 Buckets are so useful in Riak that all keys must belong to a bucket. There is no global namespace. The true definition of a unique key in Riak is actually `bucket/key`.
 
