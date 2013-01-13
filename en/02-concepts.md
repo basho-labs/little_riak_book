@@ -77,7 +77,7 @@ I always recommend that initiates take the time to grok this list. Keeping these
 
 ## Riak Components
 
-Riak is a Key/Value (KV) database, built from the ground up to safely distribute data across a cluster of physical servers, called nodes. A Riak cluster is also known as a Ring (we'll cover why later).
+Riak is a Key/Value (KV) database, built from the ground up to safely distribute data across a cluster of physical servers, called nodes. A Riak cluster is also known as a ring (we'll cover why later).
 
 <!-- For now, we'll only consider the concepts required to be a Riak users, and cover operations later. -->
 
