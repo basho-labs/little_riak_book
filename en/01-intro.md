@@ -12,7 +12,7 @@ People make these sorts of bets with data all of the time. A single server has a
 
 ## What is Riak
 
-Riak is an open-source, distributed key/value database for high availability, fault-tolerance, and near-linear scalability. It's a mouthful, that basically means Riak has remarkably high uptime, and grows with you.
+Riak is an open-source, distributed key/value database for high availability, fault-tolerance, and near-linear scalability. In short, Riak has remarkably high uptime and grows with you.
 
 <!-- image: phone with 1/0's flying from it to a disk array -->
 
