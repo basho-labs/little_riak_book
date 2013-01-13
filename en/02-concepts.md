@@ -48,7 +48,7 @@ This limitation changes how you model data. Relational normalization (organizing
     
     Examples: *CouchDB*, *MongoDB*, *Couchbase*
   4. **Columnar**. Popularized by [Google's BigTable](http://research.google.com/archive/bigtable.html),
-    this form of database exists to scale across multiple servers, and groups like data into
+    this form of database exists to scale across multiple servers, and groups similar data into
     column families. Column values can be individually versioned and managed, though families
     are defined in advance, not unlike RDBMS schemas.
     
