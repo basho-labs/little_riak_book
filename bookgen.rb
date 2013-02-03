@@ -16,8 +16,8 @@ $outDir = File.join($root, 'pdf')
 
 $figures = {
   # 'cover' => 'cover',
-  'roulette' => '1.1',
-  'addresses' => '2.1',
+  # 'decor/roulette' => '1.1',
+  # 'decor/addresses' => '2.1',
   'replication' => '2.2',
   'partitions' => '2.3',
   'replpart' => '2.4',
@@ -41,7 +41,7 @@ $figures = {
 def gen_pdf(languages)
   def figures(&block)
     begin
-      Dir["#$root/assets/*.pdf","#$root/assets/*.png"].each do |file|
+      Dir["#$root/assets/*.pdf","#$root/assets/*.png","#$root/assets/decor/*.png"].each do |file|
         assetname = file.sub(/.*?\/assets\/(.*?)\.\w{3}$/, '\1')
         next unless figure = $figures[assetname]
         cp file, file.sub(/assets\/(.*?)\.\w{3}/, "figures/#{figure}.png")
@@ -97,7 +97,7 @@ def gen_pdf(languages)
       s %r{(\n\n)\t(http:\/\/[A-Za-z0-9\/\%\&\=\-\_\\\.]+)\n([^\t]|\t\n)}, '\1<\2>\1'
 
       # Process figures
-      # s /Insert\s18333fig\d+\.png\s*\n.*?\d{1,2}-\d{1,2}\. (.*)/, 'FIG: \1'
+      s /^\!\[(.*?)\]\(..\/(.*?\/decor\/.*?)\)/, 'DEC: \2'
       s /^\!\[(.*?)\]\((.*?)\)/, 'FIG: \1'
     end
   end
@@ -123,6 +123,7 @@ def gen_pdf(languages)
       s /#{config['prechap'].gsub(space, '\s')}\s*(\d+)(\s*)#{config['postchap'].gsub(space, '\s')}/, '\chapref{\1}\2'
 
       # Miscellaneous fixes
+      s /DEC: (.*)/, "\\begin{wrapfigure}{r}{.3\\textwidth}\n  \\includegraphics[scale=2.0]{\\1}\n\\end{wrapfigure}"
       s /FIG: (.*)/, '\img{\1}'
       s '\begin{enumerate}[1.]', '\begin{enumerate}'
       s /(\w)--(\w)/, '\1-\2'
@@ -270,12 +271,12 @@ languages = [ARGV[0] || "en"]
 # generate the pdf
 gen_pdf(languages)
 
-# generate the ebooks
-languages.each do |language|
-  formats = %w{mobi epub}
+# # generate the ebooks
+# languages.each do |language|
+#   formats = %w{mobi epub}
 
-  html_file = gen_html(language)
-  formats.each do |format|
-    gen_book(language, html_file, format)
-  end
-end
+#   html_file = gen_html(language)
+#   formats.each do |format|
+#     gen_book(language, html_file, format)
+#   end
+# end

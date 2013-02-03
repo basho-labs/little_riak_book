@@ -87,7 +87,7 @@ Riak functions similarly to a very large hash space. Depending on your backgroun
 
 Key/value is the most basic construct in all of computerdom. You can think of a key like a home address, such as Bob's house with the unique key 5124, while the value would be maybe Bob (and his stuff).
 
-![A Key is an Address](../assets/addresses.png)
+![A Key is an Address](../assets/decor/addresses.png)
 
 ```javascript
 hashtable["5124"] = "Bob"
