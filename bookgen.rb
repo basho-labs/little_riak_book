@@ -18,12 +18,13 @@ $figures = {
   # 'cover' => 'cover',
   # 'decor/roulette' => '1.1',
   # 'decor/addresses' => '2.1',
-  'replication' => '2.2',
-  'partitions' => '2.3',
-  'replpart' => '2.4',
-  'ring0' => '2.5',
-  'ring1' => '2.6',
-  'nrw' => '2.7',
+  'replication' => '2.1',
+  'partitions' => '2.2',
+  'replpart' => '2.3',
+  'ring0' => '2.4',
+  'ring1' => '2.5',
+  'nrw' => '2.6',
+  # 'decor/drinks.png' => '3.1',
   'mapreduce' => '3.1',
   'top' => '4.1',
   'riak-stack' => '4.2',
@@ -123,7 +124,7 @@ def gen_pdf(languages)
       s /#{config['prechap'].gsub(space, '\s')}\s*(\d+)(\s*)#{config['postchap'].gsub(space, '\s')}/, '\chapref{\1}\2'
 
       # Miscellaneous fixes
-      s /DEC: (.*)/, "\\begin{wrapfigure}{r}{.3\\textwidth}\n  \\includegraphics[scale=2.0]{\\1}\n\\end{wrapfigure}"
+      s /DEC: (.*)/, "\\begin{wrapfigure}{r}{.3\\textwidth}\n  \\includegraphics[scale=1.0]{\\1}\n\\end{wrapfigure}"
       s /FIG: (.*)/, '\img{\1}'
       s '\begin{enumerate}[1.]', '\begin{enumerate}'
       s /(\w)--(\w)/, '\1-\2'

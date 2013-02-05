@@ -214,8 +214,6 @@ Different use-cases will dictate whether a bucket is heavily written to, or larg
 
 The basis of Riak's availability and tolerance is that it can read from, or write to, multiple nodes. Riak allows you to adjust these N/R/W values (which we covered under [Concepts](#practical-tradeoffs)) on a per-bucket basis.
 
-<!-- Sloppy Quorum -->
-
 <h4>N/R/W</h4>
 
 N is the number of total nodes that a value should be replicated to, defaulting to 3. But we can set this `n_val` to any number fewer than the total number of nodes.
@@ -273,6 +271,16 @@ curl -i -XPUT http://localhost:8098/riak/logs \
 * `all` - All replicas must reply, which is the same as setting `r` or `w` equal to `n_val`
 * `one` - Setting `r` or `w` equal to `1`
 * `quorum` - A majority of the replicas must respond, that is, “half plus one”.
+
+<h4>Sloppy Quorum</h4>
+
+In a perfect world, a strict quorum would be sufficient for most write requests. However, at any moment a node could go down, or the network could partition, or squirrels get caught in the tubes, triggering the unavailability of a required nodes. This is known as a strict quorum. Riak defaults to what's known as a *sloppy quorum*, meaning that if any primary (expected) node is unavailable, the next available node in the ring will accept requests.
+
+Think about it like this. Say you're out drinking with your friend. You order 2 drinks (W=2), but before they arrive, she leaves temporarily. If you were a strict quorum, you could merely refuse both drinks, since the required people (N=2) are unavailable. But you'd rather be a sloppy drunk... erm, I mean sloppy *quorum*. Rather than deny the drink, you take both, one accepted *on her behalf* (you also get to pay).
+
+![A Sloppy Quorum](../assets/decor/drinks.png)
+
+When she returns, you slide her drink over. This is known as *hinted handoff*, which we'll look at again in the next chapter. For now it's sufficient to note that there's a difference between the default sloppy quorum (W), and requiring a strict quorum of primary nodes (PW).
 
 <h5>More than R's and W's</h5>
 
