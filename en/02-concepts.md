@@ -48,7 +48,7 @@ This limitation changes how you model data. Relational normalization (organizing
     
     Examples: *CouchDB*, *MongoDB*, *Couchbase*
   4. **Columnar**. Popularized by [Google's BigTable](http://research.google.com/archive/bigtable.html),
-    this form of database exists to scale across multiple servers, and groups like data into
+    this form of database exists to scale across multiple servers, and groups similar data into
     column families. Column values can be individually versioned and managed, though families
     are defined in advance, not unlike RDBMS schemas.
     
@@ -73,11 +73,11 @@ One detour in the land of distributed databases is to understand the condition t
 7. Transport cost is zero.
 8. The network is homogeneous.
 
-I always recommend that initiates take the time to grock this list. Keeping these points everpresent in your mind can save days of pain and expense in the future.
+I always recommend that initiates take the time to grok this list. Keeping these points ever present in your mind can save days of pain and expense in the future.
 
 ## Riak Components
 
-Riak is a Key/Value (KV) database, built from the ground up to safely distribute data across a cluster of physical servers, called nodes. A Riak cluster is also known as a Ring (we'll cover why later).
+Riak is a Key/Value (KV) database, built from the ground up to safely distribute data across a cluster of physical servers, called nodes. A Riak cluster is also known as a ring (we'll cover why later).
 
 <!-- For now, we'll only consider the concepts required to be a Riak users, and cover operations later. -->
 
@@ -122,7 +122,7 @@ main["5122"] = "Alice"
 bagshot["5122"] = "Gas"
 ```
 
-Certainly you could have just named your keys `main_5122` and `bywater_5122`, but buckets allow for cleaner key naming, and have other benefits that I'll outline later.
+Certainly you could have just named your keys `main_5122` and `bagshot_5122`, but buckets allow for cleaner key naming, and have other benefits that I'll outline later.
 
 Buckets are so useful in Riak that all keys must belong to a bucket. There is no global namespace. The true definition of a unique key in Riak is actually `bucket/key`.
 
@@ -130,7 +130,7 @@ For convenience, we call a *bucket/key + value* pair an *object*, sparing oursel
 
 ## Replication and Partitions
 
-Distributing data across several nodes is how Riak is able to remain highly available, while tolerant of outages and network partitions. Riak combines two styles of distribution to achieve this: [replication](http://en.wikipedia.org/wiki/Replication_(computing\)) and [partitions](http://en.wikipedia.org/wiki/Partition_(database\)).
+Distributing data across several nodes is how Riak is able to remain highly available, tolerating outages and network partitions. Riak combines two styles of distribution to achieve this: [replication](http://en.wikipedia.org/wiki/Replication_(computing\)) and [partitions](http://en.wikipedia.org/wiki/Partition_(database\)).
 
 <h3>Replication</h3>
 
@@ -138,7 +138,7 @@ Distributing data across several nodes is how Riak is able to remain highly avai
 
 The obvious benefit of replication is that if one node goes down, nodes that contain replicated data remain available to serve requests. In other words, the system remains *available*.
 
-For example, imagine you have a list of country keys, whose values contain those countries' capitals. If all you do is replicate that data to 2 servers, you would have 2 duplicate databases.
+For example, imagine you have a list of country keys, whose values are those countries' capitals. If all you do is replicate that data to 2 servers, you would have 2 duplicate databases.
 
 ![Replication](../assets/replication.svg)
 
@@ -155,7 +155,7 @@ For example, if we partition our countries into 2 servers, we might put all coun
 
 ![Partitions](../assets/partitions.svg)
 
-There is a bit of overhead the partition approach. Some service must keep track of what range of values live on which node. A requesting application must know that the key `Spain` will be routed to Node B, not Node A.
+There is a bit of overhead to the partition approach. Some service must keep track of what range of values live on which node. A requesting application must know that the key `Spain` will be routed to Node B, not Node A.
 
 There's also another downside. Unlike replication, simple partitioning of data actually *decreases* uptime. If one node goes down, that entire partition of data is unavailable. This is why Riak uses both replication and partitioning.
 
@@ -180,7 +180,7 @@ Riak follows the *consistent hashing* technique, that conceptually maps objects 
 
 Riak partitions are not mapped alphabetically (as we used in the examples above), but instead, a partition marks a range of key hashes (SHA-1 function applied to a key). The maximum hash value is 2^160, and divided into some number of partitions---64 partitions by default (the Riak config setting is `ring_creation_size`).
 
-Let's walk through what all that means. If you have the key `favorite`, applying the SHA-1 algorithm would return `dc2b 258d 7221 3f8d 05d1 5973 a66d c156 847b 83f4` in hexadecimal. With 64 partitions, each partition has 1/64 of the 2^160 possible values, making the first partition range from 0 to 2^154-1, the second range is 2^154 to 2*2^154-1, and so on, up to the last partition 63*2^154-1 to 2^160-1.
+Let's walk through what all that means. If you have the key `favorite`, applying the SHA-1 algorithm would return `dc2b 258d 7221 3f8d 05d1 5973 a66d c156 847b 83f4` in hexadecimal. With 64 partitions, each partition has 1/64 of the 2^160 possible values, making the first partition range from 0 to 2^154-1, the second range is 2^154 to 2\*2^154-1, and so on, up to the last partition 63\*2^154-1 to 2^160-1.
 
 <!-- V=lists:sum([lists:nth(X, H)*math:pow(16, X-1) || X <- lists:seq(1,string:len(H))]) / 64. -->
 <!-- V / 2.28359630832954E46. // 2.2.. is 2^154 -->
