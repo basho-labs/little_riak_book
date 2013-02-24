@@ -96,7 +96,7 @@ hashtable["5124"] = "Bob"
 Retrieving Bob is as easy as going to his house.
 
 ```javascript
-bob = hashtable["5124"]
+"Bob" = hashtable["5124"]
 ```
 
 Let's say that poor old Bob dies, and Claire moves into this house. The address remains the same, but the contents have changed.
