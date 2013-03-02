@@ -1,6 +1,6 @@
-<html><head><title>A Little Riak Book</title></head><meta charset="utf-8"><body><h1 id="toc_25">A Little Riak Book</h1>
+<html><head><title>A Little Riak Book</title></head><meta charset="utf-8"><body><h1 id="toc_27">A Little Riak Book</h1>
 
-<h3 id="toc_26"><em>Eric Redmond</em></h3>
+<h3 id="toc_28"><em>Eric Redmond</em></h3>
 
 <p><em>This is a work in progress, and should be treated as such. General redaction ensues:
 facts are being verified, texts are being edited, jokes are being made funny.</em></p>
@@ -9,105 +9,125 @@ facts are being verified, texts are being edited, jokes are being made funny.</e
 <a href="#toc_0">Introduction</a>
 <ul>
 <li>
-<a href="#toc_1">What is Riak</a>
+<a href="#toc_1">Downtime Roulette</a>
 </li>
 <li>
-<a href="#toc_2">About This Book</a>
+<a href="#toc_2">What is Riak</a>
+<ul>
+<li>
+<a href="#toc_3">Always Bet on Riak</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_4">About This Book</a>
 </li>
 </ul>
 </li>
 </ul>
 <ul>
 <li>
-<a href="#toc_3">Concepts</a>
+<a href="#toc_5">Concepts</a>
 <ul>
 <li>
-<a href="#toc_4">The Landscape</a>
+<a href="#toc_6">The Landscape</a>
 <ul>
 <li>
-<a href="#toc_5">The Fallacies of Distributed Computing</a>
+<a href="#toc_7">The Fallacies of Distributed Computing</a>
 </li>
 </ul>
 </li>
 <li>
-<a href="#toc_6">Riak Components</a>
+<a href="#toc_8">Riak Components</a>
 </li>
 <li>
-<a href="#toc_7">Replication and Partitions</a>
+<a href="#toc_9">Replication and Partitions</a>
 </li>
 <li>
-<a href="#toc_8">Practical Tradeoffs</a>
+<a href="#toc_10">Practical Tradeoffs</a>
 </li>
 <li>
-<a href="#toc_9">Wrapup</a>
-</li>
-</ul>
-</li>
-</ul>
-<ul>
-<li>
-<a href="#toc_10">Developers</a>
-<ul>
-<li>
-<a href="#toc_11">Lookup</a>
-</li>
-<li>
-<a href="#toc_12">Buckets</a>
-</li>
-<li>
-<a href="#toc_13">Entropy</a>
-</li>
-<li>
-<a href="#toc_14">Querying</a>
-</li>
-<li>
-<a href="#toc_15">Wrapup</a>
+<a href="#toc_11">Wrapup</a>
 </li>
 </ul>
 </li>
 </ul>
 <ul>
 <li>
-<a href="#toc_16">Operators</a>
+<a href="#toc_12">Developers</a>
 <ul>
 <li>
-<a href="#toc_17">Clusters</a>
+<a href="#toc_13">Lookup</a>
 </li>
 <li>
-<a href="#toc_18">Managing a Cluster</a>
+<a href="#toc_14">Buckets</a>
 </li>
 <li>
-<a href="#toc_19">How Riak is Built</a>
+<a href="#toc_15">Entropy</a>
 </li>
 <li>
-<a href="#toc_20">Tools</a>
+<a href="#toc_16">Querying</a>
 </li>
 <li>
-<a href="#toc_21">Wrapup</a>
+<a href="#toc_17">Wrapup</a>
 </li>
 </ul>
 </li>
 </ul>
 <ul>
 <li>
-<a href="#toc_22">Notes</a>
+<a href="#toc_18">Operators</a>
 <ul>
 <li>
-<a href="#toc_23">A Short Note on MDC</a>
+<a href="#toc_19">Clusters</a>
 </li>
 <li>
-<a href="#toc_24">A Short Note on RiakCS</a>
+<a href="#toc_20">Managing a Cluster</a>
+</li>
+<li>
+<a href="#toc_21">How Riak is Built</a>
+</li>
+<li>
+<a href="#toc_22">Tools</a>
+</li>
+<li>
+<a href="#toc_23">Wrapup</a>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>
+<a href="#toc_24">Notes</a>
+<ul>
+<li>
+<a href="#toc_25">A Short Note on MDC</a>
+</li>
+<li>
+<a href="#toc_26">A Short Note on RiakCS</a>
 </li>
 </ul>
 </li>
 </ul>
 <h1 id="toc_0">Introduction</h1>
 
-<h2 id="toc_1">What is Riak</h2>
+<h2 id="toc_1">Downtime Roulette</h2>
+
+<p>Picture a roulette wheel in a casino, where any particular number has a 1 in 37 chance of being hit. Imagine you could place a single wager that a given number will <em>not</em> hit (about 97.3% in your favor), and winning would pay out 10 times your wager. Would you make that bet? I&#39;d reach for my wallet so fast my thumb would start a fire on my pocket.</p>
+
+<p><img src="../assets/roulette.png" alt="Gambling With Uptime"></p>
+
+<p>Now imagine you could bet again, but only win if the wheel made a sequential 100 spins in your favor, otherwise you lose. Would you still play? Winning a single bet might be easy, but over many trials the odds are not in your favor.</p>
+
+<p>People make these sorts of bets with data all of the time. A single server has a good chance of remaining available. When you run a cluster with thousands of servers, or billions of requests, the odds of any one breaking down becomes the rule. Even a once-in-a-million disaster is commonplace in light of a billion opportunities.</p>
+
+<h2 id="toc_2">What is Riak</h2>
 
 <p>Riak is an open-source, distributed key/value database for high availability, fault-tolerance, and near-linear scalability. It&#39;s a mouthful, that basically means Riak has remarkably high uptime, and grows with you.</p>
 
-<p>In an increasingly interconnected world, major shifts have occurred in data management. The web and connected devices have spurred an explosion of both data collection and access unseen in the history of the world. The amount of data stored and managed has grown at a staggering rate, and in parallel, more people than ever require fast and reliable access to this data. This trend is known as <em>Big Data</em>.</p>
+<!-- image: phone with 1/0's flying from it to a disk array -->
+
+<p>As the modern world stitches itself together with increasingly intricate connections, major shifts are occurring in information management. The web and networked devices spur an explosion of data collection and access unseen in the history of the world. The magnitude of values stored and managed continues to grow at a staggering rate, and in parallel, more people than ever require fast and reliable access to this data. This trend is known as <em>Big Data</em>.</p>
 
 <p><aside id="big-data" class="sidebar"><h3>So What is Big Data?</h3></p>
 
@@ -115,9 +135,13 @@ facts are being verified, texts are being edited, jokes are being made funny.</e
 
 <p>I have a 6 Terabyte RAID in my house to store videos and other backups. Does that count? On the other hand, CERN grabbed about <a href="http://www.itbusinessedge.com/cm/blogs/lawson/the-big-data-software-problem-behind-cerns-higgs-boson-hunt/?cs=50736">200 Petabytes</a> looking for the Higgs boson.</p>
 
+<!-- image: raid box -->
+
 <p>It&#39;s a hard number to pin down, because Big Data is a personal figure. What&#39;s big to one might be small to another. This is why many definitions don&#39;t refer to byte count at all, but instead about relative potentials. A reasonable, albeit wordy, <a href="http://www.gartner.com/DisplayDocument?ref=clientFriendlyUrl&amp;id=2057415">definition of Big Data</a> is given by Gartner.</p>
 
 <p><blockquote>Big Data are high-volume, high-velocity, and/or high-variety information assets that require new forms of processing to enable enhanced decision making, insight discovery and process optimization.</blockquote></aside></p>
+
+<h3 id="toc_3">Always Bet on Riak</h3>
 
 <p>The sweet spot of Riak is high-volume (data that&#39;s available to read and write when you need it), high-velocity (easily responds to growth), and high-variety information assets (you can store any type of data as a value).</p>
 
@@ -127,18 +151,22 @@ facts are being verified, texts are being edited, jokes are being made funny.</e
 
 <p>So should you use Riak? A good rule of thumb for potential users is to ask yourself if every moment of downtime will cost you in some way (money, users, etc). Not all systems require such extreme amounts of uptime, and if you don&#39;t, Riak may not be for you.</p>
 
-<h2 id="toc_2">About This Book</h2>
+<h2 id="toc_4">About This Book</h2>
 
 <p>This is not an &quot;install and follow along&quot; guide. This is a &quot;read and comprehend&quot; guide. Don&#39;t feel compelled to have Riak, or even have a computer handy, when starting this book. You may feel like installing at some point, and if so, instructions can be found on the <a href="http://docs.basho.com">Riak docs</a>.</p>
 
 <p>In my opinion, the most important section of this book is the <a href="#concepts">concepts chapter</a>. If you already have a little knowledge it may start slow, but it picks up in a hurry. After laying the theoretical groundwork, we&#39;ll move onto helping <a href="#developers">developers</a> use Riak, by learning how to query it and tinker with some settings. Finally, we&#39;ll go over the basic details that <a href="#operators">operators</a> should know, such as how to set up a Riak cluster, configure some values, use optional tools, and more.</p>
-<h1 id="toc_3">Concepts</h1>
+<h1 id="toc_5">Concepts</h1>
 
-<p>Believe me, dear reader, when I suggest that thinking in a distributed fashion is awkward. When I had first encountered Riak, I was not prepared for some of its more preternatural concepts. Our brains just aren&#39;t hardwired to think in a distributed, asynchronous manner. Richard Dawkins coined the term <em>Middle World</em>---the serial, rote land humans encounter every day, which exists between the extremes of the very small strangeness of quarks and the vastness of outer space. We don&#39;t consider these extremes clearly because we don&#39;t encounter them on a daily basis, just like distributed computations and storage. So we create models and tools to bring the physical act of scattered parallel resources in line, on our more ordinary synchronous terms. Where Riak takes great pains to simplify the hard parts, it does not pretend that they don&#39;t exist. Just like you can never hope to program at an expert level without any knowledge of memory or CPU management, so too can you never safely develop a highly available clusters without a firm grasp of a few underlying concepts.</p>
+<p>Believe me, dear reader, when I suggest that thinking in a distributed fashion is awkward. When I had first encountered Riak, I was not prepared for some of its more preternatural concepts. Our brains just aren&#39;t hardwired to think in a distributed, asynchronous manner. Richard Dawkins coined the term <em>Middle World</em>---the serial, rote land humans encounter every day, which exists between the extremes of the very small strangeness of quarks and the vastness of outer space. We don&#39;t consider these extremes clearly because we don&#39;t encounter them on a daily basis, just like distributed computations and storage. So we create models and tools to bring the physical act of scattered parallel resources in line to our more ordinary synchronous terms. While Riak takes great pains to simplify the hard parts, it does not pretend that they don&#39;t exist. Just like you can never hope to program at an expert level without any knowledge of memory or CPU management, so too can you never safely develop a highly available clusters without a firm grasp of a few underlying concepts.</p>
 
-<h2 id="toc_4">The Landscape</h2>
+<!-- image: caveman confused by a bunch of atoms -->
+
+<h2 id="toc_6">The Landscape</h2>
 
 <p>The existence of databases like Riak is the culmination of two basic trends: accessible technology spurring different data requirements, and gaps in the data management market.</p>
+
+<!-- image: landscape -->
 
 <p>First, as we&#39;ve seen steady improvements in technology along with reductions in cost, vast amounts of computing power and storage are now within the grasp of nearly anyone. Along with our increasingly interconnected world caused by the web and shrinking, cheaper computers (like smartphones), this has catalyzed an exponential growth of data, and a demand for more predictability and speed by savvier users. In other words, more data is being created on the front-end, while more data is being managed on the backend.</p>
 
@@ -158,6 +186,8 @@ facts are being verified, texts are being edited, jokes are being made funny.</e
 
 <p>This limitation changes how you model data. Relational normalization (organizing data to reduce redundancy) exists for systems that can cheaply join data together per request. However, the ability to spread data across multiple nodes requires a denormalized approach, where some data is duplicated, and computed values may be stored for the sake of performance.
 </aside></p>
+
+<!-- image: icons for each of these types -->
 
 <ol>
 <li><p><strong>Relational</strong>. Traditional databases usually use SQL to model and query data.
@@ -190,9 +220,9 @@ multi-datacenter distributed systems like <em>Riak Enterprise</em>.</p>
 <p>Examples: <em>Riak</em>, <em>Redis</em>, <em>Voldemort</em></p></li>
 </ol>
 
-<h3 id="toc_5">The Fallacies of Distributed Computing</h3>
+<h3 id="toc_7">The Fallacies of Distributed Computing</h3>
 
-<p>One detour in the land of distributed databases is the condition that they are distributed systems replete with their benefits and handicaps. Engineers at Sun Microsystems created this list of <a href="http://www.rgoarchitects.com/Files/fallacies.pdf">eight fallacies</a> that engineers new to distributed systems aften fall victim to. They still apply today, even when operating a database like Riak.</p>
+<p>One detour in the land of distributed databases is to understand the condition that they are distributed systems replete with their benefits and handicaps. Engineers at Sun Microsystems created this list of <a href="http://www.rgoarchitects.com/Files/fallacies.pdf">eight fallacies</a> that engineers new to distributed systems aften fall victim to. They still apply today, even when operating a database like Riak.</p>
 
 <ol>
 <li>The network is reliable.</li>
@@ -205,59 +235,58 @@ multi-datacenter distributed systems like <em>Riak Enterprise</em>.</p>
 <li>The network is homogeneous.</li>
 </ol>
 
-<p>I always recommend to initiates to take the time to grock this list. Keeping these points in the back of your mind can save days of pain and expense in the future.</p>
+<p>I always recommend that initiates take the time to grock this list. Keeping these points everpresent in your mind can save days of pain and expense in the future.</p>
 
-<h2 id="toc_6">Riak Components</h2>
+<h2 id="toc_8">Riak Components</h2>
 
 <p>Riak is a Key/Value (KV) database, built from the ground up to safely distribute data across a cluster of physical servers, called nodes. A Riak cluster is also known as a Ring (we&#39;ll cover why later).</p>
 
-<p>For now, we&#39;ll only consider the concepts required to be a Riak users, and cover operations later.</p>
+<!-- For now, we'll only consider the concepts required to be a Riak users, and cover operations later. -->
 
-<p>Riak functions similarly to a very large hashtable. Depending on your background, you may instead call it a map, or dictionary, or object. But the idea is the same: you store a value with an immutable key, and retrieve it later.</p>
+<p>Riak functions similarly to a very large hash space. Depending on your background, you may call it hashtable, a map, a dictionary, or an object. But the idea is the same: you store a value with an immutable key, and retrieve it later.</p>
 
 <h3>Key and Value</h3>
 
-<!-- replace with an image -->
+<p>Key/value is the most basic construct in all of computerdom. You can think of a key like a home address, such as Bob&#39;s house with the unique key 5124, while the value would be maybe Bob (and his stuff).</p>
 
-<p>If Riak were a variable that functioned as a hashtable, you might set the value of your favorite food using the <em>key</em> <code>favorite</code>.</p>
+<p><img src="../assets/addresses.png" alt="A Key is an Address"></p>
 
-<pre><code class="javascript">hashtable[&quot;favorite&quot;] = &quot;pizza&quot;
+<pre><code class="javascript">hashtable[&quot;5124&quot;] = &quot;Bob&quot;
 </code></pre>
 
-<p>And retrieve the <em>value</em> <code>pizza</code> by using the same key as before.</p>
+<p>Retrieving Bob is as easy as going to his house.</p>
 
-<pre><code class="javascript">food = hashtable[&quot;favorite&quot;]
-food == &quot;pizza&quot;
+<pre><code class="javascript">bob = hashtable[&quot;5124&quot;]
 </code></pre>
 
-<p>One day you burn the roof of your mouth. In anger, you decided your favorite food is now <code>cold pizza</code>.</p>
+<p>Let&#39;s say that poor old Bob dies, and Claire moves into this house. The address remains the same, but the contents have changed.</p>
 
-<pre><code class="javascript">hashtable[&quot;favorite&quot;] = &quot;cold pizza&quot;
+<pre><code class="javascript">hashtable[&quot;5124&quot;] = &quot;Claire&quot;
 </code></pre>
 
-<p>Successive requests for <code>favorite</code> will now return <code>cold pizza</code>.</p>
-
-<p>For convenience, we call a key/value pair an <em>object</em>. Together our <code>favorite</code>/<code>pizza</code> pair is referred to as the &quot;<code>favorite</code> object&quot;, rather than the more verbose &quot;<code>favorite</code> key and its value&quot;.</p>
+<p>Successive requests for <code>5124</code> will now return <code>Claire</code>.</p>
 
 <h3>Buckets</h3>
 
-<p><em>Buckets</em> are how Riak allows you to categorizes objects. You can group multiple objects into logical collections, where identical keys will not overlap between buckets.</p>
+<!-- image: address streets metaphore -->
 
-<p>You can think of buckets as <a href="http://en.wikipedia.org/wiki/Namespace_(computer_science)">namespaces</a>.</p>
+<p>Addresses in Riakville are more than a house number, but also a street. There could be another 5124 on another street, so the way we can ensure a unique address is by requiring both, as in <em>5124 Main Street</em>.</p>
 
-<p>Using our <code>favorite</code> example from above, we can specify a favorite food, versus a favorite animal, by using the same key. Unless you&#39;re a Midwest farm kid like me, these categories probably won&#39;t overlap much.</p>
+<p><em>Buckets</em> are like streets in Riak. But rather than mere geography, you can group multiple key/values into logical <a href="http://en.wikipedia.org/wiki/Namespace_(computer_science)">namespaces</a> (like residential streets, industrial streets, commercial streets, etc), where identical keys will not overlap between buckets.</p>
 
-<pre><code class="javascript">food[&quot;favorite&quot;] = &quot;pizza&quot;
-animals[&quot;favorite&quot;] = &quot;red panda&quot;
+<p>For example, while Alice may live at <em>5122 Main Street</em>, there may be a gas station at <em>5122 Bagshot Row</em>.</p>
+
+<pre><code class="javascript">main[&quot;5122&quot;] = &quot;Alice&quot;
+bagshot[&quot;5122&quot;] = &quot;Gas&quot;
 </code></pre>
 
-<p>You could have just named your keys <code>edible_favorite</code> and <code>animal_favorite</code>, but buckets allow for cleaner key naming, and has other added benefits that I&#39;ll outline later.</p>
+<p>Certainly you could have just named your keys <code>main_5122</code> and <code>bywater_5122</code>, but buckets allow for cleaner key naming, and have other benefits that I&#39;ll outline later.</p>
 
-<p>Buckets are so useful in Riak that all keys must belong to a bucket. There is no global namespace.</p>
+<p>Buckets are so useful in Riak that all keys must belong to a bucket. There is no global namespace. The true definition of a unique key in Riak is actually <code>bucket/key</code>.</p>
 
-<p>In fact in Riak, the true definition of an object key is actually <code>bucket/key</code>.</p>
+<p>For convenience, we call a <em>bucket/key + value</em> pair an <em>object</em>, sparing ourselves the verbosity of &quot;X key in the Y bucket and its value&quot;.</p>
 
-<h2 id="toc_7">Replication and Partitions</h2>
+<h2 id="toc_9">Replication and Partitions</h2>
 
 <p>Distributing data across several nodes is how Riak is able to remain highly available, while tolerant of outages and network partitions. Riak combines two styles of distribution to achieve this: <a href="http://en.wikipedia.org/wiki/Replication_(computing)">replication</a> and <a href="http://en.wikipedia.org/wiki/Partition_(database)">partitions</a>.</p>
 
@@ -268,28 +297,6 @@ animals[&quot;favorite&quot;] = &quot;red panda&quot;
 <p>The obvious benefit of replication is that if one node goes down, nodes that contain replicated data remain available to serve requests. In other words, the system remains <em>available</em>.</p>
 
 <p>For example, imagine you have a list of country keys, whose values contain those countries&#39; capitals. If all you do is replicate that data to 2 servers, you would have 2 duplicate databases.</p>
-
-<h5>Node A</h5>
-
-<pre><code class="javascript">&quot;Afghanistan&quot;: &quot;Kabul&quot;
-&quot;Albania&quot;:     &quot;Tirana&quot;
-&quot;Algeria&quot;:     &quot;Algiers&quot;
-...
-&quot;Yemen&quot;:       &quot;Sanaa&quot;
-&quot;Zambia&quot;:      &quot;Lusaka&quot;
-&quot;Zimbabwe&quot;:    &quot;Harare&quot;
-</code></pre>
-
-<h5>Node B</h5>
-
-<pre><code class="javascript">&quot;Afghanistan&quot;: &quot;Kabul&quot;
-&quot;Albania&quot;:     &quot;Tirana&quot;
-&quot;Algeria&quot;:     &quot;Algiers&quot;
-...
-&quot;Yemen&quot;:       &quot;Sanaa&quot;
-&quot;Zambia&quot;:      &quot;Lusaka&quot;
-&quot;Zimbabwe&quot;:    &quot;Harare&quot;
-</code></pre>
 
 <p><img src="../assets/replication.svg" alt="Replication"></p>
 
@@ -303,53 +310,17 @@ animals[&quot;favorite&quot;] = &quot;red panda&quot;
 
 <p>For example, if we partition our countries into 2 servers, we might put all countries beginning with letters A-N into Node A, and O-Z into Node B.</p>
 
-<h5>Node A</h5>
-
-<pre><code class="javascript">&quot;Afghanistan&quot;: &quot;Kabul&quot;
-&quot;Albania&quot;:     &quot;Tirana&quot;
-&quot;Algeria&quot;:     &quot;Algiers&quot;
-...
-&quot;Norway&quot;:      &quot;Oslo&quot;
-</code></pre>
-
-<h5>Node B</h5>
-
-<pre><code class="javascript">&quot;Oman&quot;:        &quot;Muscat&quot;
-...
-&quot;Yemen&quot;:       &quot;Sanaa&quot;
-&quot;Zambia&quot;:      &quot;Lusaka&quot;
-&quot;Zimbabwe&quot;:    &quot;Harare&quot;
-</code></pre>
+<p><img src="../assets/partitions.svg" alt="Partitions"></p>
 
 <p>There is a bit of overhead the partition approach. Some service must keep track of what range of values live on which node. A requesting application must know that the key <code>Spain</code> will be routed to Node B, not Node A.</p>
 
 <p>There&#39;s also another downside. Unlike replication, simple partitioning of data actually <em>decreases</em> uptime. If one node goes down, that entire partition of data is unavailable. This is why Riak uses both replication and partitioning.</p>
-
-<p><img src="../assets/partitions.svg" alt="Partitions"></p>
 
 <h3>Replication+Partitions</h3>
 
 <p>Since partitions allow us to increase capacity, and replication improves availability, Riak combines them. We partition data across multiple nodes, as well as replicate that data into multiple nodes.</p>
 
 <p>Where our previous example partitioned data into 2 nodes, we can replicate each of those partitions into 2 more nodes, for a total of 4.</p>
-
-<h5>Nodes A & C</h5>
-
-<pre><code class="javascript">&quot;Afghanistan&quot;: &quot;Kabul&quot;
-&quot;Albania&quot;:     &quot;Tirana&quot;
-&quot;Algeria&quot;:     &quot;Algiers&quot;
-...
-&quot;Norway&quot;:      &quot;Oslo&quot;
-</code></pre>
-
-<h5>Nodes B & D</h5>
-
-<pre><code class="javascript">&quot;Oman&quot;:        &quot;Muscat&quot;
-...
-&quot;Yemen&quot;:       &quot;Sanaa&quot;
-&quot;Zambia&quot;:      &quot;Lusaka&quot;
-&quot;Zimbabwe&quot;:    &quot;Harare&quot;
-</code></pre>
 
 <p>Our server count has increased, but so has our capacity and reliability. If you&#39;re designing a horizontally scalable system by partitioning data, you must deal with replicating those partitions.</p>
 
@@ -402,7 +373,7 @@ animals[&quot;favorite&quot;] = &quot;red panda&quot;
 
 <p>Armed with this information, requests for data can target any node. It will horizontally access data from the proper nodes, and return the result.</p>
 
-<h2 id="toc_8">Practical Tradeoffs</h2>
+<h2 id="toc_10">Practical Tradeoffs</h2>
 
 <p>So far we&#39;ve covered the good parts of partitioning and replication: highly available when responding to requests, and inexpensive capacity scaling on commodity hardware. With the clear benefits of horizontal scaling, why is it not more common?</p>
 
@@ -435,7 +406,7 @@ animals[&quot;favorite&quot;] = &quot;red panda&quot;
 
 <p>Riak allows you to choose how many nodes you want to replicate an object to, and how many nodes must be written to or read from per request. These values are settings labeled <code>n_val</code> (the number of nodes to replicate to), <code>r</code> (the number of nodes read from before returning), and <code>w</code> (the number of nodes written to before considered successful).</p>
 
-<p>A thought experiment might help clarify.</p>
+<p>A thought experiment may help clarify things.</p>
 
 <p><img src="../assets/nrw.svg" alt="NRW"></p>
 
@@ -525,14 +496,14 @@ value:  pizza
 
 <p>As your server count grows---especially as you introduce multiple datacenters---the odds of partitions and node failures drastically increase. My best advice is to design for it upfront.</p>
 
-<h2 id="toc_9">Wrapup</h2>
+<h2 id="toc_11">Wrapup</h2>
 
 <p>Riak is designed to bestow a range of real-world benefits, but equally, to handle the fallout of wielding such power. Consistent hashing and vnodes are an elegant solution to horizontally scaling across servers. N/R/W allows you to dance with the CAP theorem by fine-tuning against its constraints. And vector clocks allow another step closer to true consistency by allowing you to manage conflicts that will occur at high load.</p>
 
 <p>We&#39;ll cover other technical concepts as needed, like the gossip protocol, hinted handoff, or read-repair.</p>
 
 <p>Next we&#39;ll go through Riak as a user. We&#39;ll check out lookups, take advantage of write hooks, and alternative query options like secondary indexing, search, and mapreduce.</p>
-<h1 id="toc_10">Developers</h1>
+<h1 id="toc_12">Developers</h1>
 
 <p><aside class="sidebar"><h3>A Note on &quot;Node&quot;</h3></p>
 
@@ -545,7 +516,7 @@ value:  pizza
 
 <p>Developing with a Riak database is quite easy to do, once you understand some of the finer points. It is a key/value store, in the technical sense (you associate values with keys, and retrieve them using the same keys) but it offers so much more. You can embed write hooks to fire before or after a write, or index data for quick retrieval. Riak has a SOLR-based search, and lets you run mapreduce functions to extract and aggregate data across a huge cluster in a relatively short timespan. We&#39;ll show some of the bucket-specific settings developers can configure.</p>
 
-<h2 id="toc_11">Lookup</h2>
+<h2 id="toc_13">Lookup</h2>
 
 <p><aside class="sidebar"><h3>Supported Languages</h3></p>
 
@@ -733,7 +704,7 @@ Content-Length: 16
 
 <p>You should note that list actions should <em>not</em> be used in production (they&#39;re really expensive operations). But they are useful for development, investigations, or for running occasional analytics at off-peak hours.</p>
 
-<h2 id="toc_12">Buckets</h2>
+<h2 id="toc_14">Buckets</h2>
 
 <p>Although we&#39;ve been using buckets as namespaces up to now, they are capable of more.</p>
 
@@ -874,7 +845,7 @@ A value sized greater than 0 is required
 
 <p>Post-commits are similar in form and function, but they react after a commit has occurred.</p>
 
-<h2 id="toc_13">Entropy</h2>
+<h2 id="toc_15">Entropy</h2>
 
 <p>Entropy is a byproduct of eventual consistency. In other words: although eventual consistency says a write will replicate to other nodes in time, there can be a bit of delay while all nodes do not contain the same value.</p>
 
@@ -921,8 +892,8 @@ A value sized greater than 0 is required
 <p>Casey writes <code>[{&quot;item&quot;:&quot;kale&quot;,&quot;count&quot;:10}]</code>.</p>
 
 <pre><code class="bash">curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
-  -H &#39;Content-Type:application/json&#39; \
-  -H &#39;X-Riak-ClientId:casey&#39; \
+  -H &quot;Content-Type:application/json&quot; \
+  -H &quot;X-Riak-ClientId:casey&quot; \
   -d &#39;[{&quot;item&quot;:&quot;kale&quot;,&quot;count&quot;:20}]&#39;
 HTTP/1.1 200 OK
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA=
@@ -943,9 +914,9 @@ Content-Length: 28
 <p>Mark writes <code>[{&quot;item&quot;:&quot;kale&quot;,&quot;count&quot;:10},{&quot;item&quot;:&quot;milk&quot;,&quot;count&quot;:1}]</code>.</p>
 
 <pre><code class="bash">curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
-  -H &#39;Content-Type:application/json&#39; \
-  -H &#39;X-Riak-ClientId:mark&#39; \
-  -H &#39;X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA=&#39; \
+  -H &quot;Content-Type:application/json&quot; \
+  -H &quot;X-Riak-ClientId:mark&quot; \
+  -H &quot;X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA=&quot;&quot; \
   -d &#39;[{&quot;item&quot;:&quot;kale&quot;,&quot;count&quot;:20},{&quot;item&quot;:&quot;milk&quot;,&quot;count&quot;:1}]&#39;
 HTTP/1.1 200 OK
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmTwZTIlMfKcMaK7RRfFgA=
@@ -975,9 +946,9 @@ Content-Length: 54
 <p>Andy writes <code>[{&quot;item&quot;:&quot;kale&quot;,&quot;count&quot;:10},{&quot;item&quot;:&quot;almonds&quot;,&quot;count&quot;:12}]</code>.</p>
 
 <pre><code class="bash">curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
-  -H &#39;Content-Type:application/json&#39; \
-  -H &#39;X-Riak-ClientId:andy&#39; \
-  -H &#39;X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA=&#39; \
+  -H &quot;Content-Type:application/json&quot; \
+  -H &quot;X-Riak-ClientId:andy&quot; \
+  -H &quot;X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA=&quot;&quot; \
   -d &#39;[{&quot;item&quot;:&quot;kale&quot;,&quot;count&quot;:20},{&quot;item&quot;:&quot;almonds&quot;,&quot;count&quot;:12}]&#39;
 HTTP/1.1 300 Multiple Choices
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmTwZTInMfKoG7LdoovCwA=
@@ -1032,7 +1003,7 @@ Siblings:
 <p>If you want to retrieve all sibling data, tell Riak that you&#39;ll accept the multipart message by adding <code>-H &quot;Accept:multipart/mixed&quot;</code>.</p>
 
 <pre><code class="bash">curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207 \
-  -H &#39;Accept:multipart/mixed&#39;
+  -H &quot;Accept:multipart/mixed&quot;
 </code></pre>
 
 <p><aside class="sidebar"><h3>Use-Case Specific?</h3></p>
@@ -1054,8 +1025,8 @@ Riak not to resolve this conflict automatically... we want this flexibility.
 <p>Successive reads will receive a single (merged) result.</p>
 
 <pre><code class="bash">curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
-  -H &#39;Content-Type:application/json&#39; \
-  -H &#39;X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTInMfKoG7LdoovCwA=&#39; \
+  -H &quot;Content-Type:application/json&quot; \
+  -H &quot;X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTInMfKoG7LdoovCwA=&quot; \
   -d &#39;[{&quot;item&quot;:&quot;kale&quot;,&quot;count&quot;:20},{&quot;item&quot;:&quot;milk&quot;,&quot;count&quot;:1},{&quot;item&quot;:&quot;almonds&quot;,&quot;count&quot;:12}]&#39;
 </code></pre>
 
@@ -1068,7 +1039,7 @@ Riak not to resolve this conflict automatically... we want this flexibility.
 
 <p>If your nodes get be out of sync (for example, if you increase the <code>n_val</code> on a bucket), you can force read repair by performing a read operation for all of that bucket&#39;s keys. They may return with <code>not found</code> the first time, will pull the newest values. Successive reads should now work.</p>
 
-<h2 id="toc_14">Querying</h2>
+<h2 id="toc_16">Querying</h2>
 
 <p>So far we&#39;ve only dealt with key-value lookups. The truth is, key-value is a pretty powerful mechanism that spans a spectrum of use-cases. However, sometimes we need to lookup data by value, rather than key. Sometimes we need to perform some calculations, or aggregations, or search.</p>
 
@@ -1086,9 +1057,9 @@ provided it&#39;s prefixed by <code>X-Riak-Index-</code> and suffixed by <code>_
 integer, or <code>_bin</code> for a string.</p>
 
 <pre><code class="bash">curl -i -XPUT http://localhost:8098/riak/people/casey \
-  -H &#39;Content-Type:application/json&#39; \
-  -H &#39;X-Riak-Index-age_int:31&#39; \
-  -H &#39;X-Riak-Index-fridge_bin:fridge-97207&#39; \
+  -H &quot;Content-Type:application/json&quot; \
+  -H &quot;X-Riak-Index-age_int:31&quot; \
+  -H &quot;X-Riak-Index-fridge_bin:fridge-97207&quot; \
   -d &#39;{&quot;work&quot;:&quot;rodeo clown&quot;}&#39;
 </code></pre>
 
@@ -1133,10 +1104,10 @@ then further reduced down to the calling node and returned.</p>
 prefixed by either INFO or ERROR. We want to count the number of INFO
 logs that contain the word &quot;cart&quot;.</p>
 
-<pre><code class="bash">curl -XPOST http://localhost:8098/riak/logs -d &#39;INFO: New user added&#39;
-curl -XPOST http://localhost:8098/riak/logs -d &#39;INFO: Kale added to shopping cart&#39;
-curl -XPOST http://localhost:8098/riak/logs -d &#39;INFO: Milk added to shopping cart&#39;
-curl -XPOST http://localhost:8098/riak/logs -d &#39;ERROR: shopping cart cancelled&#39;
+<pre><code class="bash">curl -XPOST http://localhost:8098/riak/logs -d &quot;INFO: New user added&quot;
+curl -XPOST http://localhost:8098/riak/logs -d &quot;INFO: Kale added to shopping cart&quot;
+curl -XPOST http://localhost:8098/riak/logs -d &quot;INFO: Milk added to shopping cart&quot;
+curl -XPOST http://localhost:8098/riak/logs -d &quot;ERROR: shopping cart cancelled&quot;
 </code></pre>
 
 <p>MapReduce jobs can be either Erlang or Javascript code. This time we&#39;ll go the
@@ -1144,7 +1115,7 @@ easy route and write Javascript. You execute mapreduce by posting JSON to the
 <code>/mapred</code> path.</p>
 
 <pre><code class="bash">curl -XPOST http://localhost:8098/mapred \
-  -H &#39;Content-Type: application/json&#39; \
+  -H &quot;Content-Type: application/json&quot; \
   -d @- \
 &lt;&lt;EOF
 {
@@ -1205,7 +1176,7 @@ that number to be greater than 97000.</p>
 special attention to the <code>map</code> function, and lack of <code>reduce</code>.</p>
 
 <pre><code class="bash">curl -XPOST http://localhost:8098/mapred \
-  -H &#39;Content-Type: application/json&#39; \
+  -H &quot;Content-Type: application/json&quot; \
   -d @- \
 &lt;&lt;EOF
 {
@@ -1256,8 +1227,8 @@ with the object linked from.</p>
 using the HTTP header <code>Link</code>.</p>
 
 <pre><code class="bash">curl -XPUT http://localhost:8098/riak/people/mark \
-  -H &#39;Content-Type:application/json&#39; \
-  -H &#39;Link: &lt;/riak/people/casey&gt;; riaktag=&quot;brother&quot;&#39;
+  -H &quot;Content-Type:application/json&quot; \
+  -H &quot;Link: &lt;/riak/people/casey&gt;; riaktag=\&quot;brother\&quot;&quot;
 </code></pre>
 
 <p>With a Link in place, now it&#39;s time to walk it. Walking is like a normal
@@ -1351,8 +1322,8 @@ up with an index (these details can be found in the next chapter).</p>
 <code>people</code> table (with a default index).</p>
 
 <pre><code class="bash">curl -XPUT http://localhost:8091/riak/people/ryan \
-  -H &#39;Content-Type:text/plain&#39; \
-  -d &#39;Ryan Zezeski&#39;
+  -H &quot;Content-Type:text/plain&quot; \
+  -d &quot;Ryan Zezeski&quot;
 </code></pre>
 
 <p>To execute a search, request <code>/search/[bucket]</code> along with any distributed <a href="http://wiki.apache.org/solr/CommonQueryParameters">Solr parameters</a>. Here we
@@ -1360,7 +1331,7 @@ query for documents that contain a word starting with <code>zez</code>, request 
 results to be in json format (<code>wt=json</code>), only return the Riak key
 (<code>fl=_yz_rk</code>).</p>
 
-<pre><code class="bash">curl &#39;http://localhost:8091/search/people?wt=json&amp;omitHeader=true&amp;fl=_yz_rk&amp;q=zez*&#39; | jsonpp
+<pre><code class="bash">curl &quot;http://localhost:8091/search/people?wt=json&amp;omitHeader=true&amp;fl=_yz_rk&amp;q=zez*&quot; | jsonpp
 {
   &quot;response&quot;: {
     &quot;numFound&quot;: 1,
@@ -1393,10 +1364,10 @@ requires all tagged values begin with <code>X-Riak-Meta</code>, and be listed un
 a special header named <code>X-Riak-Meta-yz-tags</code>.</p>
 
 <pre><code class="bash">curl -XPUT http://localhost:8091/riak/people/dave \
-  -H &#39;Content-Type:text/plain&#39; \
-  -H &#39;X-Riak-Meta-yz-tags: X-Riak-Meta-nickname_s&#39; \
-  -H &#39;X-Riak-Meta-nickname_s:dizzy&#39; \
-  -d &#39;Dave Smith&#39;
+  -H &quot;Content-Type:text/plain&quot; \
+  -H &quot;X-Riak-Meta-yz-tags: X-Riak-Meta-nickname_s&quot; \
+  -H &quot;X-Riak-Meta-nickname_s:dizzy&quot; \
+  -d &quot;Dave Smith&quot;
 </code></pre>
 
 <p>To search by the <code>nickname_s</code> tag, just prefix the query string followed
@@ -1429,7 +1400,7 @@ value. All tagged values will be returned on matching results.</p>
 
 <p><em>Expect more features to appear as Yokozuna gets closer to a final release.</em></p>
 
-<h2 id="toc_15">Wrapup</h2>
+<h2 id="toc_17">Wrapup</h2>
 
 <p>Riak is a distributed data store with several additions to improve upon the
 standard key-value lookups, like specifying replication values. Since values
@@ -1441,7 +1412,7 @@ walking</em>, or <em>search</em>.</p>
 
 <p>Next we&#39;ll peek further under the hook, and see how to set up and manage
 a cluster of your own, and what you should know.</p>
-<h1 id="toc_16">Operators</h1>
+<h1 id="toc_18">Operators</h1>
 
 <!-- What Riak is famous for is its simplicity to operate and stability at increasing scales. -->
 
@@ -1455,7 +1426,7 @@ of your application stack.</p>
 about using Riak, but there is more to Riak than that. There are details you
 should know if you plan on operating a Riak cluster of your own.</p>
 
-<h2 id="toc_17">Clusters</h2>
+<h2 id="toc_19">Clusters</h2>
 
 <p>Up to this point you&#39;ve conceptually read about &quot;clusters&quot; and the &quot;Ring&quot; in
 nebulous summations. What exactly do we mean, and what are the practical
@@ -1611,7 +1582,7 @@ because a node was added or removed, data must be transferred to its new home. I
 the same thing will happen: a vnode checks if it&#39;s in the correct place, and if not, attempts
 to transfer its data to its new home node.</p>
 
-<h2 id="toc_18">Managing a Cluster</h2>
+<h2 id="toc_20">Managing a Cluster</h2>
 
 <p>Now that we have a grasp of the general concepts of Riak, how users query it,
 and how Riak manages replication, it&#39;s time to build a cluster. It&#39;s so easy to
@@ -1941,7 +1912,7 @@ line tools usually is. There are plenty of details behind many of the <code>riak
 commands, too numerous to cover in such a short book. I encourage you to toy around
 with them on your own installation.</p>
 
-<h2 id="toc_19">How Riak is Built</h2>
+<h2 id="toc_21">How Riak is Built</h2>
 
 <p>It&#39;s difficult to label Riak a single project. It&#39;s probably more correct to think of
 Riak as the center of gravity for a whole system of projects. As we&#39;ve covered
@@ -2416,7 +2387,7 @@ you run across deprecated configuration, or documentation.</p>
 <li>SASL - A logging engine improved by Lager.</li>
 </ul>
 
-<h2 id="toc_20">Tools</h2>
+<h2 id="toc_22">Tools</h2>
 
 <h3>Riaknostic</h3>
 
@@ -2546,7 +2517,7 @@ but it has a phenomenal start.</p>
 Vertically (by adding bigger hardware), and Horizontally (by adding more nodes).
  -->
 
-<h2 id="toc_21">Wrapup</h2>
+<h2 id="toc_23">Wrapup</h2>
 
 <p>Once you comprehend the basics of Riak, it&#39;s a simple thing to manage. If this seems like
 a lot to swallow, take it from a long-time relational database guy (me), Riak is a
@@ -2556,16 +2527,16 @@ do themselves manually, such as sharding by keys, adding/removing nodes, rebalan
 supporting multiple backends, and allowing growth with unbalanced nodes.
 And due to Riak&#39;s architecture, the best part of all is when a server goes down at night,
 you can sleep (do you remember what that was?), and fix it in the morning.</p>
-<h1 id="toc_22">Notes</h1>
+<h1 id="toc_24">Notes</h1>
 
-<h2 id="toc_23">A Short Note on MDC</h2>
+<h2 id="toc_25">A Short Note on MDC</h2>
 
 <p><em>MDC</em>, or Multi Data Center, is a commercial extension to Riak provided by Basho.
 While the documentation is freely available, the source code is not. If you get
 the scale where keeping multiple Riak cluster in sync across the globe is 
 necessary, I would recommend considering this option.</p>
 
-<h2 id="toc_24">A Short Note on RiakCS</h2>
+<h2 id="toc_26">A Short Note on RiakCS</h2>
 
 <p><em>RiakCS</em> is Basho&#39;s commercial extension to Riak to allow your cluster to act as
 a remote storage mechanism, comparable to (and compatible with) Amazon&#39;s

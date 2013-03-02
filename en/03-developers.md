@@ -214,8 +214,6 @@ Different use-cases will dictate whether a bucket is heavily written to, or larg
 
 The basis of Riak's availability and tolerance is that it can read from, or write to, multiple nodes. Riak allows you to adjust these N/R/W values (which we covered under [Concepts](#practical-tradeoffs)) on a per-bucket basis.
 
-<!-- Sloppy Quorum -->
-
 <h4>N/R/W</h4>
 
 N is the number of total nodes that a value should be replicated to, defaulting to 3. But we can set this `n_val` to any number fewer than the total number of nodes.
@@ -273,6 +271,16 @@ curl -i -XPUT http://localhost:8098/riak/logs \
 * `all` - All replicas must reply, which is the same as setting `r` or `w` equal to `n_val`
 * `one` - Setting `r` or `w` equal to `1`
 * `quorum` - A majority of the replicas must respond, that is, “half plus one”.
+
+<h4>Sloppy Quorum</h4>
+
+In a perfect world, a strict quorum would be sufficient for most write requests. However, at any moment a node could go down, or the network could partition, or squirrels get caught in the tubes, triggering the unavailability of a required nodes. This is known as a strict quorum. Riak defaults to what's known as a *sloppy quorum*, meaning that if any primary (expected) node is unavailable, the next available node in the ring will accept requests.
+
+Think about it like this. Say you're out drinking with your friend. You order 2 drinks (W=2), but before they arrive, she leaves temporarily. If you were a strict quorum, you could merely refuse both drinks, since the required people (N=2) are unavailable. But you'd rather be a sloppy drunk... erm, I mean sloppy *quorum*. Rather than deny the drink, you take both, one accepted *on her behalf* (you also get to pay).
+
+![A Sloppy Quorum](../assets/decor/drinks.png)
+
+When she returns, you slide her drink over. This is known as *hinted handoff*, which we'll look at again in the next chapter. For now it's sufficient to note that there's a difference between the default sloppy quorum (W), and requiring a strict quorum of primary nodes (PW).
 
 <h5>More than R's and W's</h5>
 
@@ -370,7 +378,7 @@ Realistically, this exists for speed and simplicity, when you really don't care 
 
 As we saw under [Concepts](#practical-tradeoffs), *vector clocks* are Riak's way of tracking a true sequence of events of an object. We went over the concept, but let's see how and when Riak vclocks are used.
 
-Every client needs its own id, sent on every write as `X-Riak-ClientId`.
+Every node in Riak has its own unique id, which it uses to denote where an update happens as the vector clock key.
 
 <h4>Siblings</h4>
 
@@ -399,8 +407,7 @@ Casey writes `[{"item":"kale","count":10}]`.
 
 ```bash
 curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
-  -H 'Content-Type:application/json' \
-  -H 'X-Riak-ClientId:casey' \
+  -H "Content-Type:application/json" \
   -d '[{"item":"kale","count":20}]'
 HTTP/1.1 200 OK
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA=
@@ -422,9 +429,8 @@ Mark writes `[{"item":"kale","count":10},{"item":"milk","count":1}]`.
 
 ```bash
 curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
-  -H 'Content-Type:application/json' \
-  -H 'X-Riak-ClientId:mark' \
-  -H 'X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA=' \
+  -H "Content-Type:application/json" \
+  -H "X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA="" \
   -d '[{"item":"kale","count":20},{"item":"milk","count":1}]'
 HTTP/1.1 200 OK
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmTwZTIlMfKcMaK7RRfFgA=
@@ -453,9 +459,8 @@ Andy writes `[{"item":"kale","count":10},{"item":"almonds","count":12}]`.
 
 ```bash
 curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
-  -H 'Content-Type:application/json' \
-  -H 'X-Riak-ClientId:andy' \
-  -H 'X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA=' \
+  -H "Content-Type:application/json" \
+  -H "X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA="" \
   -d '[{"item":"kale","count":20},{"item":"almonds","count":12}]'
 HTTP/1.1 300 Multiple Choices
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmTwZTInMfKoG7LdoovCwA=
@@ -513,7 +518,7 @@ If you want to retrieve all sibling data, tell Riak that you'll accept the multi
 
 ```bash
 curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207 \
-  -H 'Accept:multipart/mixed'
+  -H "Accept:multipart/mixed"
 ```
 
 <aside class="sidebar"><h3>Use-Case Specific?</h3>
@@ -536,8 +541,8 @@ Successive reads will receive a single (merged) result.
 
 ```bash
 curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
-  -H 'Content-Type:application/json' \
-  -H 'X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTInMfKoG7LdoovCwA=' \
+  -H "Content-Type:application/json" \
+  -H "X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTInMfKoG7LdoovCwA=" \
   -d '[{"item":"kale","count":20},{"item":"milk","count":1},{"item":"almonds","count":12}]'
 ```
 
@@ -570,9 +575,9 @@ integer, or `_bin` for a string.
 
 ```bash
 curl -i -XPUT http://localhost:8098/riak/people/casey \
-  -H 'Content-Type:application/json' \
-  -H 'X-Riak-Index-age_int:31' \
-  -H 'X-Riak-Index-fridge_bin:fridge-97207' \
+  -H "Content-Type:application/json" \
+  -H "X-Riak-Index-age_int:31" \
+  -H "X-Riak-Index-fridge_bin:fridge-97207" \
   -d '{"work":"rodeo clown"}'
 ```
 
@@ -620,10 +625,10 @@ prefixed by either INFO or ERROR. We want to count the number of INFO
 logs that contain the word "cart".
 
 ```bash
-curl -XPOST http://localhost:8098/riak/logs -d 'INFO: New user added'
-curl -XPOST http://localhost:8098/riak/logs -d 'INFO: Kale added to shopping cart'
-curl -XPOST http://localhost:8098/riak/logs -d 'INFO: Milk added to shopping cart'
-curl -XPOST http://localhost:8098/riak/logs -d 'ERROR: shopping cart cancelled'
+curl -XPOST http://localhost:8098/riak/logs -d "INFO: New user added"
+curl -XPOST http://localhost:8098/riak/logs -d "INFO: Kale added to shopping cart"
+curl -XPOST http://localhost:8098/riak/logs -d "INFO: Milk added to shopping cart"
+curl -XPOST http://localhost:8098/riak/logs -d "ERROR: shopping cart cancelled"
 ```
 
 MapReduce jobs can be either Erlang or Javascript code. This time we'll go the
@@ -632,7 +637,7 @@ easy route and write Javascript. You execute mapreduce by posting JSON to the
 
 ```bash
 curl -XPOST http://localhost:8098/mapred \
-  -H 'Content-Type: application/json' \
+  -H "Content-Type: application/json" \
   -d @- \
 <<EOF
 {
@@ -695,7 +700,7 @@ special attention to the `map` function, and lack of `reduce`.
 
 ```bash
 curl -XPOST http://localhost:8098/mapred \
-  -H 'Content-Type: application/json' \
+  -H "Content-Type: application/json" \
   -d @- \
 <<EOF
 {
@@ -748,8 +753,8 @@ using the HTTP header `Link`.
 
 ```bash
 curl -XPUT http://localhost:8098/riak/people/mark \
-  -H 'Content-Type:application/json' \
-  -H 'Link: </riak/people/casey>; riaktag="brother"'
+  -H "Content-Type:application/json" \
+  -H "Link: </riak/people/casey>; riaktag=\"brother\""
 ```
 
 With a Link in place, now it's time to walk it. Walking is like a normal
@@ -848,8 +853,8 @@ The simplest example is a full-text search. Here we add `ryan` to the
 
 ```bash
 curl -XPUT http://localhost:8091/riak/people/ryan \
-  -H 'Content-Type:text/plain' \
-  -d 'Ryan Zezeski'
+  -H "Content-Type:text/plain" \
+  -d "Ryan Zezeski"
 ```
 
 To execute a search, request `/search/[bucket]` along with any distributed [Solr parameters](http://wiki.apache.org/solr/CommonQueryParameters). Here we
@@ -858,7 +863,7 @@ results to be in json format (`wt=json`), only return the Riak key
 (`fl=_yz_rk`).
 
 ```bash
-curl 'http://localhost:8091/search/people?wt=json&omitHeader=true&fl=_yz_rk&q=zez*' | jsonpp
+curl "http://localhost:8091/search/people?wt=json&omitHeader=true&fl=_yz_rk&q=zez*" | jsonpp
 {
   "response": {
     "numFound": 1,
@@ -893,10 +898,10 @@ a special header named `X-Riak-Meta-yz-tags`.
 
 ```bash
 curl -XPUT http://localhost:8091/riak/people/dave \
-  -H 'Content-Type:text/plain' \
-  -H 'X-Riak-Meta-yz-tags: X-Riak-Meta-nickname_s' \
-  -H 'X-Riak-Meta-nickname_s:dizzy' \
-  -d 'Dave Smith'
+  -H "Content-Type:text/plain" \
+  -H "X-Riak-Meta-yz-tags: X-Riak-Meta-nickname_s" \
+  -H "X-Riak-Meta-nickname_s:dizzy" \
+  -d "Dave Smith"
 ```
 
 To search by the `nickname_s` tag, just prefix the query string followed

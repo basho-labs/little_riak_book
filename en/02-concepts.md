@@ -1,10 +1,14 @@
 # Concepts
 
-Believe me, dear reader, when I suggest that thinking in a distributed fashion is awkward. When I had first encountered Riak, I was not prepared for some of its more preternatural concepts. Our brains just aren't hardwired to think in a distributed, asynchronous manner. Richard Dawkins coined the term *Middle World*---the serial, rote land humans encounter every day, which exists between the extremes of the very small strangeness of quarks and the vastness of outer space. We don't consider these extremes clearly because we don't encounter them on a daily basis, just like distributed computations and storage. So we create models and tools to bring the physical act of scattered parallel resources in line, on our more ordinary synchronous terms. Where Riak takes great pains to simplify the hard parts, it does not pretend that they don't exist. Just like you can never hope to program at an expert level without any knowledge of memory or CPU management, so too can you never safely develop a highly available clusters without a firm grasp of a few underlying concepts.
+Believe me, dear reader, when I suggest that thinking in a distributed fashion is awkward. When I had first encountered Riak, I was not prepared for some of its more preternatural concepts. Our brains just aren't hardwired to think in a distributed, asynchronous manner. Richard Dawkins coined the term *Middle World*---the serial, rote land humans encounter every day, which exists between the extremes of the very small strangeness of quarks and the vastness of outer space. We don't consider these extremes clearly because we don't encounter them on a daily basis, just like distributed computations and storage. So we create models and tools to bring the physical act of scattered parallel resources in line to our more ordinary synchronous terms. While Riak takes great pains to simplify the hard parts, it does not pretend that they don't exist. Just like you can never hope to program at an expert level without any knowledge of memory or CPU management, so too can you never safely develop a highly available clusters without a firm grasp of a few underlying concepts.
+
+<!-- image: caveman confused by a bunch of atoms -->
 
 ## The Landscape
 
 The existence of databases like Riak is the culmination of two basic trends: accessible technology spurring different data requirements, and gaps in the data management market.
+
+<!-- image: landscape -->
 
 First, as we've seen steady improvements in technology along with reductions in cost, vast amounts of computing power and storage are now within the grasp of nearly anyone. Along with our increasingly interconnected world caused by the web and shrinking, cheaper computers (like smartphones), this has catalyzed an exponential growth of data, and a demand for more predictability and speed by savvier users. In other words, more data is being created on the front-end, while more data is being managed on the backend.
 
@@ -25,6 +29,8 @@ The ability to easily join data across physical servers is a tradeoff that separ
 This limitation changes how you model data. Relational normalization (organizing data to reduce redundancy) exists for systems that can cheaply join data together per request. However, the ability to spread data across multiple nodes requires a denormalized approach, where some data is duplicated, and computed values may be stored for the sake of performance.
 </aside>
 
+<!-- image: icons for each of these types -->
+
   1. **Relational**. Traditional databases usually use SQL to model and query data.
     They are useful for data which can be stored in a highly structured schema, yet
     require flexible querying. Scaling a relational database (RDBMS) traditionally
@@ -42,7 +48,7 @@ This limitation changes how you model data. Relational normalization (organizing
     
     Examples: *CouchDB*, *MongoDB*, *Couchbase*
   4. **Columnar**. Popularized by [Google's BigTable](http://research.google.com/archive/bigtable.html),
-    this form of database exists to scale across multiple servers, and groups like data into
+    this form of database exists to scale across multiple servers, and groups similar data into
     column families. Column values can be individually versioned and managed, though families
     are defined in advance, not unlike RDBMS schemas.
     
@@ -56,7 +62,7 @@ This limitation changes how you model data. Relational normalization (organizing
 
 ### The Fallacies of Distributed Computing
 
-One detour in the land of distributed databases is to understand the condition that they are distributed systems replete with their benefits and handicaps. Engineers at Sun Microsystems created this list of [eight fallacies](http://www.rgoarchitects.com/Files/fallacies.pdf) that engineers new to distributed systems aften fall victim to. They still apply today, even when operating a database like Riak.
+One detour in the land of distributed databases is to understand the condition that they are distributed systems replete with their benefits and handicaps. Engineers at Sun Microsystems created this list of [eight fallacies](http://www.rgoarchitects.com/Files/fallacies.pdf) that engineers new to distributed systems often fall victim to. They still apply today, even when operating a database like Riak.
 
 1. The network is reliable.
 2. Latency is zero.
@@ -67,65 +73,64 @@ One detour in the land of distributed databases is to understand the condition t
 7. Transport cost is zero.
 8. The network is homogeneous.
 
-I always recommend to initiates to take the time to grock this list. Keeping these points in the back of your mind can save days of pain and expense in the future.
+I always recommend that initiates take the time to grok this list. Keeping these points ever present in your mind can save days of pain and expense in the future.
 
 ## Riak Components
 
-Riak is a Key/Value (KV) database, built from the ground up to safely distribute data across a cluster of physical servers, called nodes. A Riak cluster is also known as a Ring (we'll cover why later).
+Riak is a Key/Value (KV) database, built from the ground up to safely distribute data across a cluster of physical servers, called nodes. A Riak cluster is also known as a ring (we'll cover why later).
 
-For now, we'll only consider the concepts required to be a Riak users, and cover operations later.
+<!-- For now, we'll only consider the concepts required to be a Riak users, and cover operations later. -->
 
-Riak functions similarly to a very large hashtable. Depending on your background, you may instead call it a map, or dictionary, or object. But the idea is the same: you store a value with an immutable key, and retrieve it later.
+Riak functions similarly to a very large hash space. Depending on your background, you may call it hashtable, a map, a dictionary, or an object. But the idea is the same: you store a value with an immutable key, and retrieve it later.
 
 <h3>Key and Value</h3>
 
-<!-- replace with an image -->
+Key/value is the most basic construct in all of computerdom. You can think of a key like a home address, such as Bob's house with the unique key 5124, while the value would be maybe Bob (and his stuff).
 
-If Riak were a variable that functioned as a hashtable, you might set the value of your favorite food using the *key* `favorite`.
-
-```javascript
-hashtable["favorite"] = "pizza"
-```
-
-And retrieve the *value* `pizza` by using the same key as before.
+![A Key is an Address](../assets/decor/addresses.png)
 
 ```javascript
-food = hashtable["favorite"]
-food == "pizza"
+hashtable["5124"] = "Bob"
 ```
 
-One day you burn the roof of your mouth. In anger, you decided your favorite food is now `cold pizza`.
+Retrieving Bob is as easy as going to his house.
 
 ```javascript
-hashtable["favorite"] = "cold pizza"
+bob = hashtable["5124"]
 ```
 
-Successive requests for `favorite` will now return `cold pizza`.
+Let's say that poor old Bob dies, and Claire moves into this house. The address remains the same, but the contents have changed.
 
-For convenience, we call a key/value pair an *object*. Together our `favorite`/`pizza` pair is referred to as the "`favorite` object", rather than the more verbose "`favorite` key and its value".
+```javascript
+hashtable["5124"] = "Claire"
+```
+
+Successive requests for `5124` will now return `Claire`.
 
 <h3>Buckets</h3>
 
-*Buckets* are how Riak allows you to categorizes objects. You can group multiple objects into logical collections, where identical keys will not overlap between buckets.
+<!-- image: address streets metaphore -->
 
-You can think of buckets as [namespaces](http://en.wikipedia.org/wiki/Namespace_(computer_science\)).
+Addresses in Riakville are more than a house number, but also a street. There could be another 5124 on another street, so the way we can ensure a unique address is by requiring both, as in *5124 Main Street*.
 
-Using our `favorite` example from above, we can specify a favorite food, versus a favorite animal, by using the same key. Unless you're a Midwest farm kid like me, these categories probably won't overlap much.
+*Buckets* are like streets in Riak. But rather than mere geography, you can group multiple key/values into logical [namespaces](http://en.wikipedia.org/wiki/Namespace_(computer_science\)) (like residential streets, industrial streets, commercial streets, etc), where identical keys will not overlap between buckets.
+
+For example, while Alice may live at *5122 Main Street*, there may be a gas station at *5122 Bagshot Row*.
 
 ```javascript
-food["favorite"] = "pizza"
-animals["favorite"] = "red panda"
+main["5122"] = "Alice"
+bagshot["5122"] = "Gas"
 ```
 
-You could have just named your keys `edible_favorite` and `animal_favorite`, but buckets allow for cleaner key naming, and has other added benefits that I'll outline later.
+Certainly you could have just named your keys `main_5122` and `bagshot_5122`, but buckets allow for cleaner key naming, and have other benefits that I'll outline later.
 
-Buckets are so useful in Riak that all keys must belong to a bucket. There is no global namespace.
+Buckets are so useful in Riak that all keys must belong to a bucket. There is no global namespace. The true definition of a unique key in Riak is actually `bucket/key`.
 
-In fact in Riak, the true definition of an object key is actually `bucket/key`.
+For convenience, we call a *bucket/key + value* pair an *object*, sparing ourselves the verbosity of "X key in the Y bucket and its value".
 
 ## Replication and Partitions
 
-Distributing data across several nodes is how Riak is able to remain highly available, while tolerant of outages and network partitions. Riak combines two styles of distribution to achieve this: [replication](http://en.wikipedia.org/wiki/Replication_(computing\)) and [partitions](http://en.wikipedia.org/wiki/Partition_(database\)).
+Distributing data across several nodes is how Riak is able to remain highly available, tolerating outages and network partitions. Riak combines two styles of distribution to achieve this: [replication](http://en.wikipedia.org/wiki/Replication_(computing\)) and [partitions](http://en.wikipedia.org/wiki/Partition_(database\)).
 
 <h3>Replication</h3>
 
@@ -133,31 +138,7 @@ Distributing data across several nodes is how Riak is able to remain highly avai
 
 The obvious benefit of replication is that if one node goes down, nodes that contain replicated data remain available to serve requests. In other words, the system remains *available*.
 
-For example, imagine you have a list of country keys, whose values contain those countries' capitals. If all you do is replicate that data to 2 servers, you would have 2 duplicate databases.
-
-<h5>Node A</h5>
-
-```javascript
-"Afghanistan": "Kabul"
-"Albania":     "Tirana"
-"Algeria":     "Algiers"
-...
-"Yemen":       "Sanaa"
-"Zambia":      "Lusaka"
-"Zimbabwe":    "Harare"
-```
-
-<h5>Node B</h5>
-
-```javascript
-"Afghanistan": "Kabul"
-"Albania":     "Tirana"
-"Algeria":     "Algiers"
-...
-"Yemen":       "Sanaa"
-"Zambia":      "Lusaka"
-"Zimbabwe":    "Harare"
-```
+For example, imagine you have a list of country keys, whose values are those countries' capitals. If all you do is replicate that data to 2 servers, you would have 2 duplicate databases.
 
 ![Replication](../assets/replication.svg)
 
@@ -172,57 +153,17 @@ With partitioning, our total capacity can increase without any big expensive har
 
 For example, if we partition our countries into 2 servers, we might put all countries beginning with letters A-N into Node A, and O-Z into Node B.
 
-<h5>Node A</h5>
+![Partitions](../assets/partitions.svg)
 
-```javascript
-"Afghanistan": "Kabul"
-"Albania":     "Tirana"
-"Algeria":     "Algiers"
-...
-"Norway":      "Oslo"
-```
-
-<h5>Node B</h5>
-
-```javascript
-"Oman":        "Muscat"
-...
-"Yemen":       "Sanaa"
-"Zambia":      "Lusaka"
-"Zimbabwe":    "Harare"
-```
-
-There is a bit of overhead the partition approach. Some service must keep track of what range of values live on which node. A requesting application must know that the key `Spain` will be routed to Node B, not Node A.
+There is a bit of overhead to the partition approach. Some service must keep track of what range of values live on which node. A requesting application must know that the key `Spain` will be routed to Node B, not Node A.
 
 There's also another downside. Unlike replication, simple partitioning of data actually *decreases* uptime. If one node goes down, that entire partition of data is unavailable. This is why Riak uses both replication and partitioning.
-
-![Partitions](../assets/partitions.svg)
 
 <h3>Replication+Partitions</h3>
 
 Since partitions allow us to increase capacity, and replication improves availability, Riak combines them. We partition data across multiple nodes, as well as replicate that data into multiple nodes.
 
 Where our previous example partitioned data into 2 nodes, we can replicate each of those partitions into 2 more nodes, for a total of 4.
-
-<h5>Nodes A & C</h5>
-
-```javascript
-"Afghanistan": "Kabul"
-"Albania":     "Tirana"
-"Algeria":     "Algiers"
-...
-"Norway":      "Oslo"
-```
-
-<h5>Nodes B & D</h5>
-
-```javascript
-"Oman":        "Muscat"
-...
-"Yemen":       "Sanaa"
-"Zambia":      "Lusaka"
-"Zimbabwe":    "Harare"
-```
 
 Our server count has increased, but so has our capacity and reliability. If you're designing a horizontally scalable system by partitioning data, you must deal with replicating those partitions.
 
@@ -239,7 +180,7 @@ Riak follows the *consistent hashing* technique, that conceptually maps objects 
 
 Riak partitions are not mapped alphabetically (as we used in the examples above), but instead, a partition marks a range of key hashes (SHA-1 function applied to a key). The maximum hash value is 2^160, and divided into some number of partitions---64 partitions by default (the Riak config setting is `ring_creation_size`).
 
-Let's walk through what all that means. If you have the key `favorite`, applying the SHA-1 algorithm would return `dc2b 258d 7221 3f8d 05d1 5973 a66d c156 847b 83f4` in hexadecimal. With 64 partitions, each partition has 1/64 of the 2^160 possible values, making the first partition range from 0 to 2^154-1, the second range is 2^154 to 2*2^154-1, and so on, up to the last partition 63*2^154-1 to 2^160-1.
+Let's walk through what all that means. If you have the key `favorite`, applying the SHA-1 algorithm would return `dc2b 258d 7221 3f8d 05d1 5973 a66d c156 847b 83f4` in hexadecimal. With 64 partitions, each partition has 1/64 of the 2^160 possible values, making the first partition range from 0 to 2^154-1, the second range is 2^154 to 2\*2^154-1, and so on, up to the last partition 63\*2^154-1 to 2^160-1.
 
 <!-- V=lists:sum([lists:nth(X, H)*math:pow(16, X-1) || X <- lists:seq(1,string:len(H))]) / 64. -->
 <!-- V / 2.28359630832954E46. // 2.2.. is 2^154 -->
@@ -305,7 +246,7 @@ Riak's solution is based on Amazon Dynamo's novel approach of a *tunable* AP sys
 
 Riak allows you to choose how many nodes you want to replicate an object to, and how many nodes must be written to or read from per request. These values are settings labeled `n_val` (the number of nodes to replicate to), `r` (the number of nodes read from before returning), and `w` (the number of nodes written to before considered successful).
 
-A thought experiment might help clarify.
+A thought experiment may help clarify things.
 
 ![NRW](../assets/nrw.svg)
 
