@@ -62,7 +62,7 @@ This limitation changes how you model data. Relational normalization (organizing
 
 ### The Fallacies of Distributed Computing
 
-One detour in the land of distributed databases is to understand the condition that they are distributed systems replete with their benefits and handicaps. Engineers at Sun Microsystems created this list of [eight fallacies](http://www.rgoarchitects.com/Files/fallacies.pdf) that engineers new to distributed systems aften fall victim to. They still apply today, even when operating a database like Riak.
+One detour in the land of distributed databases is to understand the condition that they are distributed systems replete with their benefits and handicaps. Engineers at Sun Microsystems created this list of [eight fallacies](http://www.rgoarchitects.com/Files/fallacies.pdf) that engineers new to distributed systems often fall victim to. They still apply today, even when operating a database like Riak.
 
 1. The network is reliable.
 2. Latency is zero.
