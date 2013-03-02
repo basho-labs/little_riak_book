@@ -378,7 +378,7 @@ Realistically, this exists for speed and simplicity, when you really don't care 
 
 As we saw under [Concepts](#practical-tradeoffs), *vector clocks* are Riak's way of tracking a true sequence of events of an object. We went over the concept, but let's see how and when Riak vclocks are used.
 
-Every client needs its own id, sent on every write as `X-Riak-ClientId`.
+Every node in Riak has its own unique id, which it uses to denote where an update happens as the vector clock key.
 
 <h4>Siblings</h4>
 
@@ -408,7 +408,6 @@ Casey writes `[{"item":"kale","count":10}]`.
 ```bash
 curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
   -H "Content-Type:application/json" \
-  -H "X-Riak-ClientId:casey" \
   -d '[{"item":"kale","count":20}]'
 HTTP/1.1 200 OK
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA=
@@ -431,7 +430,6 @@ Mark writes `[{"item":"kale","count":10},{"item":"milk","count":1}]`.
 ```bash
 curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
   -H "Content-Type:application/json" \
-  -H "X-Riak-ClientId:mark" \
   -H "X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA="" \
   -d '[{"item":"kale","count":20},{"item":"milk","count":1}]'
 HTTP/1.1 200 OK
@@ -462,7 +460,6 @@ Andy writes `[{"item":"kale","count":10},{"item":"almonds","count":12}]`.
 ```bash
 curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
   -H "Content-Type:application/json" \
-  -H "X-Riak-ClientId:andy" \
   -H "X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA="" \
   -d '[{"item":"kale","count":20},{"item":"almonds","count":12}]'
 HTTP/1.1 300 Multiple Choices
