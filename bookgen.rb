@@ -42,6 +42,7 @@ $figures = {
 def gen_pdf(languages)
   def figures(&block)
     begin
+      Dir::mkdir("#$root/figures")
       Dir["#$root/assets/*.pdf","#$root/assets/*.png","#$root/assets/decor/*.png"].each do |file|
         assetname = file.sub(/.*?\/assets\/(.*?)\.\w{3}$/, '\1')
         next unless figure = $figures[assetname]
@@ -52,6 +53,7 @@ def gen_pdf(languages)
       Dir["#$root/figures/*"].each do |file|
         rm(file)
       end
+      Dir::unlink("#$root/figures")
     end
   end
 
