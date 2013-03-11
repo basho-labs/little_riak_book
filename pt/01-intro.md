@@ -2,13 +2,15 @@
 
 ## Roleta da Inatividade
 
-Imagine uma roleta num casino, onde qualquer número tem a probabilidade de 1 em 37 de sair. Imagine agora que você poderia apostar que um determinado número *não* ia sair (97,3% de hipóteses a seu favor), e ganhando pagaria 10 vezes a sua aposta. Você faria essa aposta? Eu pegava na minha carteira tão rápido que o meu polegar iniciava um incêndio no meu bolso.
+![Apostas com a Disponibilidade](../assets/decor/roulette.png)
 
-![Apostas com o Uptime](../assets/roulette.png)
+Imagine uma roleta num casino, onde qualquer número tem a probabilidade de 1 em 37 de sair. Imagine agora que você poderia apostar que um determinado número *não* ia sair (97,3% de hipóteses a seu favor), e ganhando pagaria 10 vezes a sua aposta. Você faria essa aposta? Eu pegava na minha carteira tão rápido que o meu polegar iniciava um incêndio no meu bolso.
 
 Agora imagine que podia apostar de novo, mas só ganha se a roda fizer 100 rotações seguidas em seu favor, senão perde. Será que você ainda joga? Ganhar uma aposta simples pode ser fácil, mas ao longo de várias tentativas as probabilidades não são favoráveis.
 
-As pessoas estão sempre a fazer este tipo de apostas com os dados. Um único servidor tem boas hipóteses de continuar disponível. Mas quando você administra um cluster com milhares de servidores, ou biliões de pedidos, as hipóteses de qualquer um falhar tornam-se muito grandes. Mesmo um desastre de uma-vez-num-milhão é comum à luz de um bilião de oportunidades.
+As pessoas estão sempre a fazer este tipo de apostas com os dados. Um único servidor tem boas hipóteses de continuar disponível. Mas quando você administra um cluster com milhares de servidores, ou biliões de pedidos, as hipóteses de qualquer um falhar tornam-se muito grandes. 
+
+Até um desastre de uma-vez-num-milhão é comum à luz de um bilião de oportunidades.
 
 ## O que é o Riak?
 
@@ -45,5 +47,5 @@ Portanto, será que você deve usar o Riak? Uma boa regra de ouro para os potenc
 
 Este não é um guia do estilo "instale e acompanhe". Este é um guia para "ler e compreender". Não se sinta obrigado a ter o Riak instalado, ou mesmo sequer ter um computador à mão, ao iniciar este livro. Você pode desejar instalar em algum momento e, nesse caso, as instruções podem ser encontradas na documentação oficial: [Riak Docs](http://docs.basho.com).
 
-Na minha opinião, a parte mais importante deste livro é o [capítulo Conceitos](#conceitos). Se você já tem algum conhecimento pode achar o começo aborrecido, mas isso muda rapidamente. Depois de lançar as bases teóricas, vamos ajudar os [programadores](#developers) a usar o Riak, aprendendo como se consulta os dados e como alterar algumas configurações. Finalmente, vamos falar sobre os detalhes básicos que os [operadores](#operadores) devem saber, como por exemplo a criação de um cluster Riak, configurar alguns valores, usar ferramentas opcionais, e muito mais.
+Na minha opinião, a parte mais importante deste livro é o [capítulo Conceitos](#conceitos). Se você já tem algum conhecimento pode achar o começo aborrecido, mas isso muda rapidamente. Depois de lançar as bases teóricas, vamos ajudar os [administradores](#Administradores) a usar o Riak, aprendendo como se consulta os dados e como alterar algumas configurações. Finalmente, vamos falar sobre os detalhes básicos que os [operadores](#operadores) devem saber, como por exemplo a criação de um cluster Riak, configurar alguns valores, usar ferramentas opcionais, e muito mais.
 

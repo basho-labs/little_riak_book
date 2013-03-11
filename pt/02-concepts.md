@@ -72,7 +72,7 @@ Eu recomendo vivamente aos iniciados a perder algum tempo a mentalizar esta list
 
 ## Componentes do Riak
 
-Riak é uma BD chave/valor(CV), construído a partir do zero para distribuir com segurança os dados num cluster de servidores físicos, chamados de nós. Um cluster do Riak também é conhecido como um Anel (vamos falar sobre o porquê mais tarde).
+Riak é uma BD chave/valor(CV), construído a partir do zero para distribuir com segurança os dados num cluster de servidores físicos, chamados de nós. Um cluster do Riak também é conhecido como um anel (vamos falar sobre o porquê mais tarde).
 
 <!--Por agora, vamos apenas considerar os conceitos necessários para ser um utilizador do Riak, e mais tarde a sua operação e manutenção.-->
 
@@ -82,7 +82,7 @@ O Riak funciona de forma semelhante a uma tabela de hash muito grande. Dependend
 
 Chave/valor é a construção mais básica de todas na informática. Você pode pensar numa chave como um endereço de uma casa, como por exemplo, a casa do Bob com a chave única de 5124, enquanto o valor seria talvez Bob (e o seu material).
 
-![Uma Chave é um Endereço](../assets/addresses.png)
+![Uma Chave é um Endereço](../assets/decor/addresses.png)
 
 ```javascript
 hashtable["5124"] = "Bob"
@@ -173,7 +173,7 @@ O Riak usa a técnica de *hash consistente*, que conceptualmente mapeia objetos 
 
 As partições do Riak não são mapeadas alfabeticamente (como usamos nos exemplos acima), mas, em vez disso, uma partição mapeia uma gama de hashes de chaves (função SHA-1 aplicada a uma chave). O valor máximo da hash é de 2^160, e é dividido num número específico de partições---64 partições por defeito (a configuração no Riak é feita com `ring_creation_size`).
 
-Vamos ver o que tudo isto significa. Se você tem a chave `favorite`, aplicar o algoritmo SHA-1 daria `dc2b 258d 7221 3f8d 05d1 5973 a66d C156 847B 83f4` em hexadecimal. Com 64 partições, cada partição tem 1/64 dos 2^160 valores possíveis, sendo a gama da primeira partição de 0 a 2^154-1, o segundo intervalo é de 2^154 a 2*2^154-1, e assim por diante, até à última partição de 63*2^154-1 a 2^160-1.
+Vamos ver o que tudo isto significa. Se você tem a chave `favorite`, aplicar o algoritmo SHA-1 daria `dc2b 258d 7221 3f8d 05d1 5973 a66d C156 847B 83f4` em hexadecimal. Com 64 partições, cada partição tem 1/64 dos 2^160 valores possíveis, sendo a gama da primeira partição de 0 a 2^154-1, o segundo intervalo é de 2^154 a 2\*2^154-1, e assim por diante, até à última partição de 63\*2^154-1 a 2^160-1.
 
 <!-- V=lists:sum([lists:nth(X, H)*math:pow(16, X-1) || X <- lists:seq(1,string:len(H))]) / 64. -->
 <!-- V / 2.28359630832954E46. // 2.2.. is 2^154 -->
