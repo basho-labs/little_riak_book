@@ -24,8 +24,8 @@ A *cluster* in Riak is a managed collection of nodes that share a common Ring.
 
 *The Ring* in Riak is actually a two-fold concept.
 
-Firstly, the Ring is a function of the consistent hash space partitions,
-managed by vnodes. This partition range is treated as circular, from 0 to
+Firstly, the Ring represents the consistent hash partitions (the partitions
+managed by vnodes). This partition range is treated as circular, from 0 to
 2^160-1 back to 0 again. (If you're wondering, yes this means that we are
 limited to 2^160 nodes, which is a limit of a 1.46 quindecillion, or
 `1.46 x 10^48`, node cluster. For comparison, there are only `1.92 x 10^49`
@@ -35,7 +35,7 @@ When we consider replication, the N value defines how many nodes an object is
 replicated to. Riak makes a best attempt at spreading that value to as many
 nodes as it can, so it copies to the next N adjacent nodes, starting with the
 primary partition and counting around the Ring, if it reaches the last
-partition, it starts over at the first one.
+partition, it loops around back to the first one.
 
 Secondly, the Ring is also used as a shorthand for describing the state of the
 circular hash ring I just mentioned. This Ring (aka *Ring State*) is a
@@ -189,11 +189,11 @@ The Riak docs have all of the information you need to [Install](http://docs.bash
 2. Get Riak from a package manager (ala apt-get or Homebrew), or build from source (the results end up under `rel/riak`, with the binaries under `bin`).
 3. Run `riak start`
 
-Install Riak on four or five nodes---five being the recommended safe minimum for production.
+Install Riak on four or five nodes---five being the recommended safe minimum for production. Fewer nodes are OK during software development and testing.
 
 <h3>Command Line</h3>
 
-Most Riak operations can be performed though the command line. We'll concern ourselves with two: `riak` and `riak-admin`.
+Most Riak operations can be performed though the command line. We'll concern ourselves with two commands: `riak` and `riak-admin`.
 
 <h4>riak</h4>
 
@@ -211,7 +211,8 @@ You can print the current running `version`. `ping` will return `pong` if the se
 `chkconfig` is useful if you want to ensure your `etc/app.config` is not broken
 (that is to say, it's parsable). I mentioned `attach` briefly above, when
 we looked into the details of the Ring---it attaches a console to the local
-running Riak server so you can execute Riak's Erlang code. And finally, `escript` is similar to console, except you pass in script file of commands you wish to run.
+running Riak server so you can execute Riak's Erlang code. `escript` is similar
+to `attach`, except you pass in script file of commands you wish to run automatically.
 
 <!-- 
 If you want to build this on a single dev machine, here is a truncated guide.
@@ -262,7 +263,7 @@ vnode_index_deletes : 0
 ...
 ```
 
-Adding javascript or erlang files to Riak (as we did in the
+Adding JavaScript or Erlang files to Riak (as we did in the
 [developers chapter](#developers) ) are not automatically found by the nodes,
 but they instead must be informed by either `js-reload` or `erl-reload` command.
 
@@ -276,7 +277,7 @@ queue up so many messages at a time (MsgQ), and so on. This is useful for advanc
 and is especially useful if you know Erlang, or seek help from other users, the Riak team, or
 Basho.
 
-![Top](../assets/top.svg)
+![Top](../assets/top.pdf)
 
 <h3>Making a Cluster</h3>
 
@@ -318,8 +319,8 @@ an old node for a new one uses `replace` or `force-replace`.
 
 I should mention here that using `leave` is the nice way of taking a node
 out of commission. However, you don't always get that choice. If a server
-happens to explode (or simply smoke ominously), you don't need it's approval
-to remove if from the cluster, but can instead mark it as `down`.
+happens to explode (or simply smoke ominously), you don't need its approval
+to remove it from the cluster, but can instead mark it as `down`.
 
 But before we worry about removing nodes, let's add some first.
 
@@ -335,7 +336,7 @@ Success: staged join request for 'C@10.0.1.3' to 'A@10.0.1.1'
 You should always keep in mind the general pattern Riak
 follows when you make a change to the cluster:
 
-*Join/Leave/Down -> Ring state change -> Gossiped -> Hinted handoff*
+*Join/Leave/Down -> Commit -> Ring state change -> Gossiped -> Hinted handoff*
 
 Large amounts of data can take time and cause system strain to transfer, so
 don't wait until it's too late to grow.
@@ -396,13 +397,13 @@ Cluster changes committed
 ```
 
 Without any data, adding a node to a cluster is a quick operation. However, with large amounts of
-data to be transferred to a new node, it can take quite a while before the service is available.
+data to be transferred to a new node, it can take quite a while before the new node is ready to use.
 
 <h3>Status Options</h3>
 
 To check on a launching node's progress, you can run the `wait-for-service` command. It will
-output the status of the service and stop when it's finally up. You can get a list of available
-`services` through the similarly named command.
+output the status of the service and stop when it's finally up. In this example, we check
+the `riak_kv` service.
 
 ```
 $ riak-admin wait-for-service riak_kv C@10.0.1.3
@@ -410,6 +411,8 @@ riak_kv is not up: []
 riak_kv is not up: []
 riak_kv is up
 ```
+
+You can get a list of available services with the `services` command.
 
 You can also see if the whole ring is ready to go with `ringready`. If the nodes do not agree
 on the state of the ring, it will output `FALSE`, otherwise `TRUE`.
@@ -435,8 +438,8 @@ Valid:3 / Leaving:0 / Exiting:0 / Joining:0 / Down:0
 ```
 
 And for more details of any current handoffs or unreachable nodes, try `ring-status`. It
-also lists some information from `ringready` and `transfers`. Below I turned off a node
-to show what it might look like.
+also lists some information from `ringready` and `transfers`. Below I turned off the C
+node to show what it might look like.
 
 ```bash
 $ riak-admin ring-status
@@ -665,7 +668,7 @@ is raw_name under riak. -->
 HTTP access to KV defaults to the `/riak` path as we've seen in examples
 throughout the book. This prefix is editable via `raw_name`. Many of the
 other KV settings are concerned with backward compatibility  modes,
-backend settings, mapreduce, and Javascript integration.
+backend settings, mapreduce, and JavaScript integration.
 
 ```bash
 %% Riak KV config
@@ -747,7 +750,7 @@ path, you can also change HTTP from `/mapred` to a custom path.
 
 Though not implemented in pipe, Riak KV's mapreduce implementation is the
 primary user of the Spidermonkey JavaScript engine---the second use is
-pre-commit hooks.
+precommit hooks.
 
 ```bash
 %% Riak KV config
@@ -901,9 +904,9 @@ $ curl -XPUT http://riaknode:8098/riak/session_data \
 So far, all of the components we've seen have been inside the Riak house. The API
 is the front door. *In a perfect world*, the API would manage two implementations:
 Protocol buffers (PB), an efficient binary protocol framework designed by Google;
-and HTTP. Unfortunately the HTTP client interface is not yet ported, leaving only
-PB for now---though I like to consider this as a mere implementation detail, to be
-unraveled from KV soon.
+and HTTP. It's worth noting that the HTTP client interface is not yet actually ported
+to the API project, leaving only PB for now---though I like to consider this as a
+mere implementation detail, to be unraveled from KV soon.
 
 But because they are not yet separated, only PB is configured under `riak_api`,
 while HTTP still remains under KV.

@@ -18,7 +18,7 @@ Developing with a Riak database is quite easy to do, once you understand some of
 Riak has official drivers for the following languages:
 Erlang, Java, PHP, Python, Ruby
 
-Including community supplied drivers, supported languages are even more numberous: C/C++, Clojure, Common Lisp, Dart, Go, Groovy, Haskell, Javascript (jquery and nodejs), Lisp Flavored Erlang, .NET, Perl, PHP, Play, Racket, Scala, Smalltalk
+Including community supplied drivers, supported languages are even more numberous: C/C++, Clojure, Common Lisp, Dart, Go, Groovy, Haskell, JavaScript (jQuery and NodeJS), Lisp Flavored Erlang, .NET, Perl, PHP, Play, Racket, Scala, Smalltalk
 
 There are also dozens of other [project-specific addons](http://docs.basho.com/riak/latest/references/Community-Developed-Libraries-and-Projects/).
 </aside>
@@ -161,7 +161,7 @@ A deleted object in Riak is internally marked as deleted, by writing a marker kn
 
 This detail isn't normally important, except to understand two things:
 
-1. In Riak, a *delete* is actually a *write*, and should be considered as such.
+1. In Riak, a *delete* is actually a *write*, and should be considered as such when calculating read/write ratios.
 2. Checking for the existence of a key is not enough to know if an object exists. You might be reading a key between a delete and a reap. You must read for tombstones.
 
 <h4>Lists</h4>
@@ -216,7 +216,7 @@ The basis of Riak's availability and tolerance is that it can read from, or writ
 
 <h4>N/R/W</h4>
 
-N is the number of total nodes that a value should be replicated to, defaulting to 3. But we can set this `n_val` to any number fewer than the total number of nodes.
+N is the number of total nodes that a value should be replicated to, defaulting to 3. But we can set this `n_val` to less than the total number of nodes.
 
 Any bucket property, including `n_val`, can be set by sending a `props` value as a JSON object to the bucket URL. Let's set the `n_val` to 5 nodes, meaning that objects written to `cart` will be replicated to 5 nodes.
 
@@ -254,13 +254,13 @@ As you can see, `n_val` is 5. That's expected. But you may also have noticed tha
 
 <h5>Symbolic Values</h5>
 
-A *quorum* is a one more than half of all the total replicated nodes (`floor(N/2) + 1`). This is an important figure, since if more than half of all nodes are written to, and more than half of all nodes are read from, then you will get the most recent value (under normal circumstances).
+A *quorum* is one more than half of all the total replicated nodes (`floor(N/2) + 1`). This figure is important, since if more than half of all nodes are written to, and more than half of all nodes are read from, then you will get the most recent value (under normal circumstances).
 
 Here's an example with the above `n_val` of 5 ({A,B,C,D,E}). Your `w` is a quorum (which is `3`, or `floor(5/2)+1`), so a PUT may respond successfully after writing to {A,B,C} ({D,E} will eventually be replicated to). Immediately after, a read quorum may GET values from {C,D,E}. Even if D and E have older values, you have pulled a value from node C, meaning you will receive the most recent value.
 
 What's important is that your reads and writes *overlap*. As long as `r+w > n`, you'll be able to get the newest values. In other words, you'll have consistency.
 
-A `quorum` is an excellent default, since you're reading and writing from a balance of nodes. But if you have specific requirements, like a log that is often written to, but rarely read, you might find it make more sense to write to a single node, but read from all of them. This affords you an overlap 
+A `quorum` is an excellent default, since you're reading and writing from a balance of nodes. But if you have specific requirements, like a log that is often written to, but rarely read, you might find it make more sense to wait for a successful write from a single node, but read from all of them. This affords you an overlap 
 
 ```bash
 curl -i -XPUT http://localhost:8098/riak/logs \
@@ -308,9 +308,9 @@ This is a consistent write, since if a single node is not available the write wi
 
 Another utility of buckets are their ability to enforce behaviors on writes by way of hooks. You can attach functions to run either before, or after, a value is committed to a bucket.
 
-Functions that run before a write is called pre-commit, and has the ability to cancel a write altogether if the incoming data is considered bad in some way. A simple pre-commit hook is to check if a value exists at all.
+Functions that run before a write is called precommit, and has the ability to cancel a write altogether if the incoming data is considered bad in some way. A simple precommit hook is to check if a value exists at all.
 
-I put my custom files under the riak installation `./custom/my_validators.erl`.
+I put my custom Erlang code files under the riak installation `./custom/my_validators.erl`.
 
 ```bash
 -module(my_validators).
@@ -318,9 +318,9 @@ I put my custom files under the riak installation `./custom/my_validators.erl`.
 
 %% Object size must be greater than 0 bytes
 value_exists(RiakObject) ->
-  case erlang:byte_size(riak_object:get_value(RiakObject)) of
-    Size when Size == 0 ->
-      {fail, "A value sized greater than 0 is required"};
+  Value = riak_object:get_value(RiakObject),
+  case erlang:byte_size(Value) of
+    0 -> {fail, "A value sized greater than 0 is required"};
     _ -> RiakObject
   end.
 ```
@@ -331,7 +331,7 @@ Then compile the file.
 erlc my_validators.erl
 ```
 
-Install the file by informing the Riak installation of your new code in `app.config` (restart Riak).
+Install the file by informing the Riak installation of your new code via `app.config` (restart Riak).
 
 ```bash
 {riak_kv,
@@ -340,7 +340,7 @@ Install the file by informing the Riak installation of your new code in `app.con
 }
 ```
 
-All you need to do is set the Erlang module and function as a JSON value to the bucket's pre-commit array `{"mod":"my_validators","fun":"value_exists"}`.
+Then you need to do set the Erlang module (`my_validators`) and function (`value_exists`) as a JSON value to the bucket's precommit array `{"mod":"my_validators","fun":"value_exists"}`.
 
 ```bash
 curl -i -XPUT http://localhost:8098/riak/cart \
@@ -356,15 +356,15 @@ curl -XPOST http://localhost:8098/riak/cart \
 A value sized greater than 0 is required
 ```
 
-You can also write pre-commit functions in Javascript, though Erlang code will execute faster.
+You can also write precommit functions in JavaScript, though Erlang code will execute faster.
 
 Post-commits are similar in form and function, but they react after a commit has occurred.
 
 ## Entropy
 
-Entropy is a byproduct of eventual consistency. In other words: although eventual consistency says a write will replicate to other nodes in time, there can be a bit of delay while all nodes do not contain the same value.
+Entropy is a byproduct of eventual consistency. In other words: although eventual consistency says a write will replicate to other nodes in time, there can be a bit of delay during which all nodes do not contain the same value.
 
-That difference is *entropy*, and so Riak has created several *anti-entropy* strategies (also called *AE*). We've already talked about how an R/W quorum can deal with differing values when write/read requests overlap at least one node. Riak can repair entropy, or allow you the option to do so yourself.
+That difference is *entropy*, and so Riak has created several *anti-entropy* strategies (abbreviated as *AE*). We've already talked about how an R/W quorum can deal with differing values when write/read requests overlap at least one node. Riak can repair entropy, or allow you the option to do so yourself.
 
 Riak has a couple strategies related to the case of nodes that do not agree on value.
 
@@ -431,7 +431,7 @@ Mark writes `[{"item":"kale","count":10},{"item":"milk","count":1}]`.
 curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
   -H "Content-Type:application/json" \
   -H "X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA="" \
-  -d '[{"item":"kale","count":20},{"item":"milk","count":1}]'
+  -d '[{"item":"kale","count":10},{"item":"milk","count":1}]'
 HTTP/1.1 200 OK
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmTwZTIlMfKcMaK7RRfFgA=
 Vary: Accept-Encoding
@@ -553,7 +553,7 @@ It's worth noting that you should never set both `allow_multi` and
 
 When a successful read happens, but not all replicas agree upon the value, this triggers a *read repair*. This means that Riak will update the replicas with the most recent value. This can happen when, either an object is not found (the vnode has no copy), of a vnode contains an older value (older means that it is an ancestor of the newest vector clock). Unlike `last_write_wins` or manual conflict resolution, read repair is (obviously, I hope, by the name) triggered by a read, rather than a write.
 
-If your nodes get be out of sync (for example, if you increase the `n_val` on a bucket), you can force read repair by performing a read operation for all of that bucket's keys. They may return with `not found` the first time, will pull the newest values. Successive reads should now work.
+If your nodes get out of sync (for example, if you increase the `n_val` on a bucket), you can force read repair by performing a read operation for all of that bucket's keys. They may return with `not found` the first time, then successive will pull the newest values.
 
 
 ## Querying
@@ -610,7 +610,7 @@ processing into two phases, map and reduce, that themselves are executed
 in parts. Map will be executed per object to convert/extract some value,
 then those mapped values will be reduced into some aggregate result. What
 do we gain from this structure? It's predicated on the idea that it's cheaper
-to move the algorithms to where the data lives, than to transferring massive 
+to move the algorithms to where the data lives, than to transfer massive 
 amounts of data to a single server to run a calculation.
 
 This method, popularized by Google, can be seen in a wide array of NoSQL
@@ -631,8 +631,8 @@ curl -XPOST http://localhost:8098/riak/logs -d "INFO: Milk added to shopping car
 curl -XPOST http://localhost:8098/riak/logs -d "ERROR: shopping cart cancelled"
 ```
 
-MapReduce jobs can be either Erlang or Javascript code. This time we'll go the
-easy route and write Javascript. You execute mapreduce by posting JSON to the
+MapReduce jobs can be either Erlang or JavaScript code. This time we'll go the
+easy route and write JavaScript. You execute mapreduce by posting JSON to the
 `/mapred` path.
 
 ```bash
@@ -667,7 +667,7 @@ The result should be `[2]`, as expected. Both map and reduce phases should
 always return an array. The map phase receives a single riak object, while
 the reduce phase received an array of values, either the result of multiple
 map function outputs, or of multiple reduce outputs. I probably cheated a
-bit by using Javascript's `reduce` function to sum the values, but, well,
+bit by using JavaScript's `reduce` function to sum the values, but, well,
 welcome to the world of thinking in terms of mapreduce!
 
 <h4>Key Filters</h4>
@@ -945,5 +945,5 @@ such as *mapreduce*; or allow for header metadata to provide an added
 descriptive dimension to the object, such as *secondary indexes*, *link
 walking*, or *search*.
 
-Next we'll peek further under the hook, and see how to set up and manage
+Next we'll peek further under the hood, and see how to set up and manage
 a cluster of your own, and what you should know.

@@ -274,12 +274,12 @@ languages = [ARGV[0] || "en"]
 # generate the pdf
 gen_pdf(languages)
 
-# # generate the ebooks
-# languages.each do |language|
-#   formats = %w{mobi epub}
+# generate the ebooks
+languages.each do |language|
+  formats = %w{mobi epub}
 
-#   html_file = gen_html(language)
-#   formats.each do |format|
-#     gen_book(language, html_file, format)
-#   end
-# end
+  html_file = gen_html(language)
+  formats.each do |format|
+    gen_book(language, html_file, format)
+  end
+end
