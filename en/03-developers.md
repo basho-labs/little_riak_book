@@ -408,7 +408,7 @@ Casey writes `[{"item":"kale","count":10}]`.
 ```bash
 curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
   -H "Content-Type:application/json" \
-  -d '[{"item":"kale","count":20}]'
+  -d '[{"item":"kale","count":10}]'
 HTTP/1.1 200 OK
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA=
 Vary: Accept-Encoding
@@ -461,7 +461,7 @@ Andy writes `[{"item":"kale","count":10},{"item":"almonds","count":12}]`.
 curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
   -H "Content-Type:application/json" \
   -H "X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA="" \
-  -d '[{"item":"kale","count":20},{"item":"almonds","count":12}]'
+  -d '[{"item":"kale","count":10},{"item":"almonds","count":12}]'
 HTTP/1.1 300 Multiple Choices
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmTwZTInMfKoG7LdoovCwA=
 Vary: Accept-Encoding
@@ -479,14 +479,14 @@ Link: </riak/cart>; rel="up"
 Etag: 62NRijQH3mRYPRybFneZaY
 Last-Modified: Thu, 01 Nov 2012 00:14:04 GMT
 
-[{"item":"kale","count":20},{"item":"milk","count":1}]
+[{"item":"kale","count":10},{"item":"milk","count":1}]
 --Ql3O0enxVdaMF3YlXFOdmO5bvrs
 Content-Type: application/json
 Link: </riak/cart>; rel="up"
 Etag: 7kfvPXisoVBfC43IiPKYNb
 Last-Modified: Thu, 01 Nov 2012 00:24:07 GMT
 
-[{"item":"kale","count":20},{"item":"almonds","count":12}]
+[{"item":"kale","count":10},{"item":"almonds","count":12}]
 --Ql3O0enxVdaMF3YlXFOdmO5bvrs--
 ```
 
@@ -511,7 +511,7 @@ What can you do with this tag? Namely, you request the value of a specific sibli
 
 ```bash
 curl http://localhost:8098/riak/cart/fridge-97207?vtag=62NRijQH3mRYPRybFneZaY
-[{"item":"kale","count":20},{"item":"milk","count":1}]
+[{"item":"kale","count":10},{"item":"milk","count":1}]
 ```
 
 If you want to retrieve all sibling data, tell Riak that you'll accept the multipart message by adding `-H "Accept:multipart/mixed"`.
@@ -543,7 +543,7 @@ Successive reads will receive a single (merged) result.
 curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
   -H "Content-Type:application/json" \
   -H "X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTInMfKoG7LdoovCwA=" \
-  -d '[{"item":"kale","count":20},{"item":"milk","count":1},{"item":"almonds","count":12}]'
+  -d '[{"item":"kale","count":10},{"item":"milk","count":1},{"item":"almonds","count":12}]'
 ```
 
 It's worth noting that you should never set both `allow_multi` and
@@ -761,7 +761,7 @@ With a Link in place, now it's time to walk it. Walking is like a normal
 request, but with the suffix of `/[bucket],[riaktag],[keep]`. In other words,
 the *bucket* a possible link points to, the value of a *riaktag*, and whether to
 *keep* the results of this phase (only useful when chaining link walks). Each
-of these values can be set to a wildcard _, meaning you don't care the value.
+of these values can be set to a wildcard _, meaning you don't care about the value.
 
 ```bash
 curl http://localhost:8098/riak/people/mark/people,brother,_
@@ -830,7 +830,7 @@ In an attempt to make Riak Search user friendly, it was originally developed
 with a "Solr like" interface. Sadly, due to the complexity of building
 distributed search engines, it was woefully incomplete. Basho decided that,
 rather than attempting to maintain parity with Solr, a popular and featureful
-search engine in it's own right, it made more sense to integrate the two.
+search engine in its own right, it made more sense to integrate the two.
 </aside>
 
 <h3>Search (Yokozuna)</h3>

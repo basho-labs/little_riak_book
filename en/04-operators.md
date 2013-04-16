@@ -3,10 +3,9 @@
 <!-- What Riak is famous for is its simplicity to operate and stability at increasing scales. -->
 
 In some ways, Riak is downright mundane in its role as the easiest NoSQL
-database to operate. Want more servers? Add them. A network cable gets cut at
-2am? Sleep until morning and fix it. But the fact that it generally hums without
-a hiccup, does not diminish the importance of understanding this integral part
-of your application stack.
+database to operate. Want more servers? Add them. A network cable is cut at
+2am? Sleep until morning and fix it. Understanding this integral part of
+your application stack is still important, however, despite Riak's reliability.
 
 We've covered the core concepts of Riak, and I've provided a taste of how to go
 about using Riak, but there is more to Riak than that. There are details you
@@ -87,7 +86,7 @@ In this example, I have a total of four Riak nodes running on `A@10.0.1.1`,
 `B@10.0.1.2`, `C@10.0.1.3`, and `D@10.0.1.4`.
 
 The following is Erlang, the language Riak was written in. Riak has the amazing, and probably
-dangerous  command `attach`, that attaches an Erlang console to a live Riak node, loaded with
+dangerous, `attach` command that attaches an Erlang console to a live Riak node, loaded with
 all of the Riak modules. So here we're getting a copy of the Ring from the locally running node.
 
 The `riak_core_ring:chash(Ring)` function extracts the total count of partitions (8), with an array
@@ -149,31 +148,28 @@ If something has happened to one of those nodes, like a network split
 (confusingly also called a partition---the "P" in "CAP"), the remaining
 active nodes in the list become candidates to hold the data.
 
-So if the partition `7307508...` write could not connect to node `10.0.1.1`, 
+So if the partition `7307508...` write could not connect to node `A@10.0.1.1`, 
 Riak would then attempt to write that partition `7307508...` to `C@10.0.1.3`
 as a fallback (it's the next node in the list preflist after the 3 primaries).
 
-Due to the structure of the Ring, how it distributes partitions, and how it
-handles failures, it's relatively simple to ensure that data is replicated to
-as many physical nodes as possible, while being able to remain operational if
-a node is unavailable, by simply trying the next available node in the list.
-
+The way that the Ring is structured allows Riak to ensure data is always
+written to the appropriate number of physical nodes, even in cases where one
+or more physical nodes are unavailable. It does this by simply trying the next
+available node in the preflist.
 
 <h3>Hinted Handoff</h3>
 
-When a node goes down data is replicated to a backup node. But this is not a solution, merely a
-band aid. So Riak will periodically trigger vnodes to check if they reside on the correct node
-(according to the Ring). If not, the managing process will attempt to connect with the home
-node, and if that node responds, will hand off any data it hold back to proper node.
+When a node goes down, data is replicated to a backup node. This is not a
+permanent solution, but merely a band-aid. Riak periodically triggers vnodes
+to check if they reside on the correct physical node. A managing process on
+each physical node is responsible for handing off these vnodes to the target
+node, if it is reachable.
 
-As long as the temporary node cannot connect to the primary, it will continue to access writes
-and reads on behalf of its incapacitated brethren.
+As long as the temporary node cannot connect to the primary, it will continue
+to access writes and reads on behalf of its incapacitated brethren.
 
-High availability is not the only purpose of hinted handoff. In the case where the ring changes,
-because a node was added or removed, data must be transferred to its new home. In this case,
-the same thing will happen: a vnode checks if it's in the correct place, and if not, attempts
-to transfer its data to its new home node.
-
+Hinted handoff not only helps Riak achieve high availability, it also facilitates
+data migration when physical nodes are added or removed from the Ring.
 
 ## Managing a Cluster
 
@@ -186,7 +182,7 @@ do, in fact, I didn't bother discussing it for most of this book.
 The Riak docs have all of the information you need to [Install](http://docs.basho.com/riak/latest/tutorials/installation/) it per operating system. The general sequence is:
 
 1. Install Erlang
-2. Get Riak from a package manager (ala apt-get or Homebrew), or build from source (the results end up under `rel/riak`, with the binaries under `bin`).
+2. Get Riak from a package manager (*a la* `apt-get` or Homebrew), or build from source (the results end up under `rel/riak`, with the binaries under `bin`).
 3. Run `riak start`
 
 Install Riak on four or five nodes---five being the recommended safe minimum for production. Fewer nodes are OK during software development and testing.
@@ -264,8 +260,8 @@ vnode_index_deletes : 0
 ```
 
 Adding JavaScript or Erlang files to Riak (as we did in the
-[developers chapter](#developers) ) are not automatically found by the nodes,
-but they instead must be informed by either `js-reload` or `erl-reload` command.
+[developers chapter](#developers) ) are not usable by the nodes until they are informed
+about them by the `js-reload` or `erl-reload` command.
 
 `riak-admin` also provides a little `test` command, so you can perform a read/write cycle
 to a node, which I find useful for testing a client's ability to connect, and the node's
@@ -521,7 +517,7 @@ with them on your own installation.
 
 ## How Riak is Built
 
-It's difficult to label Riak a single project. It's probably more correct to think of
+It's difficult to label Riak as a single project. It's probably more correct to think of
 Riak as the center of gravity for a whole system of projects. As we've covered
 before, Riak is built on Erlang, but that's not the whole story. It's more correct
 to say Riak is fundamentally Erlang, with some pluggable native C code components
@@ -541,8 +537,8 @@ and manage Riak's processes. These include vnodes, process messages, gossips, re
 management and more. The Erlang operating system process is found as a `beam.smp`
 command with many, many arguments.
 
-These arguments are configured through the `etc/vm.args` file. There are a couple
-setting you should pay special attention to.
+These arguments are configured through the `etc/vm.args` file. There are a few
+settings you should pay special attention to.
 
 ```bash
 $ ps -o command | grep beam

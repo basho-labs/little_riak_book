@@ -903,7 +903,7 @@ A value sized greater than 0 is required
 
 <pre><code class="bash">curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
   -H &quot;Content-Type:application/json&quot; \
-  -d &#39;[{&quot;item&quot;:&quot;kale&quot;,&quot;count&quot;:20}]&#39;
+  -d &#39;[{&quot;item&quot;:&quot;kale&quot;,&quot;count&quot;:10}]&#39;
 HTTP/1.1 200 OK
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA=
 Vary: Accept-Encoding
@@ -956,7 +956,7 @@ Content-Length: 54
 <pre><code class="bash">curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
   -H &quot;Content-Type:application/json&quot; \
   -H &quot;X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA=&quot;&quot; \
-  -d &#39;[{&quot;item&quot;:&quot;kale&quot;,&quot;count&quot;:20},{&quot;item&quot;:&quot;almonds&quot;,&quot;count&quot;:12}]&#39;
+  -d &#39;[{&quot;item&quot;:&quot;kale&quot;,&quot;count&quot;:10},{&quot;item&quot;:&quot;almonds&quot;,&quot;count&quot;:12}]&#39;
 HTTP/1.1 300 Multiple Choices
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmTwZTInMfKoG7LdoovCwA=
 Vary: Accept-Encoding
@@ -974,14 +974,14 @@ Link: &lt;/riak/cart&gt;; rel=&quot;up&quot;
 Etag: 62NRijQH3mRYPRybFneZaY
 Last-Modified: Thu, 01 Nov 2012 00:14:04 GMT
 
-[{&quot;item&quot;:&quot;kale&quot;,&quot;count&quot;:20},{&quot;item&quot;:&quot;milk&quot;,&quot;count&quot;:1}]
+[{&quot;item&quot;:&quot;kale&quot;,&quot;count&quot;:10},{&quot;item&quot;:&quot;milk&quot;,&quot;count&quot;:1}]
 --Ql3O0enxVdaMF3YlXFOdmO5bvrs
 Content-Type: application/json
 Link: &lt;/riak/cart&gt;; rel=&quot;up&quot;
 Etag: 7kfvPXisoVBfC43IiPKYNb
 Last-Modified: Thu, 01 Nov 2012 00:24:07 GMT
 
-[{&quot;item&quot;:&quot;kale&quot;,&quot;count&quot;:20},{&quot;item&quot;:&quot;almonds&quot;,&quot;count&quot;:12}]
+[{&quot;item&quot;:&quot;kale&quot;,&quot;count&quot;:10},{&quot;item&quot;:&quot;almonds&quot;,&quot;count&quot;:12}]
 --Ql3O0enxVdaMF3YlXFOdmO5bvrs--
 </code></pre>
 
@@ -1004,7 +1004,7 @@ Siblings:
 <p>What can you do with this tag? Namely, you request the value of a specific sibling by its <code>vtag</code>. To get the first sibling in the list (Mark&#39;s milk):</p>
 
 <pre><code class="bash">curl http://localhost:8098/riak/cart/fridge-97207?vtag=62NRijQH3mRYPRybFneZaY
-[{&quot;item&quot;:&quot;kale&quot;,&quot;count&quot;:20},{&quot;item&quot;:&quot;milk&quot;,&quot;count&quot;:1}]
+[{&quot;item&quot;:&quot;kale&quot;,&quot;count&quot;:10},{&quot;item&quot;:&quot;milk&quot;,&quot;count&quot;:1}]
 </code></pre>
 
 <p>If you want to retrieve all sibling data, tell Riak that you&#39;ll accept the multipart message by adding <code>-H &quot;Accept:multipart/mixed&quot;</code>.</p>
@@ -1034,7 +1034,7 @@ Riak not to resolve this conflict automatically... we want this flexibility.
 <pre><code class="bash">curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
   -H &quot;Content-Type:application/json&quot; \
   -H &quot;X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTInMfKoG7LdoovCwA=&quot; \
-  -d &#39;[{&quot;item&quot;:&quot;kale&quot;,&quot;count&quot;:20},{&quot;item&quot;:&quot;milk&quot;,&quot;count&quot;:1},{&quot;item&quot;:&quot;almonds&quot;,&quot;count&quot;:12}]&#39;
+  -d &#39;[{&quot;item&quot;:&quot;kale&quot;,&quot;count&quot;:10},{&quot;item&quot;:&quot;milk&quot;,&quot;count&quot;:1},{&quot;item&quot;:&quot;almonds&quot;,&quot;count&quot;:12}]&#39;
 </code></pre>
 
 <p>It&#39;s worth noting that you should never set both <code>allow_multi</code> and
@@ -1242,7 +1242,7 @@ using the HTTP header <code>Link</code>.</p>
 request, but with the suffix of <code>/[bucket],[riaktag],[keep]</code>. In other words,
 the <em>bucket</em> a possible link points to, the value of a <em>riaktag</em>, and whether to
 <em>keep</em> the results of this phase (only useful when chaining link walks). Each
-of these values can be set to a wildcard _, meaning you don&#39;t care the value.</p>
+of these values can be set to a wildcard _, meaning you don&#39;t care about the value.</p>
 
 <pre><code class="bash">curl http://localhost:8098/riak/people/mark/people,brother,_
 
@@ -1307,7 +1307,7 @@ you may wonder what the difference is between Riak Search and Yokozuna.</p>
 with a &quot;Solr like&quot; interface. Sadly, due to the complexity of building
 distributed search engines, it was woefully incomplete. Basho decided that,
 rather than attempting to maintain parity with Solr, a popular and featureful
-search engine in it&#39;s own right, it made more sense to integrate the two.
+search engine in its own right, it made more sense to integrate the two.
 </aside></p>
 
 <h3>Search (Yokozuna)</h3>
@@ -1424,10 +1424,9 @@ a cluster of your own, and what you should know.</p>
 <!-- What Riak is famous for is its simplicity to operate and stability at increasing scales. -->
 
 <p>In some ways, Riak is downright mundane in its role as the easiest NoSQL
-database to operate. Want more servers? Add them. A network cable gets cut at
-2am? Sleep until morning and fix it. But the fact that it generally hums without
-a hiccup, does not diminish the importance of understanding this integral part
-of your application stack.</p>
+database to operate. Want more servers? Add them. A network cable is cut at
+2am? Sleep until morning and fix it. Understanding this integral part of
+your application stack is still important, however, despite Riak&#39;s reliability.</p>
 
 <p>We&#39;ve covered the core concepts of Riak, and I&#39;ve provided a taste of how to go
 about using Riak, but there is more to Riak than that. There are details you
@@ -1506,7 +1505,7 @@ in the <code>etc/app.config</code> file (we&#39;ll dig deeper into this file lat
 <code>B@10.0.1.2</code>, <code>C@10.0.1.3</code>, and <code>D@10.0.1.4</code>.</p>
 
 <p>The following is Erlang, the language Riak was written in. Riak has the amazing, and probably
-dangerous  command <code>attach</code>, that attaches an Erlang console to a live Riak node, loaded with
+dangerous, <code>attach</code> command that attaches an Erlang console to a live Riak node, loaded with
 all of the Riak modules. So here we&#39;re getting a copy of the Ring from the locally running node.</p>
 
 <p>The <code>riak_core_ring:chash(Ring)</code> function extracts the total count of partitions (8), with an array
@@ -1565,29 +1564,28 @@ the <code>D@10.0.1.4</code> node&#39;s partition <code>5480631...</code> (I trun
 (confusingly also called a partition---the &quot;P&quot; in &quot;CAP&quot;), the remaining
 active nodes in the list become candidates to hold the data.</p>
 
-<p>So if the partition <code>7307508...</code> write could not connect to node <code>10.0.1.1</code>, 
+<p>So if the partition <code>7307508...</code> write could not connect to node <code>A@10.0.1.1</code>, 
 Riak would then attempt to write that partition <code>7307508...</code> to <code>C@10.0.1.3</code>
 as a fallback (it&#39;s the next node in the list preflist after the 3 primaries).</p>
 
-<p>Due to the structure of the Ring, how it distributes partitions, and how it
-handles failures, it&#39;s relatively simple to ensure that data is replicated to
-as many physical nodes as possible, while being able to remain operational if
-a node is unavailable, by simply trying the next available node in the list.</p>
+<p>The way that the Ring is structured allows Riak to ensure data is always
+written to the appropriate number of physical nodes, even in cases where one
+or more physical nodes are unavailable. It does this by simply trying the next
+available node in the preflist.</p>
 
 <h3>Hinted Handoff</h3>
 
-<p>When a node goes down data is replicated to a backup node. But this is not a solution, merely a
-band aid. So Riak will periodically trigger vnodes to check if they reside on the correct node
-(according to the Ring). If not, the managing process will attempt to connect with the home
-node, and if that node responds, will hand off any data it hold back to proper node.</p>
+<p>When a node goes down, data is replicated to a backup node. This is not a
+permanent solution, but merely a band-aid. Riak periodically triggers vnodes
+to check if they reside on the correct physical node. A managing process on
+each physical node is responsible for handing off these vnodes to the target
+node, if it is reachable.</p>
 
-<p>As long as the temporary node cannot connect to the primary, it will continue to access writes
-and reads on behalf of its incapacitated brethren.</p>
+<p>As long as the temporary node cannot connect to the primary, it will continue
+to access writes and reads on behalf of its incapacitated brethren.</p>
 
-<p>High availability is not the only purpose of hinted handoff. In the case where the ring changes,
-because a node was added or removed, data must be transferred to its new home. In this case,
-the same thing will happen: a vnode checks if it&#39;s in the correct place, and if not, attempts
-to transfer its data to its new home node.</p>
+<p>Hinted handoff not only helps Riak achieve high availability, it also facilitates
+data migration when physical nodes are added or removed from the Ring.</p>
 
 <h2 id="toc_20">Managing a Cluster</h2>
 
@@ -1601,7 +1599,7 @@ do, in fact, I didn&#39;t bother discussing it for most of this book.</p>
 
 <ol>
 <li>Install Erlang</li>
-<li>Get Riak from a package manager (ala apt-get or Homebrew), or build from source (the results end up under <code>rel/riak</code>, with the binaries under <code>bin</code>).</li>
+<li>Get Riak from a package manager (*a la* <code>apt-get</code> or Homebrew), or build from source (the results end up under <code>rel/riak</code>, with the binaries under <code>bin</code>).</li>
 <li>Run <code>riak start</code></li>
 </ol>
 
@@ -1677,8 +1675,8 @@ vnode_index_deletes : 0
 </code></pre>
 
 <p>Adding JavaScript or Erlang files to Riak (as we did in the
-<a href="#developers">developers chapter</a> ) are not automatically found by the nodes,
-but they instead must be informed by either <code>js-reload</code> or <code>erl-reload</code> command.</p>
+<a href="#developers">developers chapter</a> ) are not usable by the nodes until they are informed
+about them by the <code>js-reload</code> or <code>erl-reload</code> command.</p>
 
 <p><code>riak-admin</code> also provides a little <code>test</code> command, so you can perform a read/write cycle
 to a node, which I find useful for testing a client&#39;s ability to connect, and the node&#39;s
@@ -1924,7 +1922,7 @@ with them on your own installation.</p>
 
 <h2 id="toc_21">How Riak is Built</h2>
 
-<p>It&#39;s difficult to label Riak a single project. It&#39;s probably more correct to think of
+<p>It&#39;s difficult to label Riak as a single project. It&#39;s probably more correct to think of
 Riak as the center of gravity for a whole system of projects. As we&#39;ve covered
 before, Riak is built on Erlang, but that&#39;s not the whole story. It&#39;s more correct
 to say Riak is fundamentally Erlang, with some pluggable native C code components
@@ -1944,8 +1942,8 @@ and manage Riak&#39;s processes. These include vnodes, process messages, gossips
 management and more. The Erlang operating system process is found as a <code>beam.smp</code>
 command with many, many arguments.</p>
 
-<p>These arguments are configured through the <code>etc/vm.args</code> file. There are a couple
-setting you should pay special attention to.</p>
+<p>These arguments are configured through the <code>etc/vm.args</code> file. There are a few
+settings you should pay special attention to.</p>
 
 <pre><code class="bash">$ ps -o command | grep beam
 /riak/erts-5.9.1/bin/beam.smp \
