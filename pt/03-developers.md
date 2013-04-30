@@ -405,7 +405,7 @@ O Casey escreve `[{"item":"couve","contador":10}]`.
 ```bash
 curl -i -XPUT http://localhost:8098/riak/carrinho/fridge-97207?returnbody=true \
   -H "Content-Type:application/json" \
-  -d '[{"item":"couve","contador":20}]'
+  -d '[{"item":"couve","contador":10}]'
 HTTP/1.1 200 OK
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA=
 Vary: Accept-Encoding
@@ -428,7 +428,7 @@ O Mark escreve `[{"item":"couve","contador":10},{"item":"leite","contador":1}]`.
 curl -i -XPUT http://localhost:8098/riak/carrinho/fridge-97207?returnbody=true \
   -H "Content-Type:application/json" \
   -H "X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA="" \
-  -d '[{"item":"couve","contador":20},{"item":"leite","contador":1}]'
+  -d '[{"item":"couve","contador":10},{"item":"leite","contador":1}]'
 HTTP/1.1 200 OK
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmTwZTIlMfKcMaK7RRfFgA=
 Vary: Accept-Encoding
@@ -476,14 +476,14 @@ Link: </riak/carrinho>; rel="up"
 Etag: 62NRijQH3mRYPRybFneZaY
 Last-Modified: Thu, 01 Nov 2012 00:14:04 GMT
 
-[{"item":"couve","contador":20},{"item":"leite","contador":1}]
+[{"item":"couve","contador":10},{"item":"leite","contador":1}]
 --Ql3O0enxVdaMF3YlXFOdmO5bvrs
 Content-Type: application/json
 Link: </riak/carrinho>; rel="up"
 Etag: 7kfvPXisoVBfC43IiPKYNb
 Last-Modified: Thu, 01 Nov 2012 00:24:07 GMT
 
-[{"item":"couve","contador":20},{"item":"amêndoas","contador":12}]
+[{"item":"couve","contador":10},{"item":"amêndoas","contador":12}]
 --Ql3O0enxVdaMF3YlXFOdmO5bvrs--
 ```
 
@@ -508,7 +508,7 @@ O que se pode fazer com estes vtags? Pode solicitar um determinado sibling usand
 
 ```bash
 curl http://localhost:8098/riak/carrinho/fridge-97207?vtag=62NRijQH3mRYPRybFneZaY
-[{"item":"couve","contador":20},{"item":"leite","contador":1}]
+[{"item":"couve","contador":10},{"item":"leite","contador":1}]
 ```
 
 Se quiser recuperar todos os siblings, diga ao Riak que aceita uma mensagem com múltiplos valores adicionando `-H "Accept:multipart/mixed"`.
@@ -537,7 +537,7 @@ Leituras subsequentes receberão um único valor (fruto da nossa "fusão").
 curl -i -XPUT http://localhost:8098/riak/carrinho/fridge-97207?returnbody=true \
   -H "Content-Type:application/json" \
   -H "X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTInMfKoG7LdoovCwA=" \
-  -d '[{"item":"couve","contador":20},{"item":"leite","contador":1},{"item":"amêndoas","contador":12}]'
+  -d '[{"item":"couve","contador":10},{"item":"leite","contador":1},{"item":"amêndoas","contador":12}]'
 ```
 
 É de notar que nunca deve definir ambos `allow_multi` e `last_write_wins` como `true`. É contraditório ativar ambas as propriedades e podem causar efeitos indefinidos.
