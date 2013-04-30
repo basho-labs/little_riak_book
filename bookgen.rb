@@ -42,6 +42,7 @@ $figures = {
 def gen_pdf(languages)
   def figures(&block)
     begin
+      Dir::mkdir("#$root/figures")
       Dir["#$root/assets/*.pdf","#$root/assets/*.png","#$root/assets/decor/*.png"].each do |file|
         assetname = file.sub(/.*?\/assets\/(.*?)\.\w{3}$/, '\1')
         next unless figure = $figures[assetname]
@@ -52,6 +53,7 @@ def gen_pdf(languages)
       Dir["#$root/figures/*"].each do |file|
         rm(file)
       end
+      Dir::unlink("#$root/figures")
     end
   end
 
@@ -272,12 +274,12 @@ languages = [ARGV[0] || "en"]
 # generate the pdf
 gen_pdf(languages)
 
-# # generate the ebooks
-# languages.each do |language|
-#   formats = %w{mobi epub}
+# generate the ebooks
+languages.each do |language|
+  formats = %w{mobi epub}
 
-#   html_file = gen_html(language)
-#   formats.each do |format|
-#     gen_book(language, html_file, format)
-#   end
-# end
+  html_file = gen_html(language)
+  formats.each do |format|
+    gen_book(language, html_file, format)
+  end
+end
