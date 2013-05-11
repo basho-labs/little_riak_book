@@ -186,6 +186,7 @@ def gen_pdf(languages)
         File.read(file)
       end.join("\n\n")
 
+      ### Output a PDF suitable for a 8.5x11 PDF
       print "\tParsing markdown... "
       latex = IO.popen('pandoc -p --no-wrap -f markdown -t latex', 'w+') do |pipe|
         pipe.write(pre_pandoc(markdown, config))
@@ -197,6 +198,7 @@ def gen_pdf(languages)
       print "\tCreating riaklil-#{lang}.tex... "
       dir = "#$here/rendered"
       File.open("#{dir}/riaklil-#{lang}.tex", 'w') do |file|
+        isprint = false
         file.write(template.result(binding))
       end
       puts "done"
@@ -206,7 +208,41 @@ def gen_pdf(languages)
       # cd($root)
       3.times do |i|
         print "\t\tPass #{i + 1}... "
-        IO.popen("xelatex -output-directory=\"#{dir}\" \"#{dir}/riaklil-#{lang}.tex\" 2>&1") do |pipe|
+        IO.popen("xelatex -papersize=letter -output-directory=\"#{dir}\" \"#{dir}/riaklil-#{lang}.tex\" 2>&1") do |pipe|
+          unless $DEBUG
+            if $_[0..1]=='! '
+              puts "failed with:\n\t\t\t#{$_.strip}"
+              puts "\tConsider running this again with --debug."
+              abort = true
+            end while not abort and pipe.gets
+          else
+            STDERR.print while pipe.gets rescue abort = true
+          end
+        end
+        break if abort
+        puts "done"
+      end
+
+      ### Output a PDF suitable for a 6x9 print book 
+      print "\tParsing markdown for print... "
+      latex = IO.popen('pandoc -p --no-wrap -f markdown -t latex', 'w+') do |pipe|
+        pipe.write(pre_pandoc(markdown, config))
+        pipe.close_write
+        post_pandoc(pipe.read, config)
+      end
+      puts "done"
+
+      print "\tCreating riaklil-print-#{lang}.tex... "
+      dir = "#$here/rendered"
+      File.open("#{dir}/riaklil-print-#{lang}.tex", 'w') do |file|
+        isprint = true
+        file.write(template.result(binding))
+      end
+      puts "done"
+
+      3.times do |i|
+        print "\t\tPass #{i + 1}... "
+        IO.popen("xelatex -papersize=letter -output-directory=\"#{dir}\" \"#{dir}/riaklil-print-#{lang}.tex\" 2>&1") do |pipe|
           unless $DEBUG
             if $_[0..1]=='! '
               puts "failed with:\n\t\t\t#{$_.strip}"
@@ -274,12 +310,12 @@ languages = [ARGV[0] || "en"]
 # generate the pdf
 gen_pdf(languages)
 
-# generate the ebooks
-languages.each do |language|
-  formats = %w{mobi epub}
+# # generate the ebooks
+# languages.each do |language|
+#   formats = %w{mobi epub}
 
-  html_file = gen_html(language)
-  formats.each do |format|
-    gen_book(language, html_file, format)
-  end
-end
+#   html_file = gen_html(language)
+#   formats.each do |format|
+#     gen_book(language, html_file, format)
+#   end
+# end
