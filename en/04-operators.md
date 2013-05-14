@@ -197,7 +197,8 @@ Simply typing the `riak` command will give a usage list, although not a
 terribly descriptive one.
 
 ```bash
-Usage: riak {start|stop|restart|reboot|ping|console|attach|chkconfig|escript|version}
+Usage: riak {start|stop|restart|reboot|ping|console|\
+             attach|chkconfig|escript|version}
 ```
 
 Most of these commands are self explanatory, once you know what they mean. `start` and `stop` are simple enough. `restart` means to stop the running node and restart it inside of the same Erlang VM (virtual machine), while `reboot` will take down the Erlang VM and restart everything.
@@ -349,27 +350,27 @@ nodes in one stage.
 
 ```bash
 $ riak-admin cluster plan
-=============================== Staged Changes ================================
+=============================== Staged Changes ==============
 Action         Nodes(s)
--------------------------------------------------------------------------------
+-------------------------------------------------------------
 join           'B@10.0.1.2'
 join           'C@10.0.1.3'
--------------------------------------------------------------------------------
+-------------------------------------------------------------
 
 
 NOTE: Applying these changes will result in 1 cluster transition
 
-###############################################################################
+#############################################################
                          After cluster transition 1/1
-###############################################################################
+#############################################################
 
-================================= Membership ==================================
+================================= Membership ================
 Status     Ring    Pending    Node
--------------------------------------------------------------------------------
+-------------------------------------------------------------
 valid     100.0%     34.4%    'A@10.0.1.1'
 valid       0.0%     32.8%    'B@10.0.1.2'
 valid       0.0%     32.8%    'C@10.0.1.3'
--------------------------------------------------------------------------------
+-------------------------------------------------------------
 Valid:3 / Leaving:0 / Exiting:0 / Joining:0 / Down:0
 
 WARNING: Not all replicas will be on distinct nodes
@@ -423,13 +424,13 @@ For a more complete view of the status of the nodes in the ring, you can check o
 
 ```bash
 $ riak-admin member-status
-================================= Membership ==================================
+================================= Membership ================
 Status     Ring    Pending    Node
--------------------------------------------------------------------------------
+-------------------------------------------------------------
 valid      34.4%      --      'A@10.0.1.1'
 valid      32.8%      --      'B@10.0.1.2'
 valid      32.8%      --      'C@10.0.1.3'
--------------------------------------------------------------------------------
+-------------------------------------------------------------
 Valid:3 / Leaving:0 / Exiting:0 / Joining:0 / Down:0
 ```
 
@@ -439,12 +440,12 @@ node to show what it might look like.
 
 ```bash
 $ riak-admin ring-status
-================================== Claimant ===================================
+================================== Claimant =================
 Claimant:  'A@10.0.1.1'
 Status:     up
 Ring Ready: true
 
-============================== Ownership Handoff ==============================
+============================== Ownership Handoff ============
 Owner:      dev1 at 127.0.0.1
 Next Owner: dev2 at 127.0.0.1
 
@@ -453,7 +454,7 @@ Index: 182687704666362864775460604089535377456991567872
   Complete:   [riak_kv_vnode,riak_pipe_vnode]
 ...
 
-============================== Unreachable Nodes ==============================
+============================== Unreachable Nodes ============
 The following nodes are unreachable: ['C@10.0.1.3']
 
 WARNING: The cluster state will not converge until all nodes
@@ -574,8 +575,9 @@ My `vm.args` starts with this:
 ## Name of the riak node
 -name A@10.0.1.1
 
-## Cookie for distributed erlang.  All nodes in the same cluster
-## should use the same cookie or they will not be able to communicate.
+## Cookie for distributed erlang.  All nodes in the
+## same cluster should use the same cookie or they
+## will not be able to communicate.
 -setcookie testing123
 ```
 
@@ -614,16 +616,16 @@ in the cluster (`ring_creation_size`), and several port options.
     %% e.g. 16, 32, 64, 128, 256, 512 etc
     %{ring_creation_size, 64},
 
-    %% http is a list of IP addresses and TCP ports that the Riak
-    %% HTTP interface will bind.
+    %% http is a list of IP addresses and TCP ports that
+    %% the Riak HTTP interface will bind.
     {http, [ {"127.0.0.1", 8098 } ]},
 
-    %% https is a list of IP addresses and TCP ports that the Riak
-    %% HTTPS interface will bind.
+    %% https is a list of IP addresses and TCP ports that
+    %% the Riak HTTPS interface will bind.
     %{https, [{ "127.0.0.1", 8098 }]},
 
-    %% Default cert and key locations for https can be overridden
-    %% with the ssl config variable, for example:
+    %% Default cert and key locations for https can be
+    %% overridden with the ssl config variable, for example:
     %{ssl, [
     %       {certfile, "./etc/cert.pem"},
     %       {keyfile, "./etc/key.pem"}
@@ -669,26 +671,29 @@ backend settings, mapreduce, and JavaScript integration.
 ```bash
 %% Riak KV config
 {riak_kv, [
-  %% raw_name is the first part of all URLS used by the Riak raw HTTP
-  %% interface.  See riak_web.erl and raw_http_resource.erl for details.
+  %% raw_name is the first part of all URLS used by the
+  %% Riak raw HTTP interface. See riak_web.erl and
+  %% raw_http_resource.erl for details.
   {raw_name, "riak"},
 
-  %% http_url_encoding determines how Riak treats URL encoded
-  %% buckets, keys, and links over the REST API. When set to 'on'
-  %% Riak always decodes encoded values sent as URLs and Headers.
-  %% Otherwise, Riak defaults to compatibility mode where links
-  %% are decoded, but buckets and keys are not. The compatibility
-  %% mode will be removed in a future release.
+  %% http_url_encoding determines how Riak treats URL
+  %% encoded buckets, keys, and links over the REST API.
+  %% When set to 'on'. Riak always decodes encoded values
+  %% sent as URLs and Headers.
+  %% Otherwise, Riak defaults to compatibility mode where
+  %% links are decoded, but buckets and keys are not. The
+  %% compatibility mode will be removed in a future release.
   {http_url_encoding, on},
 
-  %% Switch to vnode-based vclocks rather than client ids.  This
-  %% significantly reduces the number of vclock entries.
+  %% Switch to vnode-based vclocks rather than client ids.
+  %% This significantly reduces the number of vclock entries.
   {vnode_vclocks, true},
 
-  %% This option toggles compatibility of keylisting with 1.0
-  %% and earlier versions.  Once a rolling upgrade to a version
-  %% > 1.0 is completed for a cluster, this should be set to true
-  %% for better control of memory usage during key listing operations
+  %% This option toggles compatibility of keylisting with
+  %% 1.0 and earlier versions.  Once a rolling upgrade to
+  %% a version > 1.0 is completed for a cluster, this
+  %% should be set to true for better control of memory
+  %% usage during key listing operations
   {listkeys_backpressure, true},
   ...
 ]},
@@ -706,7 +711,8 @@ path, you can also change HTTP from `/mapred` to a custom path.
 ```bash
 %% Riak KV config
 {riak_kv, [
-  %% mapred_name is URL used to submit map/reduce requests to Riak.
+  %% mapred_name is URL used to submit map/reduce requests
+  %% to Riak.
   {mapred_name, "mapred"},
 
   %% mapred_system indicates which version of the MapReduce
@@ -716,8 +722,8 @@ path, you can also change HTTP from `/mapred` to a custom path.
   {mapred_system, pipe},
 
   %% mapred_2i_pipe indicates whether secondary-index
-  %% MapReduce inputs are queued in parallel via their own
-  %% pipe ('true'), or serially via a helper process
+  %% MapReduce inputs are queued in parallel via their
+  %% own pipe ('true'), or serially via a helper process
   %% ('false' or undefined).  Set to 'false' or leave
   %% undefined during a rolling upgrade from 1.0.
   {mapred_2i_pipe, true},
@@ -733,9 +739,9 @@ path, you can also change HTTP from `/mapred` to a custom path.
   %% Only valid when mapred_system == legacy
   %% {mapper_batch_size, 5},
 
-  %% Number of objects held in the MapReduce cache. These will be
-  %% ejected when the cache runs out of room or the bucket/key
-  %% pair for that entry changes
+  %% Number of objects held in the MapReduce cache. These
+  %% will be ejected when the cache runs out of room or the
+  %% bucket/key pair for that entry changes
   %% Only valid when mapred_system == legacy
   %% {map_cache_size, 10000},
   ...
@@ -752,21 +758,23 @@ precommit hooks.
 %% Riak KV config
 {riak_kv, [
   ...
-  %% Each of the following entries control how many Javascript
-  %% virtual machines are available for executing map, reduce,
-  %% pre- and post-commit hook functions.
+  %% Each of the following entries control how many
+  %% Javascript virtual machines are available for
+  %% executing map, reduce, pre- and post-commit
+  %% hook functions.
   {map_js_vm_count, 8 },
   {reduce_js_vm_count, 6 },
   {hook_js_vm_count, 2 },
 
-  %% js_max_vm_mem is the maximum amount of memory, in megabytes,
-  %% allocated to the Javascript VMs. If unset, the default is
-  %% 8MB.
+  %% js_max_vm_mem is the maximum amount of memory,
+  %% in megabytes, allocated to the Javascript VMs.
+  %% If unset, the default is 8MB.
   {js_max_vm_mem, 8},
 
-  %% js_thread_stack is the maximum amount of thread stack, in megabyes,
-  %% allocate to the Javascript VMs. If unset, the default is 16MB.
-  %% NOTE: This is not the same as the C thread stack.
+  %% js_thread_stack is the maximum amount of thread
+  %% stack, in megabyes, allocate to the Javascript VMs.
+  %% If unset, the default is 16MB. NOTE: This is not
+  %% the same as the C thread stack.
   {js_thread_stack, 16},
 
   %% js_source_dir should point to a directory containing Javascript
@@ -847,8 +855,10 @@ the following options.
   {data_root, "./data/leveldb"},
   {write_buffer_size_min, 31457280 }, %% 30 MB in bytes
   {write_buffer_size_max, 62914560}, %% 60 MB in bytes
-  {max_open_files, 20}, %% Maximum number of files open at once per partition
-  {cache_size, 8388608} %% 8MB default cache size per-partition
+  %% Maximum number of files open at once per partition
+  {max_open_files, 20},
+  %% 8MB default cache size per-partition
+  {cache_size, 8388608}
 ]},
 ```
 
@@ -915,19 +925,20 @@ for presenting those interfaces, managing connections, providing entry points.
 ```bash
 %% Riak Client APIs config
 {riak_api, [
-  %% pb_backlog is the maximum length to which the queue of pending
-  %% connections may grow. If set, it must be an integer >= 0.
-  %% By default the value is 5. If you anticipate a huge number of
-  %% connections being initialised *simultaneously*, set this number
-  %% higher.
+  %% pb_backlog is the maximum length to which the queue
+  %% of pending connections may grow. If set, it must be
+  %% an integer >= 0. By default the value is 5. If you
+  %% anticipate a huge number of connections being
+  %% initialised *simultaneously*, set this number higher.
   %% {pb_backlog, 64},
 
-  %% pb_ip is the IP address that the Riak Protocol Buffers interface
-  %% will bind to.  If this is undefined, the interface will not run.
+  %% pb_ip is the IP address that the Riak Protocol 
+  %% Buffers interface will bind to.  If this is undefined,
+  %% the interface will not run.
   {pb_ip,   "127.0.0.1" },
 
-  %% pb_port is the TCP port that the Riak Protocol Buffers interface
-  %% will bind to
+  %% pb_port is the TCP port that the Riak Protocol 
+  %% Buffers interface will bind to
   {pb_port, 8087 }
 ]},
 ```
@@ -947,9 +958,9 @@ docs
 %% Lager Config
 {lager, [
   %% What handlers to install with what arguments
-  %% If you wish to disable rotation, you can either set the size to 0
-  %% and the rotation time to "", or instead specify a 2-tuple that only
-  %% consists of {Logfile, Level}.
+  %% If you wish to disable rotation, you can either set
+  %% the size to 0 and the rotation time to "", or instead
+  %% specify 2-tuple that only consists of {Logfile, Level}.
   {handlers, [
     {lager_file_backend, [ 
       {"./log/error.log", error, 10485760, "$D0", 5}, 
@@ -963,7 +974,8 @@ docs
   
   ...
   
-  %% Whether to redirect error_logger messages into lager - defaults to true
+  %% Whether to redirect error_logger messages into lager -
+  %% defaults to true
   {error_logger_redirect, true}
 ]},
 ```
@@ -1018,7 +1030,8 @@ downloaded and integrated with an installation.
 http://riaknostic.basho.com/
 
 ```bash
-$ wget https://github.com/basho/riaknostic/downloads/riaknostic-1.0.2.tar.gz -P /tmp
+$ export BASHO_GIT="https://github.com/basho"
+$ wget $BASHO_GIT/riaknostic/downloads/riaknostic-1.0.2.tar.gz -P /tmp
 $ cd /riak/lib
 $ tar xzvf /tmp/riaknostic-1.0.2.tar.gz
 ```
@@ -1043,8 +1056,9 @@ I'm a bit concerned that my disk might be slow, so I ran the `disk` diagnostic.
 
 ```bash
 $ riak-admin diag disk
-21:52:47.353 [notice] Data directory /riak/data/bitcask is not mounted with 'noatime'.\
-Please remount its disk with the 'noatime' flag to improve performance.
+21:52:47.353 [notice] Data directory /riak/data/bitcask is\
+not mounted with 'noatime'. Please remount its disk with the\
+'noatime' flag to improve performance.
 ```
 
 Riaknostic returns an analysis and suggestion for improvement. Had my disk
@@ -1074,12 +1088,12 @@ intermediate authority, add the `cacertfile` too.
 ```bash
 %% Riak Core config
 {riak_core, [
-    %% https is a list of IP addresses and TCP ports that the Riak
-    %% HTTPS interface will bind.
+    %% https is a list of IP addresses and TCP ports that
+    %% the Riak HTTPS interface will bind.
     {https, [{ "127.0.0.1", 8069 }]},
 
-    %% Default cert and key locations for https can be overridden
-    %% with the ssl config variable, for example:
+    %% Default cert and key locations for https can be
+    %% overridden with the ssl config variable, for example:
     {ssl, [
            {certfile, "./etc/cert.pem"},
            {keyfile, "./etc/key.pem"},
