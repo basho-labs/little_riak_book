@@ -169,14 +169,13 @@ available node in the preflist.
 
 <h3>Hinted Handoff</h3>
 
-When a node goes down, data is replicated to a backup node. This is not a
-permanent solution, but merely a band-aid. Riak periodically triggers vnodes
-to check if they reside on the correct physical node. A managing process on
-each physical node is responsible for handing off these vnodes to the target
-node, if it is reachable.
+When a node goes down, data is replicated to a backup node. This is
+not permanent; Riak will periodically examine whether each vnode
+resides on the correct physical node and hands them off to the proper
+node when possible.
 
 As long as the temporary node cannot connect to the primary, it will continue
-to access writes and reads on behalf of its incapacitated brethren.
+to accept write and read requests on behalf of its incapacitated brethren.
 
 Hinted handoff not only helps Riak achieve high availability, it also facilitates
 data migration when physical nodes are added or removed from the Ring.
@@ -281,7 +280,7 @@ ability to write.
 Finally, `top` is an analysis command checking the Erlang details of a particular node in
 real time. Different processes have different process ids (Pids), use varying amounts of memory,
 queue up so many messages at a time (MsgQ), and so on. This is useful for advanced diagnostics,
-and is especially useful if you know Erlang, or seek help from other users, the Riak team, or
+and is especially useful if you know Erlang or need help from other users, the Riak team, or
 Basho.
 
 ![Top](../assets/top.pdf)
@@ -390,10 +389,11 @@ Transfers resulting from cluster changes: 42
   21 transfers from 'A@10.0.1.1' to 'B@10.0.1.2'
 ```
 
-Making changes to cluster membership can be fairly resource intensive, so Riak defaults to
-only performing 2 transfers at a time. You can choose to alter this `transfer-limit` from
-the `riak-admin`, but bear in mind the higher the number, the greater normal operations
-will be impinged.
+Making changes to cluster membership can be fairly resource intensive,
+so Riak defaults to only performing 2 transfers at a time. You can
+choose to alter this `transfer-limit` using `riak-admin`, but bear in
+mind the higher the number, the greater normal operations will be
+impinged.
 
 At this point, if you find a mistake in the plan, you have the chance to `clear` it and try
 again. When you are ready, `commit` the cluster to enact the plan.
@@ -599,15 +599,16 @@ some optional SSL encryption settings.
 
 ![Tech Stack Core](../assets/riak-stack-core.svg)
 
-If any single component deserves the title of "Riak proper", it would be
-*Riak Core*. Core, and implementations are responsible for managing the
-partitioned keyspace, launching and supervising vnodes, preference list
-building, hinted handoff, and things that aren't related specifically to
-client interfaces, handling requests, or storage.
+If any single component deserves the title of "Riak proper", it would
+be *Riak Core*. Core shares responsibility with projects built atop it
+for managing the partitioned keyspace, launching and supervising
+vnodes, preference list building, hinted handoff, and things that
+aren't related specifically to client interfaces, handling requests,
+or storage.
 
-Riak Core, like any project, has some hard coded values (for example, how
+Riak Core, like any project, has some hard-coded values (for example, how
 protocol buffer messages are encoded in binary). However, many values
-can be modified to fit your use-case. The majority of this configuration
+can be modified to fit your use case. The majority of this configuration
 occurs under `app.config`. This file is Erlang code, so commented lines
 begin with a `%` character.
 
@@ -664,10 +665,10 @@ in the cluster (`ring_creation_size`), and several port options.
 
 ![Tech Stack KV](../assets/riak-stack-kv.svg)
 
-Riak KV is the Key/Value implementation of Riak Core. This is where the magic
-happens, such as handling requests, coordinating them for redundancy and read
-repair. It's what makes the Riak, as we know it, a KV store rather than something
-else like a Cassandra-style columnar data store.
+Riak KV is a key/value implementation of Riak Core. This is where the
+magic happens, such as handling requests and coordinating them for
+redundancy and read repair. It's what makes Riak a KV store rather
+than something else like a Cassandra-style columnar data store.
 
 <!-- When configuring KV, you may scratch your head about about when a setting belongs
 under `riak_kv` versus `riak_core`. For example, if `http` is under core, why
@@ -713,7 +714,7 @@ backend settings, mapreduce, and JavaScript integration.
 
 ![Tech Stack Pipe](../assets/riak-stack-pipe.svg)
 
-Riak pipe is an input/output messaging system that forms the basis of Riak's
+Riak Pipe is an input/output messaging system that forms the basis of Riak's
 mapreduce. This was not always the case, and MR used to be a dedicated
 implementation, hence some legacy options. Like the ability to alter the KV
 path, you can also change HTTP from `/mapred` to a custom path.
@@ -758,9 +759,9 @@ path, you can also change HTTP from `/mapred` to a custom path.
 ]}
 ```
 
-<h4>Javascript</h4>
+<h4>JavaScript</h4>
 
-Though not implemented in pipe, Riak KV's mapreduce implementation is the
+Though not implemented in Pipe, Riak KV's mapreduce implementation is the
 primary user of the Spidermonkey JavaScript engine---the second use is
 precommit hooks.
 
