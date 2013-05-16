@@ -2,14 +2,16 @@
 
 <!-- What Riak is famous for is its simplicity to operate and stability at increasing scales. -->
 
-In some ways, Riak is downright mundane in its role as the easiest NoSQL
-database to operate. Want more servers? Add them. A network cable is cut at
-2am? Sleep until morning and fix it. Understanding this integral part of
-your application stack is still important, however, despite Riak's reliability.
+In some ways, Riak is downright mundane in its role as the easiest
+NoSQL database to operate. Want more servers? Add them. A network
+cable is cut at 2am? Deal with it after a few more hours of
+sleep. Understanding this integral part of your application stack is
+still important, however, despite Riak's reliability.
 
-We've covered the core concepts of Riak, and I've provided a taste of how to go
-about using Riak, but there is more to Riak than that. There are details you
-should know if you plan on operating a Riak cluster of your own.
+We've covered the core concepts of Riak, and I've provided a taste of
+how to use it, but there is more to the database than that. There are
+details you should know if you plan on operating a Riak cluster of
+your own.
 
 ## Clusters
 
@@ -41,7 +43,7 @@ circular hash ring I just mentioned. This Ring (aka *Ring State*) is a
 data structure that gets passed around between nodes, so each knows the state
 of the entire cluster. Which node manages which vnodes? If a node gets a
 request for an object managed by other nodes, it consults the Ring and forwards
-on the request to the proper nodes. It's a local copy of a contract that all of
+the request to the proper nodes. It's a local copy of a contract that all of
 the nodes agree to follow.
 
 Obviously, this contract needs to stay in sync between all of the nodes. If a node is permanently taken
@@ -59,20 +61,28 @@ Ring size.
 <!-- Transfers will not start while a gossip is in progress. -->
 
 
-Currently, the ability to change the total number of vnodes of a cluster is not feasible. This
+Currently, it is not possible to change the number of vnodes of a cluster. This
 means that you *must have an idea of how large you want your cluster to grow in a single
 datacenter*. Although a basic install starts with 64 vnodes, if you plan any cluster larger
 than 6 or so servers you should increase vnodes to `256` or `1024`.
 
-The number of vnodes must be a power of 2 (eg. `64`, `256`, `1024`, etc).
+The number of vnodes must be a power of 2 (eg. `64`, `256`, `1024`).
+
+<aside class="sidebar"><h3>Dynamic Ring resizing</h3>
+
+A great deal of effort has been made toward being able to change the
+number of vnodes, so by the time you read this, it is entirely
+possible that Basho has released a version of Riak that allows it.
+
+</aside>
 
 <h3>How Replication Uses the Ring</h3>
 
-Even if you are not a coder, it's worth taking a look at this Ring example. It's also worth
+Even if you are not a programmer, it's worth taking a look at this Ring example. It's also worth
 remembering that partitions are managed by vnodes, and in conversation are sometimes interchanged,
-though I'll try and be more precise here.
+though I'll try to be more precise here.
 
-Let's start with Riak configured to have 8 vnodes/partitions, which are set via `ring_creation_size`
+Let's start with Riak configured to have 8 partitions, which are set via `ring_creation_size`
 in the `etc/app.config` file (we'll dig deeper into this file later).
 
 ```bash
@@ -82,12 +92,11 @@ in the `etc/app.config` file (we'll dig deeper into this file later).
                {ring_creation_size, 8},
 ```
 
-In this example, I have a total of four Riak nodes running on `A@10.0.1.1`,
-`B@10.0.1.2`, `C@10.0.1.3`, and `D@10.0.1.4`.
+In this example, I have a total of 4 Riak nodes running on `A@10.0.1.1`,
+`B@10.0.1.2`, `C@10.0.1.3`, and `D@10.0.1.4`, each with two partitions (and thus vnodes)
 
-The following is Erlang, the language Riak was written in. Riak has the amazing, and probably
-dangerous, `attach` command that attaches an Erlang console to a live Riak node, loaded with
-all of the Riak modules. So here we're getting a copy of the Ring from the locally running node.
+Riak has the amazing, and dangerous, `attach` command that attaches an Erlang console to a live Riak
+node, with access to all of the Riak modules.
 
 The `riak_core_ring:chash(Ring)` function extracts the total count of partitions (8), with an array
 of numbers representing the start of the partition, some fraction of the 2^160 number, and the node
@@ -148,9 +157,10 @@ If something has happened to one of those nodes, like a network split
 (confusingly also called a partition---the "P" in "CAP"), the remaining
 active nodes in the list become candidates to hold the data.
 
-So if the partition `7307508...` write could not connect to node `A@10.0.1.1`, 
-Riak would then attempt to write that partition `7307508...` to `C@10.0.1.3`
-as a fallback (it's the next node in the list preflist after the 3 primaries).
+So if the node coordinating the write could not reach node
+`A@10.0.1.1` to write to partition `7307508...`, it would then attempt
+to write that partition `7307508...` to `C@10.0.1.3` as a fallback
+(it's the next node in the list preflist after the 3 primaries).
 
 The way that the Ring is structured allows Riak to ensure data is always
 written to the appropriate number of physical nodes, even in cases where one
@@ -211,7 +221,7 @@ we looked into the details of the Ring---it attaches a console to the local
 running Riak server so you can execute Riak's Erlang code. `escript` is similar
 to `attach`, except you pass in script file of commands you wish to run automatically.
 
-<!-- 
+<!--
 If you want to build this on a single dev machine, here is a truncated guide.
 Download the Riak source code, then run the following:
 make deps
@@ -229,11 +239,11 @@ You should now have a 5 node cluster running locally.
 The `riak-admin` command is the meat operations, the tool you'll use most often. This is where you'll join nodes to the Ring, diagnose issues, check status, and trigger backups.
 
 ```bash
-Usage: riak-admin { cluster | join | leave | backup | restore | test | 
-                    reip | js-reload | erl-reload | wait-for-service | 
-                    ringready | transfers | force-remove | down | 
+Usage: riak-admin { cluster | join | leave | backup | restore | test |
+                    reip | js-reload | erl-reload | wait-for-service |
+                    ringready | transfers | force-remove | down |
                     cluster-info | member-status | ring-status | vnode-status |
-                    diag | status | transfer-limit | 
+                    diag | status | transfer-limit |
                     top [-interval N] [-sort reductions|memory|msg_q] [-lines N] }
 ```
 
@@ -478,33 +488,33 @@ Vnode status information
 
 VNode: 0
 Backend: riak_kv_bitcask_backend
-Status: 
+Status:
 [{key_count,0},{status,[]}]
 
 VNode: 91343852333181432387730302044767688728495783936
 Backend: riak_kv_bitcask_backend
-Status: 
+Status:
 [{key_count,0},{status,[]}]
 
 VNode: 182687704666362864775460604089535377456991567872
 Backend: riak_kv_bitcask_backend
-Status: 
+Status:
 [{key_count,0},{status,[]}]
 
 VNode: 274031556999544297163190906134303066185487351808
 Backend: riak_kv_bitcask_backend
-Status: 
+Status:
 [{key_count,0},{status,[]}]
 
 VNode: 365375409332725729550921208179070754913983135744
 Backend: riak_kv_bitcask_backend
-Status: 
+Status:
 [{key_count,0},{status,[]}]
 ...
 ```
 
 Some commands we did not cover are either deprecated in favor of their `cluster`
-equivalents (`join`, `leave`, `force-remove`, `replace`, `force-replace`), or 
+equivalents (`join`, `leave`, `force-remove`, `replace`, `force-replace`), or
 flagged for future removal `reip` (use `cluster replace`).
 
 The last command is `diag`, which requires a [Riaknostic](http://riaknostic.basho.com/)
@@ -836,7 +846,7 @@ Using a backend is simply a matter of setting the `storage_backend` with one of 
 Then, with the exception of Multi, each memory configuration is under one of
 the following options.
 
-```bash 
+```bash
 %% Memory Config
 {memory_backend, [
   {max_memory, 4096}, %% 4GB in megabytes
@@ -932,12 +942,12 @@ for presenting those interfaces, managing connections, providing entry points.
   %% initialised *simultaneously*, set this number higher.
   %% {pb_backlog, 64},
 
-  %% pb_ip is the IP address that the Riak Protocol 
+  %% pb_ip is the IP address that the Riak Protocol
   %% Buffers interface will bind to.  If this is undefined,
   %% the interface will not run.
   {pb_ip,   "127.0.0.1" },
 
-  %% pb_port is the TCP port that the Riak Protocol 
+  %% pb_port is the TCP port that the Riak Protocol
   %% Buffers interface will bind to
   {pb_port, 8087 }
 ]},
@@ -962,18 +972,18 @@ docs
   %% the size to 0 and the rotation time to "", or instead
   %% specify 2-tuple that only consists of {Logfile, Level}.
   {handlers, [
-    {lager_file_backend, [ 
-      {"./log/error.log", error, 10485760, "$D0", 5}, 
-      {"./log/console.log", info, 10485760, "$D0", 5} 
-    ]} 
+    {lager_file_backend, [
+      {"./log/error.log", error, 10485760, "$D0", 5},
+      {"./log/console.log", info, 10485760, "$D0", 5}
+    ]}
   ]},
 
   %% Whether to write a crash log, and where.
   %% Commented/omitted/undefined means no crash logger.
   {crash_log, "./log/crash.log"},
-  
+
   ...
-  
+
   %% Whether to redirect error_logger messages into lager -
   %% defaults to true
   {error_logger_redirect, true}
@@ -1077,7 +1087,7 @@ checkups and routing configuration changes.
 
 After [downloading](https://github.com/basho/riak_control) the project, is to alter
 some `app.config` settings, to both configure users, and to adhere to Control's
-security requirements (you're opening up your cluster to remote administration, 
+security requirements (you're opening up your cluster to remote administration,
 so it's pretty important to get this right).
 
 The first thing is to enable SSL and HTTPS in the `riak_core` section we saw above.
@@ -1155,7 +1165,7 @@ Vertically (by adding bigger hardware), and Horizontally (by adding more nodes).
 
 Once you comprehend the basics of Riak, it's a simple thing to manage. If this seems like
 a lot to swallow, take it from a long-time relational database guy (me), Riak is a
-comparatively simple construct, especially when you factor in the complexity of 
+comparatively simple construct, especially when you factor in the complexity of
 distributed systems in general. Riak manages much of the daily tasks an operator might
 do themselves manually, such as sharding by keys, adding/removing nodes, rebalancing data,
 supporting multiple backends, and allowing growth with unbalanced nodes.
