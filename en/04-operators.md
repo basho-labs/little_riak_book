@@ -1080,18 +1080,22 @@ The last tool we'll look at is the aptly named
 It's a web application for managing Riak clusters, watching, and drilling down
 into the details of your nodes to get a comprehensive view of the system. That's the
 idea, anyway. It's forever a work in progress, and it does not yet have parity with
-all of the command-line tools we've looked at. However, it's great to quick
+all of the command-line tools we've looked at. However, it's great for quick
 checkups and routing configuration changes.
 
-After [downloading](https://github.com/basho/riak_control) the project, is to alter
-some `app.config` settings, to both configure users, and to adhere to Control's
-security requirements (you're opening up your cluster to remote administration,
-so it's pretty important to get this right).
+Riak Control is shipped with Riak as of version 1.1, but turned off by
+default. You can enable it on one of your servers by editing
+`app.config` and restarting the node.
 
-The first thing is to enable SSL and HTTPS in the `riak_core` section we saw above.
-You can just uncomment these lines, set the `https` port to `8069`, and point
-the `certfile` and `keyfile` to your SSL certificate. If you have an
-intermediate authority, add the `cacertfile` too.
+If you're going to turn it on in production, do so carefully: you're
+opening up your cluster to remote administration using a password that
+sadly must be stored in plain text in the configuration file.
+
+The first step is to enable SSL and HTTPS in the `riak_core` section
+of `app.config`.  You can just uncomment these lines, set the `https`
+port to a reasonable value like `8069`, and point the `certfile` and
+`keyfile` to your SSL certificate. If you have an intermediate
+authority, add the `cacertfile` too.
 
 ```bash
 %% Riak Core config
