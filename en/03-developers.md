@@ -358,7 +358,10 @@ A value sized greater than 0 is required
 
 You can also write precommit functions in JavaScript, though Erlang code will execute faster.
 
-Post-commits are similar in form and function, but they react after a commit has occurred.
+Post-commits are similar in form and function, albeit executed after the write has been performed. Key differences:
+
+* The only language supported is Erlang.
+* The function's return value is ignored, thus it cannot cause a failure message to be sent to the client.
 
 ## Entropy
 
