@@ -35,29 +35,29 @@ This limitation changes how you model data. Relational normalization (organizing
     They are useful for data which can be stored in a highly structured schema, yet
     require flexible querying. Scaling a relational database (RDBMS) traditionally
     occurs by more powerful hardware (vertical growth).
-    
+
     Examples: *PostgreSQL*, *MySQL*, *Oracle*
   2. **Graph**. These exist for highly interconnected data. They excel in
     modeling complex relationships between nodes, and many implementations can
     handle multiple billions of nodes and relationships (or edges and vertices). I tend to include *triplestores* and *object DBs* to be specialized variants.
-    
+
     Examples: *Neo4j*, *Graphbase*, *InfiniteGraph*
   3. **Document**. Document datastores model hierarchical values called documents,
     represented in formats such as JSON or XML, and do not enforce a document schema.
     They generally support distributing across multiple servers (horizontal growth).
-    
+
     Examples: *CouchDB*, *MongoDB*, *Couchbase*
   4. **Columnar**. Popularized by [Google's BigTable](http://research.google.com/archive/bigtable.html),
     this form of database exists to scale across multiple servers, and groups similar data into
     column families. Column values can be individually versioned and managed, though families
     are defined in advance, not unlike RDBMS schemas.
-    
+
     Examples: *HBase*, *Cassandra*, *BigTable*
   5. **Key/Value**. Key/Value, or KV stores, are conceptually like hashtables,
     where values are stored and accessed by an immutable key. They range from
     single-server varieties like *Memcached* used for high-speed caching, to
     multi-datacenter distributed systems like *Riak Enterprise*.
-    
+
     Examples: *Riak*, *Redis*, *Voldemort*
 
 ### The Fallacies of Distributed Computing
@@ -134,7 +134,7 @@ Distributing data across several nodes is how Riak is able to remain highly avai
 
 <h3>Replication</h3>
 
-**Replication** is the act of duplicating data across multiple servers. Riak replicates by default. 
+**Replication** is the act of duplicating data across multiple servers. Riak replicates by default.
 
 The obvious benefit of replication is that if one node goes down, nodes that contain replicated data remain available to serve requests. In other words, the system remains *available*.
 
@@ -235,7 +235,7 @@ This tradeoff is known as Brewer's CAP theorem. CAP loosely states that you can 
 
 Strictly speaking, Riak has a tunable latency-availability tradeoff. The concession is similar to tuning A/C. To decrease read/write latency effectively improves the odds of consistency, by making requests unavailable in certain circumstances in the way a CP system would.
 
-Currently, no setting can make Riak truely CP in the general case, but features for a few strict cases are being researched.
+Currently, no setting can make Riak truly CP in the general case, but features for a few strict cases are being researched.
 </aside>
 
 <h3>N/R/W</h3>
