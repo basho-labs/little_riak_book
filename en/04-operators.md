@@ -918,12 +918,10 @@ $ curl -XPUT http://riaknode:8098/riak/session_data \
 
 ![Tech Stack API](../assets/riak-stack-api.svg)
 
-So far, all of the components we've seen have been inside the Riak house. The API
-is the front door. *In a perfect world*, the API would manage two implementations:
-Protocol buffers (PB), an efficient binary protocol framework designed by Google;
-and HTTP. It's worth noting that the HTTP client interface is not yet actually ported
-to the API project, leaving only PB for now---though I like to consider this as a
-mere implementation detail, to be unraveled from KV soon.
+So far, all of the components we've seen have been inside the Riak
+house. The API is the front door. *In a perfect world*, the API would
+manage two implementations: HTTP and Protocol buffers (PB), an
+efficient binary protocol framework designed by Google.
 
 But because they are not yet separated, only PB is configured under `riak_api`,
 while HTTP still remains under KV.
