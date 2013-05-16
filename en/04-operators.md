@@ -532,7 +532,7 @@ It's difficult to label Riak as a single project. It's probably more correct to 
 Riak as the center of gravity for a whole system of projects. As we've covered
 before, Riak is built on Erlang, but that's not the whole story. It's more correct
 to say Riak is fundamentally Erlang, with some pluggable native C code components
-(like leveldb), Java (Yokozuna), and even JavaScript (for Mapreduce or commit hooks).
+(like leveldb), Java (Yokozuna), and even JavaScript (for MapReduce or commit hooks).
 
 ![Tech Stack](../assets/riak-stack.svg)
 
@@ -677,7 +677,7 @@ is raw_name under riak. -->
 HTTP access to KV defaults to the `/riak` path as we've seen in examples
 throughout the book. This prefix is editable via `raw_name`. Many of the
 other KV settings are concerned with backward compatibility  modes,
-backend settings, mapreduce, and JavaScript integration.
+backend settings, MapReduce, and JavaScript integration.
 
 ```bash
 %% Riak KV config
@@ -715,7 +715,7 @@ backend settings, mapreduce, and JavaScript integration.
 ![Tech Stack Pipe](../assets/riak-stack-pipe.svg)
 
 Riak Pipe is an input/output messaging system that forms the basis of Riak's
-mapreduce. This was not always the case, and MR used to be a dedicated
+MapReduce. This was not always the case, and MR used to be a dedicated
 implementation, hence some legacy options. Like the ability to alter the KV
 path, you can also change HTTP from `/mapred` to a custom path.
 
@@ -761,7 +761,7 @@ path, you can also change HTTP from `/mapred` to a custom path.
 
 <h4>JavaScript</h4>
 
-Though not implemented in Pipe, Riak KV's mapreduce implementation is the
+Though not implemented in Pipe, Riak KV's MapReduce implementation is the
 primary user of the Spidermonkey JavaScript engine---the second use is
 precommit hooks.
 
@@ -1015,7 +1015,7 @@ this baggage can be confounding if you are just learning Riak---especially as
 you run across deprecated configuration, or documentation.
 
 - InnoDB - The MySQL engine once supported by Riak, but now deprecated.
-- Luke - The legacy mapreduce implementation replaced by Riak Pipe.
+- Luke - The legacy MapReduce implementation replaced by Riak Pipe.
 - Search - The search implementation replaced by Yokozuna.
 - Merge Index - The backend created for the legacy Riak Search.
 - SASL - A logging engine improved by Lager.
@@ -1155,7 +1155,7 @@ partition distribution, and other status. You can also add and configure and the
 
 ![Cluster View](../assets/control-cluster.png)
 
-There is more in line for Riak Control, like performing mapreduce queries, stats views,
+There is more in line for Riak Control, like performing MapReduce queries, stats views,
 graphs, and more coming down the pipe. It's not a universal toolkit quite yet,
 but it has a phenomenal start.
 

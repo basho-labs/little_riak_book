@@ -9,7 +9,7 @@ When you write to multiple vnodes, Riak will attempt to spread values to as many
 
 _We're going to hold off on the details of installing Riak at the moment. If you'd like to follow along, it's easy enough to get started by following the [install documentation](http://docs.basho.com/riak/latest/) on the website. If not, this is a perfect section to read while you sit on a train without internet connection._
 
-Developing with a Riak database is quite easy to do, once you understand some of the finer points. It is a key/value store, in the technical sense (you associate values with keys, and retrieve them using the same keys) but it offers so much more. You can embed write hooks to fire before or after a write, or index data for quick retrieval. Riak has a SOLR-based search, and lets you run mapreduce functions to extract and aggregate data across a huge cluster in a relatively short timespan. We'll show some of the bucket-specific settings developers can configure.
+Developing with a Riak database is quite easy to do, once you understand some of the finer points. It is a key/value store, in the technical sense (you associate values with keys, and retrieve them using the same keys) but it offers so much more. You can embed write hooks to fire before or after a write, or index data for quick retrieval. Riak has a SOLR-based search, and lets you run MapReduce functions to extract and aggregate data across a huge cluster in a relatively short timespan. We'll show some of the bucket-specific settings developers can configure.
 
 ## Lookup
 
@@ -617,7 +617,7 @@ to move the algorithms to where the data lives, than to transfer massive
 amounts of data to a single server to run a calculation.
 
 This method, popularized by Google, can be seen in a wide array of NoSQL
-databases. In Riak, you execute a mapreduce job on a single node, which
+databases. In Riak, you execute a MapReduce job on a single node, which
 then propagates to the other nodes. The results are mapped and reduced,
 then further reduced down to the calling node and returned.
 
@@ -635,7 +635,7 @@ curl -XPOST http://localhost:8098/riak/logs -d "ERROR: shopping cart cancelled"
 ```
 
 MapReduce jobs can be either Erlang or JavaScript code. This time we'll go the
-easy route and write JavaScript. You execute mapreduce by posting JSON to the
+easy route and write JavaScript. You execute MapReduce by posting JSON to the
 `/mapred` path.
 
 ```bash
@@ -671,7 +671,7 @@ always return an array. The map phase receives a single riak object, while
 the reduce phase received an array of values, either the result of multiple
 map function outputs, or of multiple reduce outputs. I probably cheated a
 bit by using JavaScript's `reduce` function to sum the values, but, well,
-welcome to the world of thinking in terms of mapreduce!
+welcome to the world of thinking in terms of MapReduce!
 
 <h4>Key Filters</h4>
 
@@ -729,8 +729,8 @@ EOF
 
 <h4>MR + 2i</h4>
 
-Another option when using mapreduce is to combine it with secondary indexes.
-You can pipe the results of a 2i query into a mapreducer, simply specify the
+Another option when using MapReduce is to combine it with secondary indexes.
+You can pipe the results of a 2i query into a MapReducer, simply specify the
 index you wish to use, and either a `key` for an index lookup, or `start` and
 `end` values for a ranged query.
 
@@ -801,9 +801,9 @@ curl http://localhost:8098/riak/people/mark/people,brother,0/_,_,_
 ```
 
 Now it may not seem so from what we've seen, but link walking is a specialized
-case of mapreduce.
+case of MapReduce.
 
-There is another phase of a mapreduce query called "link". Rather than
+There is another phase of a MapReduce query called "link". Rather than
 executing a function, however, it only requires the same configuration
 that you pass through the shortcut URL query.
 
@@ -819,7 +819,7 @@ that you pass through the shortcut URL query.
     ...
 ```
 
-As we've seen, mapreduce in Riak is a powerful way of pulling data out of an
+As we've seen, MapReduce in Riak is a powerful way of pulling data out of an
 otherwise straight key/value store. But we have one more method of finding
 data in Riak.
 
@@ -944,7 +944,7 @@ Riak is a distributed data store with several additions to improve upon the
 standard key-value lookups, like specifying replication values. Since values
 in Riak are opaque, many of these methods either: require custom code to
 extract and give meaning to values,
-such as *mapreduce*; or allow for header metadata to provide an added
+such as *MapReduce*; or allow for header metadata to provide an added
 descriptive dimension to the object, such as *secondary indexes*, *link
 walking*, or *search*.
 

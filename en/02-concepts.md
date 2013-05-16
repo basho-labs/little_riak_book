@@ -22,7 +22,7 @@ Modern databases can be loosely grouped into the ways they represent data. Altho
 
 <aside id="joins" class="sidebar"><h3>A Quick note on JOINs</h3>
 
-Unlike relational databases, but similar to document and columnar stores, objects cannot be joined by Riak. Client code is responsible for accessing values and merging them, or by other code such as mapreduce.
+Unlike relational databases, but similar to document and columnar stores, objects cannot be joined by Riak. Client code is responsible for accessing values and merging them, or by other code such as MapReduce.
 
 The ability to easily join data across physical servers is a tradeoff that separates single node databases like relational and graph, from *naturally partitionable* systems like document, columnar, and key/value stores.
 
@@ -347,4 +347,4 @@ Riak is designed to bestow a range of real-world benefits, but equally, to handl
 
 We'll cover other technical concepts as needed, including the gossip protocol, hinted handoff, or read-repair.
 
-Next we'll go through Riak as a user. We'll check out lookups, take advantage of write hooks, and alternative query options like secondary indexing, search, and mapreduce.
+Next we'll go through Riak as a user. We'll check out lookups, take advantage of write hooks, and alternative query options like secondary indexing, search, and MapReduce.
