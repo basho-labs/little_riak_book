@@ -499,7 +499,7 @@ Since there was a conflict between what Mark and Andy both set the fridge value 
 
 <h4>V-Tag</h4>
 
-Since we're using the HTTP client, Riak returned a `300 Multiple Choices` code with a `multipart/mixed` mime type. It's up to you to separate the results, however, you can request a specific value by it's Etag, also called a Vtag.
+Since we're using the HTTP client, Riak returned a `300 Multiple Choices` code with a `multipart/mixed` MIME type. It's up to you to separate the results, however, you can request a specific value by its Etag, also called a Vtag.
 
 Issuing a plain get on the `/cart/fridge-97207` key will also return the vtags of all siblings.
 
