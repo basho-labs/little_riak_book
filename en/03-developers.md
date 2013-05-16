@@ -2,7 +2,7 @@
 
 <aside class="sidebar"><h3>A Note on "Node"</h3>
 
-It's worth mentioning that I use the word "node" a lot. Realistically, this means a physical/virtual server, but really, the workhorses of Riak are vnodes. 
+It's worth mentioning that I use the word "node" a lot. Realistically, this means a physical/virtual server, but really, the workhorses of Riak are vnodes.
 
 When you write to multiple vnodes, Riak will attempt to spread values to as many physical servers as possible. However, this isn't guaranteed (for example, if you have 64 vnodes, and only 2 physical ones, setting replication to 5 is perfectly fine, if not a bit silly). You're safe conceptualizing nodes as Riak instances, and it's simpler than qualifying "vnode" all the time. If something applies specifically to a vnode, I'll mention it.
 </aside>
@@ -260,7 +260,7 @@ Here's an example with the above `n_val` of 5 ({A,B,C,D,E}). Your `w` is a quoru
 
 What's important is that your reads and writes *overlap*. As long as `r+w > n`, you'll be able to get the newest values. In other words, you'll have consistency.
 
-A `quorum` is an excellent default, since you're reading and writing from a balance of nodes. But if you have specific requirements, like a log that is often written to, but rarely read, you might find it make more sense to wait for a successful write from a single node, but read from all of them. This affords you an overlap 
+A `quorum` is an excellent default, since you're reading and writing from a balance of nodes. But if you have specific requirements, like a log that is often written to, but rarely read, you might find it make more sense to wait for a successful write from a single node, but read from all of them. This affords you an overlap
 
 ```bash
 curl -i -XPUT http://localhost:8098/riak/logs \
@@ -292,9 +292,9 @@ Finally `dw` represents the minimal *durable* writes necessary for success. For 
 
 <h5>Per Request</h5>
 
-It's worth noting that these values (except for `n_val`) are not actually bound to the bucket, but are instead are just defaults for the bucket. R/W values actually apply *per request*. This is an important distinction, since it allows us to override these values on an as-needed basis: `r`, `pr`, `w`, `pw`, `dw`, `rw`.
+It's worth noting that these values (except for `n_val`) can be overridden *per request*.
 
-Consider you have data that you find very important (say, credit card checkout), and want to help ensure it will be written to every node's disk before success. You could add `?dw=all` to the end of your write.
+Consider a scenario in which you have data that you find very important (say, credit card checkout), and want to help ensure it will be written to every relevant node's disk before success. You could add `?dw=all` to the end of your write.
 
 ```bash
 curl -i -XPUT http://localhost:8098/riak/cart/cart1?dw=all \
@@ -302,7 +302,7 @@ curl -i -XPUT http://localhost:8098/riak/cart/cart1?dw=all \
   -d '{"paid":true}'
 ```
 
-This is a consistent write, since if a single node is not available the write will fail. You wouldn't normally do this since you lose Riak's availability, but it's nice to have the option.
+If any of the nodes currently responsible for the data cannot complete the request (i.e., hand off the data to the storage backend), the client will receive a failure message. This doesn't mean that the write failed, necessarily: if two of three primary vnodes successfully wrote the value, it should be available for future requests. Thus trading availability for consistency by forcing a high `dw` or `pw` value can result in unexpected behavior.
 
 <h3>Hooks</h3>
 
@@ -570,7 +570,7 @@ index defined by a name pattern to be either integers or binary values.
 
 If your installation is configured to use 2i (shown in the next chapter),
 simply writing a value to Riak with the header will be indexes,
-provided it's prefixed by `X-Riak-Index-` and suffixed by `_int` for an 
+provided it's prefixed by `X-Riak-Index-` and suffixed by `_int` for an
 integer, or `_bin` for a string.
 
 ```bash
@@ -610,7 +610,7 @@ processing into two phases, map and reduce, that themselves are executed
 in parts. Map will be executed per object to convert/extract some value,
 then those mapped values will be reduced into some aggregate result. What
 do we gain from this structure? It's predicated on the idea that it's cheaper
-to move the algorithms to where the data lives, than to transfer massive 
+to move the algorithms to where the data lives, than to transfer massive
 amounts of data to a single server to run a calculation.
 
 This method, popularized by Google, can be seen in a wide array of NoSQL
@@ -744,7 +744,7 @@ index you wish to use, and either a `key` for an index lookup, or `start` and
 
 <h4>Link Walking</h4>
 
-Conceptually, a link is a one-way relationship from one object to another. 
+Conceptually, a link is a one-way relationship from one object to another.
 *Link walking* is a convenient query option for retrieving data when you start
 with the object linked from.
 
@@ -835,7 +835,7 @@ search engine in its own right, it made more sense to integrate the two.
 
 <h3>Search (Yokozuna)</h3>
 
-*Note: This is covering a project still under development. Changes are to be 
+*Note: This is covering a project still under development. Changes are to be
 expected, so please refer to the
 [project page](https://github.com/rzezeski/yokozuna) for the most recent
 information.*
