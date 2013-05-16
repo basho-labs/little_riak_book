@@ -954,11 +954,10 @@ for presenting those interfaces, managing connections, providing entry points.
 
 <h3>Other projects</h3>
 
-Other projects add depth to Riak, though aren't strictly necessary, in a
-functional sense. Two of these projects are Lager, Riak's chosen logging
-system; and Sysmon, a useful system monitor. They both have meaningful
-defaults, and are also have well documented settings at with their repository
-docs
+Other projects add depth to Riak but aren't strictly necessary. Two of
+these projects are lager, for logging, and riak_sysmon, for
+monitoring. Both have reasonable defaults and well-documented
+settings.
 
 * [https://github.com/basho/lager](https://github.com/basho/lager)
 * [https://github.com/basho/riak_sysmon](https://github.com/basho/riak_sysmon)
