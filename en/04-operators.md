@@ -207,7 +207,7 @@ terribly descriptive one.
 
 ```bash
 Usage: riak {start|stop|restart|reboot|ping|console|\
-             attach|chkconfig|escript|version}
+             attach|chkconfig|escript|version|getpid}
 ```
 
 Most of these commands are self explanatory, once you know what they mean. `start` and `stop` are simple enough. `restart` means to stop the running node and restart it inside of the same Erlang VM (virtual machine), while `reboot` will take down the Erlang VM and restart everything.
@@ -517,7 +517,7 @@ Some commands we did not cover are either deprecated in favor of their `cluster`
 equivalents (`join`, `leave`, `force-remove`, `replace`, `force-replace`), or
 flagged for future removal `reip` (use `cluster replace`).
 
-The last command is `diag`, which requires a [Riaknostic](http://riaknostic.basho.com/)
+The last command is `diag`, which leverages [Riaknostic](http://riaknostic.basho.com/)
 installation to give you more diagnostic tools.
 
 I know this was a lot to digest, and probably pretty dry. Walking through command
@@ -1028,23 +1028,13 @@ you run across deprecated configuration, or documentation.
 You may recall that we skipped the `diag` command while looking through
 `riak-admin`, but it's time to circle back around.
 
-Riaknostic is a diagnostic tool for Riak, meant to run a suite of checks against
-an installation to discover potential problems. If it finds any, it also
-recommends potential resolutions.
+[Riaknostic](http://http://riaknostic.basho.com/) is a diagnostic tool
+for Riak, meant to run a suite of checks against an installation to
+discover potential problems. If it finds any, it also recommends
+potential resolutions.
 
-Riaknostic exists separately from the core project, but is meant to be
-downloaded and integrated with an installation.
-
-http://riaknostic.basho.com/
-
-```bash
-$ export BASHO_GIT="https://github.com/basho"
-$ wget $BASHO_GIT/riaknostic/downloads/riaknostic-1.0.2.tar.gz -P /tmp
-$ cd /riak/lib
-$ tar xzvf /tmp/riaknostic-1.0.2.tar.gz
-```
-
-That's all you need to do to access your buffet of options.
+Riaknostic exists separately from the core project but as of Riak 1.3
+is included and installed with the standard database packages.
 
 ```bash
 $ riak-admin diag --list
