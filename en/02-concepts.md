@@ -60,21 +60,6 @@ This limitation changes how you model data. Relational normalization (organizing
 
     Examples: *Riak*, *Redis*, *Voldemort*
 
-### The Fallacies of Distributed Computing
-
-One detour in the land of distributed databases is to understand the condition that they are distributed systems replete with their benefits and handicaps. Engineers at Sun Microsystems created this list of [eight fallacies](http://www.rgoarchitects.com/Files/fallacies.pdf) that engineers new to distributed systems often fall victim to. They still apply today, even when operating a database like Riak.
-
-1. The network is reliable.
-2. Latency is zero.
-3. Bandwidth is infinite.
-4. The network is secure.
-5. Topology doesn't change.
-6. There is one administrator.
-7. Transport cost is zero.
-8. The network is homogeneous.
-
-I always recommend that initiates take the time to grok this list. Keeping these points ever present in your mind can save days of pain and expense in the future.
-
 ## Riak Components
 
 Riak is a Key/Value (KV) database, built from the ground up to safely distribute data across a cluster of physical servers, called nodes. A Riak cluster is also known as a ring (we'll cover why later).
@@ -180,7 +165,7 @@ Riak follows the *consistent hashing* technique, that conceptually maps objects 
 
 Riak partitions are not mapped alphabetically (as we used in the examples above), but instead, a partition marks a range of key hashes (SHA-1 function applied to a key). The maximum hash value is 2^160, and divided into some number of partitions---64 partitions by default (the Riak config setting is `ring_creation_size`).
 
-Let's walk through what all that means. If you have the key `favorite`, applying the SHA-1 algorithm would return `dc2b 258d 7221 3f8d 05d1 5973 a66d c156 847b 83f4` in hexadecimal. With 64 partitions, each partition has 1/64 of the 2^160 possible values, making the first partition range from 0 to 2^154-1, the second range is 2^154 to 2\*2^154-1, and so on, up to the last partition 63\*2^154-1 to 2^160-1.
+Let's walk through what all that means. If you have the key `favorite`, applying the SHA-1 algorithm would return `7501 7a36 ec07 fd4c 377a 0d2a 0114 00ab 193e 61db` in hexadecimal. With 64 partitions, each has 1/64 of the 2^160 possible values, making the first partition range from 0 to 2^154-1, the second range is 2^154 to 2\*2^154-1, and so on, up to the last partition 63\*2^154-1 to 2^160-1.
 
 <!-- V=lists:sum([lists:nth(X, H)*math:pow(16, X-1) || X <- lists:seq(1,string:len(H))]) / 64. -->
 <!-- V / 2.28359630832954E46. // 2.2.. is 2^154 -->
