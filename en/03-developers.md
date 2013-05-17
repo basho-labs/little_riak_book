@@ -4,7 +4,7 @@
 
 It's worth mentioning that I use the word "node" a lot. Realistically, this means a physical/virtual server, but really, the workhorses of Riak are vnodes.
 
-When you write to multiple vnodes, Riak will attempt to spread values to as many physical servers as possible. However, this isn't guaranteed (for example, if you have 64 vnodes, and only 2 physical ones, setting replication to 5 is perfectly fine, if not a bit silly). You're safe conceptualizing nodes as Riak instances, and it's simpler than qualifying "vnode" all the time. If something applies specifically to a vnode, I'll mention it.
+When you write to multiple vnodes, Riak will attempt to spread values to as many physical servers as possible. However, this isn't guaranteed (for example, if you have only 4 physical servers with the default `n_val` of 3, there will be a few cases where data is copied to the same server twice). You're safe conceptualizing nodes as Riak instances, and it's simpler than qualifying "vnode" all the time. If something applies specifically to a vnode, I'll mention it.
 </aside>
 
 _We're going to hold off on the details of installing Riak at the moment. If you'd like to follow along, it's easy enough to get started by following the [install documentation](http://docs.basho.com/riak/latest/) on the website. If not, this is a perfect section to read while you sit on a train without internet connection._
@@ -18,7 +18,7 @@ Developing with a Riak database is quite easy to do, once you understand some of
 Riak has official drivers for the following languages:
 Erlang, Java, PHP, Python, Ruby
 
-Including community supplied drivers, supported languages are even more numberous: C/C++, Clojure, Common Lisp, Dart, Go, Groovy, Haskell, JavaScript (jQuery and NodeJS), Lisp Flavored Erlang, .NET, Perl, PHP, Play, Racket, Scala, Smalltalk
+Including community-supplied drivers, supported languages are even more numerous: C/C++, Clojure, Common Lisp, Dart, Go, Groovy, Haskell, JavaScript (jQuery and NodeJS), Lisp Flavored Erlang, .NET, Perl, PHP, Play, Racket, Scala, Smalltalk.
 
 There are also dozens of other [project-specific addons](http://docs.basho.com/riak/latest/references/Community-Developed-Libraries-and-Projects/).
 </aside>
@@ -45,7 +45,7 @@ curl -XPUT 'http://localhost:8098/riak/food/favorite' \
   -d 'pizza'
 ```
 
-I threw a few curveballs in there. The `-d` flag denotes the next string will be the value. We've kept things simple with the string `pizza`, declaring it as text with the proceeding line `-H 'Content-Type:text/plain'`. This defined the HTTP MIME type of this value as plain text. We could have set any value at all, be it XML or JSON---even an image or a video. Any HTTP MIME type is valid content (which is anything, really).
+I threw a few curveballs in there. The `-d` flag denotes the next string will be the value. We've kept things simple with the string `pizza`, declaring it as text with the proceeding line `-H 'Content-Type:text/plain'`. This defines the HTTP MIME type of this value as plain text. We could have set any value at all, be it XML or JSON---even an image or a video. Riak does not care at all what data is uploaded, so long as the object size doesn't get much larger than 4MB (a soft limit but one that it is unwise to exceed).
 
 <h4>GET</h4>
 
@@ -122,7 +122,7 @@ Content-Type: application/json
 Content-Length: 0
 ```
 
-You can extract this key from the `Location` value. Other than not being pretty, this key is just as if you defined your own key via PUT.
+You can extract this key from the `Location` value. Other than not being pretty, this key is treated the same as if you defined your own key via PUT.
 
 <h5>Body</h5>
 
@@ -157,12 +157,12 @@ The final basic operation is deleting keys, which is similar to getting a value,
 curl -XDELETE 'http://localhost:8098/riak/people/DNQGJY0KtcHMirkidasA066yj5V'
 ```
 
-A deleted object in Riak is internally marked as deleted, by writing a marker known as a *tombstone*. Later, another process called a *reaper* clears the marked objects from the backend (possibly, the reaper may be turned off).
+A deleted object in Riak is internally marked as deleted, by writing a marker known as a *tombstone*. Unless configured otherwise, another process called a *reaper* will later finish deleting the marked objects.
 
 This detail isn't normally important, except to understand two things:
 
-1. In Riak, a *delete* is actually a *write*, and should be considered as such when calculating read/write ratios.
-2. Checking for the existence of a key is not enough to know if an object exists. You might be reading a key between a delete and a reap. You must read for tombstones.
+1. In Riak, a *delete* is actually a *read* and a *write*, and should be considered as such when calculating read/write ratios.
+2. Checking for the existence of a key is not enough to know if an object exists. You might be reading a key after it has been deleted, so you should check for tombstone metadata.
 
 <h4>Lists</h4>
 
@@ -258,7 +258,7 @@ A *quorum* is one more than half of all the total replicated nodes (`floor(N/2) 
 
 Here's an example with the above `n_val` of 5 ({A,B,C,D,E}). Your `w` is a quorum (which is `3`, or `floor(5/2)+1`), so a PUT may respond successfully after writing to {A,B,C} ({D,E} will eventually be replicated to). Immediately after, a read quorum may GET values from {C,D,E}. Even if D and E have older values, you have pulled a value from node C, meaning you will receive the most recent value.
 
-What's important is that your reads and writes *overlap*. As long as `r+w > n`, you'll be able to get the newest values. In other words, you'll have consistency.
+What's important is that your reads and writes *overlap*. As long as `r+w > n`, in the absence of *sloppy quorum* (below), you'll be able to get the newest values. In other words, you'll have a reasonable level of consistency.
 
 A `quorum` is an excellent default, since you're reading and writing from a balance of nodes. But if you have specific requirements, like a log that is often written to, but rarely read, you might find it make more sense to wait for a successful write from a single node, but read from all of them. This affords you an overlap
 
@@ -287,6 +287,8 @@ When she returns, you slide her drink over. This is known as *hinted handoff*, w
 Some other values you may have noticed in the bucket's `props` object are `pw`, `pr`, and `dw`.
 
 `pr` and `pw` ensure that many *primary* nodes are available before a read or write. Riak will read or write from backup nodes if one is unavailable, because of network partition or some other server outage. This `p` prefix will ensure that only the primary nodes are used, *primary* meaning the vnode which matches the bucket plus N successive vnodes.
+
+(We mentioned above that `r+w > n` provides a reasonable level of consistency, violated when sloppy quorums are involved.  `pr+pw > n` allows for a much stronger assertion of consistency, although there are always scenarios involving conflicting writes or significant disk failures where that too may not be enough.)
 
 Finally `dw` represents the minimal *durable* writes necessary for success. For a normal `w` write to count a write as successful, a vnode need only promise a write has started, with no guarantee that write has been written to disk, aka, is durable. The `dw` setting means the backend service (for example Bitcask) has agreed to write the value. Although a high `dw` value is slower than a high `w` value, there are cases where this extra enforcement is good to have, such as dealing with financial data.
 
@@ -549,14 +551,14 @@ curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
   -d '[{"item":"kale","count":10},{"item":"milk","count":1},{"item":"almonds","count":12}]'
 ```
 
-It's worth noting that you should never set both `allow_multi` and
-`last_write_wins` to `true`. It can cause undefined behavior.
+Setting both `allow_mult` and `last_write_wins` to `true` will result
+in undefined, unsupported behavior.
 
 <h3>Read Repair</h3>
 
-When a successful read happens, but not all replicas agree upon the value, this triggers a *read repair*. This means that Riak will update the replicas with the most recent value. This can happen when, either an object is not found (the vnode has no copy), of a vnode contains an older value (older means that it is an ancestor of the newest vector clock). Unlike `last_write_wins` or manual conflict resolution, read repair is (obviously, I hope, by the name) triggered by a read, rather than a write.
+When a successful read happens, but not all replicas agree upon the value, this triggers a *read repair*. This means that Riak will update the replicas with the most recent value. This can happen either when an object is not found (the vnode has no copy) or a vnode contains an older value (older means that it is an ancestor of the newest vector clock). Unlike `last_write_wins` or manual conflict resolution, read repair is (obviously, I hope, by the name) triggered by a read, rather than a write.
 
-If your nodes get out of sync (for example, if you increase the `n_val` on a bucket), you can force read repair by performing a read operation for all of that bucket's keys. They may return with `not found` the first time, then successive will pull the newest values.
+If your nodes get out of sync (for example, if you increase the `n_val` on a bucket), you can force read repair by performing a read operation for all of that bucket's keys. They may return with `not found` the first time, but later reads will pull the newest values.
 
 
 ## Querying
@@ -763,8 +765,8 @@ curl -XPUT http://localhost:8098/riak/people/mark \
 With a Link in place, now it's time to walk it. Walking is like a normal
 request, but with the suffix of `/[bucket],[riaktag],[keep]`. In other words,
 the *bucket* a possible link points to, the value of a *riaktag*, and whether to
-*keep* the results of this phase (only useful when chaining link walks). Each
-of these values can be set to a wildcard _, meaning you don't care about the value.
+*keep* the results of this phase (only useful when chaining link walks). Any combination
+of these query values can be set to a wildcard _, meaning you want to match anything.
 
 ```bash
 curl http://localhost:8098/riak/people/mark/people,brother,_
@@ -826,7 +828,7 @@ data in Riak.
 
 <aside class="sidebar"><h3>What Happened to Riak Search?</h3>
 
-If you have used Riak before, or have ahold of some older documentation,
+If you have used Riak before, or have some older documentation,
 you may wonder what the difference is between Riak Search and Yokozuna.
 
 In an attempt to make Riak Search user friendly, it was originally developed
