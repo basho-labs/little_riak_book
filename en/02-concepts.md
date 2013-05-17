@@ -35,29 +35,29 @@ This limitation changes how you model data. Relational normalization (organizing
     They are useful for data which can be stored in a highly structured schema, yet
     require flexible querying. Scaling a relational database (RDBMS) traditionally
     occurs by more powerful hardware (vertical growth).
-    
+
     Examples: *PostgreSQL*, *MySQL*, *Oracle*
   2. **Graph**. These exist for highly interconnected data. They excel in
     modeling complex relationships between nodes, and many implementations can
     handle multiple billions of nodes and relationships (or edges and vertices). I tend to include *triplestores* and *object DBs* to be specialized variants.
-    
+
     Examples: *Neo4j*, *Graphbase*, *InfiniteGraph*
   3. **Document**. Document datastores model hierarchical values called documents,
     represented in formats such as JSON or XML, and do not enforce a document schema.
     They generally support distributing across multiple servers (horizontal growth).
-    
+
     Examples: *CouchDB*, *MongoDB*, *Couchbase*
   4. **Columnar**. Popularized by [Google's BigTable](http://research.google.com/archive/bigtable.html),
     this form of database exists to scale across multiple servers, and groups similar data into
     column families. Column values can be individually versioned and managed, though families
     are defined in advance, not unlike RDBMS schemas.
-    
+
     Examples: *HBase*, *Cassandra*, *BigTable*
   5. **Key/Value**. Key/Value, or KV stores, are conceptually like hashtables,
     where values are stored and accessed by an immutable key. They range from
     single-server varieties like *Memcached* used for high-speed caching, to
     multi-datacenter distributed systems like *Riak Enterprise*.
-    
+
     Examples: *Riak*, *Redis*, *Voldemort*
 
 ### The Fallacies of Distributed Computing
@@ -134,7 +134,7 @@ Distributing data across several nodes is how Riak is able to remain highly avai
 
 <h3>Replication</h3>
 
-**Replication** is the act of duplicating data across multiple servers. Riak replicates by default. 
+**Replication** is the act of duplicating data across multiple servers. Riak replicates by default.
 
 The obvious benefit of replication is that if one node goes down, nodes that contain replicated data remain available to serve requests. In other words, the system remains *available*.
 
@@ -225,7 +225,7 @@ Classic RDBMS databases are *write consistent*. Once a write is confirmed, succe
 
 But when values are distributed, *consistency* might not be guaranteed. In the middle of an object's replication, two servers could have different results. When we update `favorite` to `cold pizza` on one node, another node might contain the older value `pizza`, because of a network connectivity problem. If you request the value of `favorite` on either side of a network partition, two different results could possibly be returned---the database is inconsistent.
 
-We do have an alternative choice. Rather than lose consistency, you could chose to lose *availability*. We may, for instance, decide to lock the entire database during a write, and simply refuse to serve requests until that value has been replicated to all relevant nodes. Clients have to wait while their results can be brought into a consistent state (ensuring all replicas will return the same value) or fail if the nodes have trouble communicating. For many high-traffic read/write use-cases, like an online shopping cart where even minor delays will cause people to just shop elsewhere, this is not an acceptable sacrifice.
+If consistency should not be compromised in a distributed database, we can choose to sacrifice *availability* instead. We may, for instance, decide to lock the entire database during a write, and simply refuse to serve requests until that value has been replicated to all relevant nodes. Clients have to wait while their results can be brought into a consistent state (ensuring all replicas will return the same value) or fail if the nodes have trouble communicating. For many high-traffic read/write use-cases, like an online shopping cart where even minor delays will cause people to just shop elsewhere, this is not an acceptable sacrifice.
 
 This tradeoff is known as Brewer's CAP theorem. CAP loosely states that you can have a C (consistent), A (available), or P (partition-tolerant) system, but you can only choose 2. Assuming your system is distributed, you're going to be partition-tolerant, meaning, that your network can tolerate packet loss. If a network partition occurs between nodes, your servers still run.
 
@@ -260,11 +260,13 @@ But you may not wish to wait for all nodes to be written to before returning. Yo
 
 In other words, setting `w=all` would help ensure your system was more likely to be consistent, at the expense of waiting longer, with a chance that your write would fail if fewer than 3 nodes were available (meaning, over half of your total servers are down).
 
+A failed write, however, is not necessarily a true failure. The client will receive an error message, but the write will typically still have succeeded on some number of nodes smaller than the *W* value, and will typically eventually be propagated to all of the nodes that should have it.
+
 <h4>R</h4>
 
-The same goes for reading. To ensure you have the most recent value, you can read from all 3 nodes containing objects (`r=all`). Even if only 1 of 3 nodes has the most recent value, we can compare all nodes against each other and choose the latest one, thus ensuring some consistency. Remember when I mentioned that RDBMS databases were *write consistent*? This is close to *read consistency*. Just like `w=all`, however, the read will fail unless 3 nodes are available to be read. Finally, if you only want to quickly read any value, `r=1` has low latency, and is likely consistent if `w=all`.
+Reading involves similar tradeoffs. To ensure you have the most recent value, you can read from all 3 nodes containing objects (`r=all`). Even if only 1 of 3 nodes has the most recent value, we can compare all nodes against each other and choose the latest one, thus ensuring some consistency. Remember when I mentioned that RDBMS databases were *write consistent*? This is close to *read consistency*. Just like `w=all`, however, the read will fail unless 3 nodes are available to be read. Finally, if you only want to quickly read any value, `r=1` has low latency, and is likely consistent if `w=all`.
 
-In general terms, the N/R/W values are Riak's way of allowing you to trade less consistency for more availability.
+In general terms, the N/R/W values are Riak's way of allowing you to trade lower consistency for more availability.
 
 <h3>Vector Clock</h3>
 
