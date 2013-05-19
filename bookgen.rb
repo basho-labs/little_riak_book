@@ -261,7 +261,7 @@ def gen_pdf(languages)
 end
 
 
-def gen_html(language)
+def gen_html(language, published=false)
   markdown_toc = Redcarpet::Markdown.new(Redcarpet::Render::HTML_TOC.new(),
     :fenced_code_blocks => true,
     :autolink => true,
@@ -283,8 +283,13 @@ def gen_html(language)
     html << markdown.render(chapter)
   end
   prelude = markdown.render(File.read("en/prelude.pmd"))
-  html = "<html><head><title>A Little Riak Book</title></head><meta charset=\"utf-8\"><body>#{prelude}#{toc}#{html}</body></html>"
-  full_file = "#{OUTPUT_DIR}/riaklil-#{language}.html"
+  if published
+    html = "<html><head><title>A Little Riak Book</title></head><meta charset=\"utf-8\"><link href=\"style.css\" media=\"screen\" rel=\"stylesheet\" type=\"text/css\"><link href='http://fonts.googleapis.com/css?family=Playfair+Display' rel='stylesheet' type='text/css'><body>#{prelude}#{toc}#{html}</body></html>"
+    full_file = "#{OUTPUT_DIR}/book-#{language}.html"
+  else
+    html = "<html><head><title>A Little Riak Book</title></head><meta charset=\"utf-8\"><body>#{prelude}#{toc}#{html}</body></html>"
+    full_file = "#{OUTPUT_DIR}/riaklil-#{language}.html"
+  end
   File.open(full_file, 'w') {|f| f.write(html) }
   full_file
 end
@@ -310,12 +315,14 @@ languages = [ARGV[0] || "en"]
 # generate the pdf
 gen_pdf(languages)
 
-# # generate the ebooks
-# languages.each do |language|
-#   formats = %w{mobi epub}
+# generate the ebooks
+languages.each do |language|
+  formats = %w{mobi epub}
 
-#   html_file = gen_html(language)
-#   formats.each do |format|
-#     gen_book(language, html_file, format)
-#   end
-# end
+  html_file = gen_html(language)
+  formats.each do |format|
+    gen_book(language, html_file, format)
+  end
+
+  gen_html(language, true)
+end

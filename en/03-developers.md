@@ -546,7 +546,8 @@ Successive reads will receive a single (merged) result.
 curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
   -H "Content-Type:application/json" \
   -H "X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTInMfKoG7LdoovCwA=" \
-  -d '[{"item":"kale","count":10},{"item":"milk","count":1},{"item":"almonds","count":12}]'
+  -d '[{"item":"kale","count":10},{"item":"milk","count":1},\
+      {"item":"almonds","count":12}]'
 ```
 
 It's worth noting that you should never set both `allow_multi` and
@@ -866,7 +867,8 @@ results to be in json format (`wt=json`), only return the Riak key
 (`fl=_yz_rk`).
 
 ```bash
-curl "http://localhost:8091/search/people?wt=json&omitHeader=true&fl=_yz_rk&q=zez*" | jsonpp
+curl "http://localhost:8091/search/people?wt=json&\
+      omitHeader=true&fl=_yz_rk&q=zez*" | jsonpp
 {
   "response": {
     "numFound": 1,
@@ -911,7 +913,8 @@ To search by the `nickname_s` tag, just prefix the query string followed
 by a colon.
 
 ```bash
-curl 'http://localhost:8091/search/people?wt=json&omitHeader=true&q=nickname_s:dizzy' | jsonpp
+curl 'http://localhost:8091/search/people?wt=json&\
+      omitHeader=true&q=nickname_s:dizzy' | jsonpp
 {
   "response": {
     "numFound": 1,
