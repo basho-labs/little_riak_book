@@ -3,7 +3,7 @@
 <aside class="sidebar"><h3>Uma nota sobre o "Nó"</h3>
 Vale a pena mencionar que eu uso a palavra "nó" muitas vezes. Realisticamente, isso significa um servidor físico/virtual, mas realmente, o Riak interessa-se por vnodes.
 
-Quando se escreve para múltiplos vnodes , o Riak vai tentar difundir os valores para o maior número de servidores físicos possível. No entanto, isto não é garantido (por exemplo, se você tem 64 vnodes, e apenas 2 nós físicos, definir a replicação para 5 é perfeitamente possível, mas fisicamente apenas 2 máquinas terão o valor e não 5). É mais fácil pensar nos vnodes como instâncias do Riak, e é mais simples do que estar sempre qualificar "vnode". Se alguma coisa se aplicar especificamente a um vnode, eu dizê-lo-ei explicitamente.
+Quando se escreve para múltiplos vnodes , o Riak vai tentar difundir os valores para o maior número de servidores físicos possível. No entanto, isto não é garantido (por exemplo, se só tiver 4 nós físicos com o `n_val` por defeito igual a 3, vai haver alguns casos onde os dados serão copiados duas vezes para o mesmo servidor). É mais fácil pensar nos vnodes como instâncias do Riak, e é mais simples do que estar sempre qualificar "vnode". Se alguma coisa se aplicar especificamente a um vnode, eu dizê-lo-ei explicitamente.
 
 </aside>
 
@@ -18,7 +18,7 @@ Administrar uma base de dados do Riak é muito fácil de fazer, uma vez entendid
 O Riak tem drivers oficiais para as seguintes linguagens:
 Erlang, Java, PHP, Python, Ruby
 
-Incluindo os drivers fornecidos pela comunidade, as linguagens suportadas são ainda mais numerosas: C/C++, Clojure, Common Lisp, Dart, Go, Groovy, Haskell, Javascript (jquery and nodejs), Lisp Flavored Erlang, .NET, Perl, PHP, Play, Racket, Scala, Smalltalk
+Incluindo os drivers fornecidos pela comunidade, as linguagens suportadas são ainda mais numerosas: C/C++, Clojure, Common Lisp, Dart, Go, Groovy, Haskell, JavaScript (jquery and nodejs), Lisp Flavored Erlang, .NET, Perl, PHP, Play, Racket, Scala, Smalltalk
 
 Há ainda dezenas de [funcionalidades específicas de variados projetos](http://docs.basho.com/riak/latest/references/Community-Developed-Libraries-and-Projects/).
 </aside>
@@ -43,7 +43,7 @@ curl -XPUT 'http://localhost:8098/riak/alimento/favorito' \
   -d 'pizza'
 ```
 
-Eu escrevi algumas coisas estranhas aqui. A flag `-d` denota que a próxima *string* vai ser o valor. Mantivemos as coisas simples com a string `pizza`, declarando-a como texto com o comando `-H 'Content-Type:text/plain'`. Isto definiu o tipo HTTP MIME deste valor como texto simples. Nós podíamos ter definido qualquer valor, seja XML ou JSON---até mesmo uma imagem ou um vídeo. Qualquer tipo HTTP MIME é conteúdo válido (o que na prática pode ser tudo o que se quiser).
+Eu escrevi algumas coisas estranhas aqui. A flag `-d` denota que a próxima *string* vai ser o valor. Mantivemos as coisas simples com a string `pizza`, declarando-a como texto com o comando `-H 'Content-Type:text/plain'`. Isto define o tipo HTTP MIME deste valor como texto simples. Nós podíamos ter definido qualquer valor, seja XML ou JSON---até mesmo uma imagem ou um vídeo. O Riak não se interessa pelo tipo de dados que armazena, desde que o tamanho de cada objeto não seja muito maior que 4MB (um limite teórico, mas recomendável que não se ultrapasse).
 
 <h4>GET (Leitura)</h4>
 
@@ -117,7 +117,7 @@ Content-Type: application/json
 Content-Length: 0
 ```
 
-Você pode extrair essa chave do valor do `Location`. Além de não ser bonita, esta chave é como se tivesse definido a sua própria chave via PUT.
+Você pode extrair essa chave do valor do `Location`. Tirando o facto de não ser bonita, esta chave é tratada exatamente como se tivesse definido a sua própria chave via PUT.
 
 <h5>Body (Corpo da mensagem)</h5>
 
@@ -150,12 +150,12 @@ A operação básica final é remoção de chaves, que é semelhante a obter um 
 ```bash
 curl -XDELETE 'http://localhost:8098/riak/pessoas/DNQGJY0KtcHMirkidasA066yj5V'
 ```
-Um objeto removido é marcado internamente no Riak como removido, ao escrever um marcador conhecido como *tombstone* (lápide). Mais tarde, um outro processo chamado de *reaper* (ceifador) limpa os objetos marcados no servidor (possivelmente, o *reaper* pode ser desligado).
+Um objeto removido é marcado internamente no Riak como removido, ao escrever um marcador conhecido como *tombstone* (lápide). Por defeito, outro processo chamado de *reaper* (ceifador) mais tarde irá eliminar os objetos marcados no servidor.
 
 Este detalhe normalmente não é importante, a não ser para entender duas coisas:
 
-1. No Riak, uma  *remoção* é na verdade, uma *escrita*, e deve ser considerado como tal.
-2. Verificar a existência de uma chave não é suficiente para saber se um objeto existe. Pode-se estar a ler uma chave que foi marcada como removida. Portanto, nas escritas deve-se verificar se o objeto é um *tombstone*.
+1. No Riak, uma  *remoção* é na verdade, uma *leitura* e uma *escrita*, e deve ser considerado como tal para calcular o rácio de leituras/escritas na sua aplicação.
+2. Verificar a existência de uma chave não é suficiente para saber se um objeto existe. Pode-se estar a ler uma chave que já foi marcada como removida, e portanto, deve verificar se o objeto é um *tombstone*.
 
 <h4>Listagens</h4>
 
@@ -250,7 +250,7 @@ Um *quorum* é um valor que seja mais de metade que todos os nós replicados (`f
 
 Aqui está um exemplo com o `n_val` de 5 ({A,B,C,D,E}). Se o seu `w` é um quorum (que é `3`, ou `floor(5/2)+1`), então um PUT pode responder com êxito depois de escrever, por exemplo, para {A,B,C} ({D,E} serão eventualmente replicados). Imediatamente depois, um quorum de leitura pode obter os valores de {C,D,E}. Mesmo D e E tenham valores mais antigos, você leu um valor a partir do nó C, ou seja, receberá o valor mais recente.
 
-O que é importante é que as suas leituras e escritas se *sobreponham*. Desde que `r+w > n`, você vai ser capaz de obter os valores mais recentes. Ou, em outras palavras, você terá coerência de dados.
+O que é importante é que as suas leituras e escritas se *sobreponham*. Desde que `r+w > n`, na ausência de *quorum desleixado* (ver em baixo), você vai ser capaz de obter os valores mais recentes. Ou, em outras palavras, você terá uma razoável coerência de dados.
 
 O `quorum` é um excelente valor por defeito, já que se está a ler a escrever para de um conjunto alargado de nós. Mas se tem exigências específicas, como um *log* que é muitas vezes escrito, mas raramente lido, você pode achar que faz mais sentido escrever para um único nó, mas ler a partir de todos. Isto proporciona-lhe a tal sobreposição.
 
@@ -280,14 +280,16 @@ Outros valores que você deve ter notado nas propriedades `props` do bucket são
 
 O `pr` e o `pw` garantem que determinado número de nós *primários* estejam disponíveis antes de ler ou escrever. O Riak lê ou escrever para nós de backup se um destes nós primários não estiver disponível, por causa de uma partição de rede ou alguma falha de outro servidor. Mas este prefixo `p` irá assegurar que apenas os nós primários serão utilizados, onde *primário* significa um dos N primeiros vnodes que guardam este bucket.
 
+(Nós mencionamos acima que `r+w > n` nos dá um nível razoável de coerência, menos quando temos quoruns desleixados. `pr+pw > n` fornece uma garantia bem mais forte de coerência, embora hajam sempre casos de escritas conflituosas ou de graves falhas no disco que prejudiquem a coerência.)
+
 Finalmente, o `dw` representa o número *mínimo* de escritas duráveis necessárias para o sucesso. Para um escrita com `w` ser bem sucedida, um vnode precisa apenas de prometer que a escrita já começou, sem garantias de que essa escrita foi mesmo efetuada em disco, ou seja, foi tornada durável. O `dw` significa que o serviço de back-end (o serviço que trata da interface com o disco, como por exemplo, o Bitcask) concordou em escrever o valor em disco. Apesar de um alto valor `dw` penalizar o desempenho, há casos em que essa garantia extra é valiosa, como no caso de dados financeiros.
 
 
 <h5>Por Pedido</h5>
 
-É importante notar que estes valores (exceto o`n_val`) não são estritamente os valores de um bucket, mas apenas valores por defeito para o mesmo. Os valores R/W são efetivamente aplicados *por pedido*. Esta é uma distinção importante, pois permite-nos ajustar esses valores à medida: `r`, `pr`, `w`, `pw`, `dw`, `rw`.
+É importante notar que estes valores (exceto o`n_val`) podem ser alterados *por pedido*.
 
-Imagine que tem dados muito valiosos (por exemplo, o pagamento com carrinhoão de crédito), e quero ajudar a garantir que vai ser gravado no disco de cada nó antes de ser considerado bem sucesso. Você podia adicionar `?dw=all` no fim da sua operação de escrita.
+Imagine um cenário onde você tem dados muito valiosos (por exemplo, o cartão de crédito numa compra online), e quer ajudar a garantir que vai ser gravado em disco nos nós relevantes, antes de ser considerado bem sucedido. Você podia adicionar `?dw=all` no fim da sua operação de escrita.
 
 ```bash
 curl -i -XPUT http://localhost:8098/riak/carrinho/carrinho1?dw=all \
@@ -295,7 +297,7 @@ curl -i -XPUT http://localhost:8098/riak/carrinho/carrinho1?dw=all \
   -d '{"pago":true}'
 ```
 
-Esta é uma escrita coerente, uma vez que basta um único nó não estar disponível para a escrita falhar. Normalmente não fará isso, já que assim perde a disponibilidade que o Riak lhe oferece, mas é bom ter essa a opção.
+Se qualquer um dos nós atualmente responsáveis pelos dados não conseguir concluir o pedido (i.e., não conseguiu armazenar os dados), o cliente receberá uma mensagem de falha. Isso não significa que a gravação falhou, necessariamente: se dois dos três principais vnodes escreveram com sucesso o valor, ele deve estar disponível para futuros pedidos. Portanto, aumentar a coerência em favor de menos disponibilidade ao aumentar os valores `dw` ou `pw`, pode levar a comportamentos inesperados.
 
 <h3>Hooks</h3>
 
@@ -349,9 +351,12 @@ curl -XPOST http://localhost:8098/riak/carrinho \
 É necessário um valor com tamanho maior que 0 bytes.
 ```
 
-Você também pode escrever funções de pré-commit em Javascript, embora o código Erlang execute mais rápido.
+Você também pode escrever funções de pré-commit em JavaScript, embora o código Erlang execute mais rápido.
 
-Os pós-commits são similares na forma e no uso, mas eles executam após uma confirmação de escrita (após o commit).
+Os pós-commits são similares na forma e no uso, embora sejam sejam executados após a escrita ter sucedido. Principais diferenças:
+
+* A única linguagem suportado é Erlang;
+* O valor devolvido pela função é ignorado, logo não pode causar que uma mensagem de falha seja devolvida ao cliente.
 
 
 ## Entropia
@@ -540,13 +545,13 @@ curl -i -XPUT http://localhost:8098/riak/carrinho/fridge-97207?returnbody=true \
   -d '[{"item":"couve","contador":10},{"item":"leite","contador":1},{"item":"amêndoas","contador":12}]'
 ```
 
-É de notar que nunca deve definir ambos `allow_multi` e `last_write_wins` como `true`. É contraditório ativar ambas as propriedades e podem causar efeitos indefinidos.
+Definir ambos `allow_multi` e `last_write_wins` como `true`, vai resultar em efeitos indefinidos e não suportados.
 
 <h3>Read Repair (Reparação na Leitura)</h3>
 
-Quando uma leitura bem sucedida acontece, mas nem todas as réplicas concordam sobre o valor, é executado o mecanismo chamado *read repair* (reparação na leitura). Isto significa que o Riak irá atualizar as réplicas "atrasadas" com o valor mais recente. Isso pode acontecer quando um objeto não é encontrado (o vnode não tem uma cópia), ou um vnode contém um antigo valor (antigo significa que o seu vclock é um antepassado vclock mais recente). Ao contrário do `last_write_wins` ou da resolução manual de conflitos, o read repair é (obviamente, pelo nome) desencadeado por uma leitura, em vez de uma escrita.
+Quando uma leitura bem sucedida acontece, mas nem todas as réplicas concordam sobre o valor, é executado o mecanismo chamado *read repair* (reparação na leitura). Isto significa que o Riak irá atualizar as réplicas "atrasadas" com o valor mais recente. Isso pode acontecer, ou quando um objeto não é encontrado (o vnode não tem uma cópia), ou quando um vnode contém um antigo valor (antigo significa que o seu vclock é um antepassado vclock mais recente). Ao contrário do `last_write_wins` ou da resolução manual de conflitos, o read repair é (obviamente, pelo nome) desencadeado por uma leitura, em vez de uma escrita.
 
-Se os seus nós ficarem dessincronizados (por exemplo, se se aumentar o `n_val` num bucket), você pode forçar o read repair através da realização de uma operação de leitura de todas as chaves do bucket. Pode devolver `not found` (não encontrado) da primeira vez, mas leituras seguintes devem funcionar.
+Se os seus nós ficarem dessincronizados (por exemplo, se se aumentar o `n_val` num bucket), você pode forçar o read repair através da realização de uma operação de leitura de todas as chaves do bucket. Pode devolver `not found` (não encontrado) da primeira vez, mas leituras posteriores vão devolver os valores mais recentes.
 
 
 ## Consultas
@@ -606,7 +611,7 @@ curl -XPOST http://localhost:8098/riak/logs -d "INFO: leite adicionado ao carrin
 curl -XPOST http://localhost:8098/riak/logs -d "ERROR: carrinho cancelado"
 ```
 
-Os trabalhos de MapReduce tanto podem ser código Erlang como Javascript. Desta vez, vamos usar Javascript. Executa-se um trabalho MapReduce ao enviar um JSON para o caminho `/mapred`.
+Os trabalhos de MapReduce tanto podem ser código Erlang como JavaScript. Desta vez, vamos usar JavaScript. Executa-se um trabalho MapReduce ao enviar um JSON para o caminho `/mapred`.
 
 
 ```bash
@@ -637,7 +642,7 @@ curl -XPOST http://localhost:8098/mapred \
 EOF
 ```
 
-O resultado deve ser `[2]`, como esperado. Ambas as fases do mapeamento e da redução devem devolver sempre uma matriz. A fase de mapeamento recebe um único objeto do riak, enquanto que a  fase redução recebe uma matriz de valores: o resultado de múltiplos resultados de mapeamentos, ou de múltiplos resultados de redução. Eu provavelmente fiz um pouco de batota ao usar a função `reduce` do Javascript para somar os valores, mas... Bem-vindos ao pensamento em termos de MapReduce!
+O resultado deve ser `[2]`, como esperado. Ambas as fases do mapeamento e da redução devem devolver sempre uma matriz. A fase de mapeamento recebe um único objeto do riak, enquanto que a  fase redução recebe uma matriz de valores: o resultado de múltiplos resultados de mapeamentos, ou de múltiplos resultados de redução. Eu provavelmente fiz um pouco de batota ao usar a função `reduce` do JavaScript para somar os valores, mas... Bem-vindos ao pensamento em termos de MapReduce!
 
 
 <h4>Filtros de Chave</h4>
@@ -686,7 +691,7 @@ EOF
 
 <h4>MR + 2i</h4>
 
-Outra opção quando se usa MapReduce é combiná-lo com índices secundários. Você pode enviar os resultados de uma *consulta 2i* num mapreducer, basta especificar o índice que deseja usar: `key`para usar uma chave na pesquisar no índice, ou `start` e `stop` para pesquisar numa gama de valores.
+Outra opção quando se usa MapReduce é combiná-lo com índices secundários. Você pode enviar os resultados de uma *consulta 2i* num MapReduce, basta especificar o índice que deseja usar: `key`para usar uma chave na pesquisar no índice, ou `start` e `stop` para pesquisar numa gama de valores.
 
 
 ```json
@@ -714,7 +719,7 @@ curl -XPUT http://localhost:8098/riak/pessoas/mark \
   -H "Content-Type:application/json" \
   -H "Link: </riak/pessoas/casey>; riaktag=\"irmao\""
 ```
-Com um link no lugar, agora é hora de percorre-lo. Percorrer links é como um pedido normal, mas com o sufixo `/[bucket],[riaktag],[keep]`. Ou seja, o *bucket* para onde um possível link aponta, o valor do *riaktag*, e se é para manter (*keep*) os resultados desta fase (útil apenas para encadear links). Cada um desses valores pode ser definido como um *wildcard* _, ou seja, não interessa o seu valor.
+Com um link no lugar, agora é hora de percorre-lo. Percorrer links é como um pedido normal, mas com o sufixo `/[bucket],[riaktag],[keep]`. Ou seja, o *bucket* para onde um possível link aponta, o valor do *riaktag*, e se é para manter (*keep*) os resultados desta fase (útil apenas para encadear links). Qualquer conbinação dos valores nas pesquisas pode ser definido como um *wildcard* _, ou seja, qualquer valor serve.
 
 ```bash
 curl http://localhost:8098/riak/pessoas/mark/pessoas,irmao,_

@@ -54,22 +54,6 @@ Esta limitação muda a forma como se modela os dados. A normalização relacion
 
     Exemplos: *Riak*, *Redis*, *Voldemort*
 
-
-### As Falácias dos Sistemas Distribuídos
-
-Vamos fazer um pequeno desvio da terra das bases de dados distribuídas, para entender que estes sistemas estão repletos de benefícios e desvantagens. Engenheiros da Sun Microsystems criaram esta lista de [oito falácias](http://www.rgoarchitects.com/Files/fallacies.pdf) que os engenheiros cometem frequentemente nos primeiros contactos com sistemas distribuídos. Eles ainda hoje se aplicam, mesmo no caso de uma base de dados como o Riak.
-
-1. A rede é confiável.
-2. A latência é zero.
-3. A largura de banda é infinita.
-4. A rede é segura.
-5. A topologia não muda.
-6. Há apenas um administrador.
-7. O custo de transporte é zero.
-8. A rede é homogénea.
-
-Eu recomendo vivamente aos iniciados a perder algum tempo a mentalizar esta lista. Manter estes pontos em mente pode evitar várias dores de cabeça e despesas no futuro.
-
 ## Componentes do Riak
 
 Riak é uma BD chave/valor(CV), construído a partir do zero para distribuir com segurança os dados num cluster de servidores físicos, chamados de nós. Um cluster do Riak também é conhecido como um anel (vamos falar sobre o porquê mais tarde).
@@ -105,7 +89,7 @@ Pedidos subsequentes por `5124` vão devolver agora `Claire`.
 
 Os endereços em "Riakville" são mais do que o número de casa, são também o endereço de uma rua. Podia haver outro 5124 noutra rua, então a forma de podemos garantir a exclusividade de um endereço é exigindo ambos, como por exemplo *5124, Rua Principal*.
 
-*Buckets* (ou baldes) são como estas ruas. Mas ao invés de mera geografia, você pode agrupar múltiplos chave/valor logicamente em [espaço de nomes](http://pt.wikipedia.org/wiki/Espa%C3%A7o_de_nomes_(ci%C3%AAncia_da_computa%C3%A7%C3%A3o\)) (como ruas residenciais, ruas industriais, ruas comerciais, etc), onde chaves idênticas não se sobrepõem entre baldes.
+*Buckets* (ou baldes) são análogos a nomes de ruas: eles fornecem [espaço de nomes](http://pt.wikipedia.org/wiki/Espa%C3%A7o_de_nomes_(ci%C3%AAncia_da_computa%C3%A7%C3%A3o\)) para que chaves com nomes iguais possam coexistir em buckets diferentes.
 
 Por exemplo, enquanto Alice pode viver na *5122, Rua Principal*, pode haver um posto de gasolina na *5122, Rua Boavista*.
 
@@ -169,11 +153,11 @@ A equipa do Riak sugere um mínimo de 5 nós para um cluster do Riak, a replicar
 
 <h3>O Anel</h3>
 
-O Riak usa a técnica de *hash consistente*, que conceptualmente mapeia objetos para um ponto de um círculo ou um anel. Tem a vantagem de reduzir a quantidade de dados que devem ser redistribuídos quando um nó vai abaixo.
+O Riak usa a técnica de *hash consistente*, para mapear objetos num círculo (o anel).
 
 As partições do Riak não são mapeadas alfabeticamente (como usamos nos exemplos acima), mas, em vez disso, uma partição mapeia uma gama de hashes de chaves (função SHA-1 aplicada a uma chave). O valor máximo da hash é de 2^160, e é dividido num número específico de partições---64 partições por defeito (a configuração no Riak é feita com `ring_creation_size`).
 
-Vamos ver o que tudo isto significa. Se você tem a chave `favorite`, aplicar o algoritmo SHA-1 daria `dc2b 258d 7221 3f8d 05d1 5973 a66d C156 847B 83f4` em hexadecimal. Com 64 partições, cada partição tem 1/64 dos 2^160 valores possíveis, sendo a gama da primeira partição de 0 a 2^154-1, o segundo intervalo é de 2^154 a 2\*2^154-1, e assim por diante, até à última partição de 63\*2^154-1 a 2^160-1.
+Vamos ver o que tudo isto significa. Se você tem a chave `favorite`, aplicar o algoritmo SHA-1 daria `7501 7a36 ec07 fd4c 377a 0d2a 0114 00ab 193e 61db` em hexadecimal. Com 64 partições, cada uma tem 1/64 dos 2^160 valores possíveis, sendo a gama da primeira partição de 0 a 2^154-1, o segundo intervalo é de 2^154 a 2\*2^154-1, e assim por diante, até à última partição de 63\*2^154-1 a 2^160-1.
 
 <!-- V=lists:sum([lists:nth(X, H)*math:pow(16, X-1) || X <- lists:seq(1,string:len(H))]) / 64. -->
 <!-- V / 2.28359630832954E46. // 2.2.. is 2^154 -->
@@ -184,7 +168,7 @@ Se visualizarmos as nossas 64 partições como um anel, `favorite` recai aqui:
 
 ![Anel do Riak](../assets/ring0.svg)
 
-Pode-se ter perguntado: "Ele não acabou de dizer que o Riak sugere um mínimo de 5 nós? Como podemos colocar 64 partições em 5 nós?". Na verdade, cada nó tem mais que uma partição, a que o Riak chama de *vnode*, ou *nó virtual*.
+Pode-se ter perguntado: "Ele não acabou de dizer que o Riak sugere um mínimo de 5 nós? Como podemos colocar 64 partições em 5 nós?". Na verdade, cada nó tem mais que uma partição, cada uma gerida por um *vnode*, ou *nó virtual*.
 
 Contamos à volta do anel de vnodes por ordem, atribuindo a cada nó o próximo vnode disponível, até que todos os vnodes sejam contabilizados. Logo a partição/vnode 1 seria do Nó A, o vnode 2 seria do Nó B, até ao vnode 5 que seria do Nó E. De seguida continuamos a dar ao Nó A o vnode 6, ao Nó B o vnode 7, e assim por diante, até que os vnodes estejam esgotados, resultando nesta lista:
 
@@ -218,7 +202,7 @@ As bases de dados RDBMS clássicas têm *escritas coerentes*. Quando uma escrita
 
 Mas quando os valores são distribuídos, a *coerência* não pode ser garantida. A meio da replicação de um objeto, dois servidores podem ter resultados diferentes. Quando atualizamos a chave `favorito` para `pizza fria` num nó, outro nó pode ter o valor mais antigo `pizza`, por causa de um problema de conectividade de rede. Se pedir o valor da chave `favorito` em cada lado da divisão da rede, dois resultados diferentes poderão ser devolvidos---a base de dados está incoerente.
 
-Mas há uma alternativa. Em vez de perder coerência, você podia escolher perder *disponibilidade*. Podemos, por exemplo, decidir bloquear a inteira base de dados durante uma escrita, e simplesmente rejeitar todos os pedidos até que o valor seja replicado para todos os nós relevantes. Os clientes têm de esperar enquanto os seus resultados obtêm um estado coerente (garantia que todas as réplicas retornam o mesmo valor) ou a escrita falha se os nós tiverem problemas de comunicação. Para muitos cenários de alto tráfego de leituras/escritas, como um carrinho de compras online, onde até mesmo pequenos atrasos fará com que as pessoas comprarem noutro lugar, isso não é um compromisso aceitável.
+Se a coerência não deve ser comprometida, podemos então sacrificar alguma disponibilidade. Podemos, por exemplo, decidir bloquear a inteira base de dados durante uma escrita, e simplesmente rejeitar todos os pedidos até que o valor seja replicado para todos os nós relevantes. Os clientes têm de esperar enquanto os seus resultados obtêm um estado coerente (garantia que todas as réplicas retornam o mesmo valor) ou a escrita falha se os nós tiverem problemas de comunicação. Para muitos cenários de alto tráfego de leituras/escritas, como um carrinho de compras online, onde até mesmo pequenos atrasos fará com que as pessoas comprarem noutro lugar, isso não é um compromisso aceitável.
 
 Este compromisso é conhecido como o teorema de CAP, de Eric Brewer. O teorema afirma informalmente que você pode ter um sistema com C (coerência), A (disponibilidade), ou P (tolerante a partições), mas só pode escolher dois dos três. Assumindo que o seu sistema é distribuído, você vai ser tolerante a partições, o que significa que a sua rede pode tolerar a perda de pacotes. Se uma partição de rede ocorre entre nós, os servidores continuam a correr.
 
@@ -255,20 +239,22 @@ Mas você pode não querer esperar para que todos os nós sejam escritos antes d
 
 Em outras palavras, definindo `w=all` ajudaria a garantir que seu sistema seria mais provável de ser coerente, à custa de esperar mais tempo, e com possibilidade das escritas falharem se menos de 3 nós estiverem disponíveis (ou seja, mais de metade dos seus servidores estão em baixo).
 
+No entanto, uma escrita que falhe não é necessariamente uma falha. O cliente pode receber uma mensagem de erro, mas a escrita tipicamente terá sucedido num número de nós menor que *W*. Inevitavelmente, esta escrita vai ser propagada para todas os nós que guardam essa chave.
+
 <h4>R</h4>
 
-O mesmo vale para as leituras. Para garantir que tem o valor mais recente, você pode ler todos os 3 nós que contêm o objeto (`r=all`). Mesmo que apenas 1 dos 3 nós tenha o valor mais recente, podemos comparar os valores de todos os nós uns com os outros e escolher o mais recente, garantindo assim alguma coerência. Lembre-se de quando mencionei que as bases de dados RDBMS têm *escritas coerentes*? Isto é quase como *leituras coerentes*. No entanto, assim como no caso do `w=all`, uma leitura irá falhar se menos de 3 nós estejam disponíveis para serem lidos. Finalmente, se você só quer ler rapidamente qualquer valor, a configuração `r=1` tem baixa latência, e provavelmente é coerente se `w=all`.
+As leituras têm os mesmo compromissos . Para garantir que tem o valor mais recente, você pode ler todos os 3 nós que contêm o objeto (`r=all`). Mesmo que apenas 1 dos 3 nós tenha o valor mais recente, podemos comparar os valores de todos os nós uns com os outros e escolher o mais recente, garantindo assim alguma coerência. Lembre-se de quando mencionei que as bases de dados RDBMS têm *escritas coerentes*? Isto é quase como *leituras coerentes*. No entanto, assim como no caso do `w=all`, uma leitura irá falhar se menos de 3 nós estejam disponíveis para serem lidos. Finalmente, se você só quer ler rapidamente qualquer valor, a configuração `r=1` tem baixa latência, e provavelmente é coerente se `w=all`.
 
 Em termos gerais, os valores N/R/W são a maneira do Riak permitir que você troque menor coerência para mais disponibilidade.
 
 
 <h3>Vetores Versão</h3>
 
-Se acompanhou até agora, eu só tenho mais um conceito novo para lhe explicar. Escrevi anteriormente que com `r=all`, nós podemos "comparar os valores de todos os nós uns com os outros e escolher o mais recente." Mas como realmente sabemos qual é o último valor, ou valor correto? É aqui que os Vetores Versão (ou vetores de relógio) entram em jogo.
+Se acompanhou até agora, eu só tenho mais um conceito novo para lhe explicar. Escrevi anteriormente que com `r=all`, nós podemos "comparar os valores de todos os nós uns com os outros e escolher o mais recente." Mas como realmente sabemos qual é o último valor, ou valor correto? É aqui que os *vetores versão* (ou *vclocks*) entram em jogo.
 
 Os vetores versão medem uma sequência de eventos, assim como um relógio normal. Mas uma vez que não se pode razoavelmente manter dezenas, centenas, ou milhares de servidores em sincronia (sem hardware realmente exótico, como relógios atómicos geo-sincronizados, ou capacidades quânticas), em vez disso, matemos a informação de quem e como modificou um objeto. É tão fácil como manter um vetor (ou array) dos clientes que alteraram um objeto e em que ordem. Dessa forma, podemos dizer se um objeto está a ser atualizado ou se existe um conflito na escrita.
 
-Vamos usar o nosso exemplo `favorito` novamente, mas desta vez temos 3 pessoas a tentar chegar a um consenso sobre a sua comida favorita: Aaron, Britney, e Carrie. Vamos acompanhar o valor que cada um escolheu, e o seu respetivo vetor versão, ou *vclock*.
+Vamos usar o nosso exemplo `favorito` novamente, mas desta vez temos 3 pessoas a tentar chegar a um consenso sobre a sua comida favorita: Aaron, Britney, e Carrie. Vamos acompanhar o valor que cada um escolheu e o seu respetivo vclock.
 
 Quando o Aaron define o objeto `favorito` para `pizza`, um hipotético vetor versão poderia conter o seu nome e o número de atualizações por ele realizadas.
 
@@ -338,6 +324,6 @@ Desconfie se alguém promete transações ACID distribuídas e altamente dispon�
 
 O Riak é projetado para conferir uma série de benefícios no mundo real, mas igualmente, para lidar com as consequências de deter tal poder. Hashes consistentes e vnodes são uma solução elegante para escalar horizontalmente entre servidores. N/R/W permite ao utilizador brincar com o teorema CAP e ajustá-lo de acordo com o seu caso. E os vetores versão permitem dar mais um passo para atingir a verdadeira coerência, permitindo gerir os conflitos que ocorrerem quando existe elevada carga nos servidores.
 
-Nós vamos cobrir outros conceitos técnicos, conforme necessário, como o protocolo de *gossip*, o *hinted handoff* ou o *read-repair* (leitura-reparo).
+Nós vamos cobrir outros conceitos técnicos, conforme necessário, como o protocolo de *gossip*, o *hinted handoff* e o *read-repair* (leitura-reparação).
 
-De seguida, vamos ver o Riak do ponto de vista do utilizador. Vamos ver pesquisas, tirar proveito de *hooks* de escritas e opções alternativas de consulta como indexação secundária, pesquisa e MapReduce.
+De seguida, vamos ver o Riak do ponto de vista do utilizador. Vamos ver pesquisas, tirar proveito de *hooks* de escritas e examinar as opções alternativas de consulta como indexação secundária, pesquisa e MapReduce.
