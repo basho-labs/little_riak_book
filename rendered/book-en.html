@@ -1,6 +1,6 @@
-<html><head><title>A Little Riak Book</title></head><meta charset="utf-8"><body><h1 id="toc_25">A Little Riak Book</h1>
+<html><head><title>A Little Riak Book</title></head><meta charset="utf-8"><link href="style.css" media="screen" rel="stylesheet" type="text/css"><link href='http://fonts.googleapis.com/css?family=Playfair+Display' rel='stylesheet' type='text/css'><body><h1 class="title">A Little Riak Book</h1>
 
-<h3 id="toc_26"><em>Eric Redmond</em></h3>
+<h3 class="author"><em>Eric Redmond</em></h3>
 <ul>
 <li>
 <a href="#toc_0">Introduction</a>
@@ -1011,7 +1011,8 @@ Riak not to resolve this conflict automatically... we want this flexibility.
 <pre><code class="bash">curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
   -H &quot;Content-Type:application/json&quot; \
   -H &quot;X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTInMfKoG7LdoovCwA=&quot; \
-  -d &#39;[{&quot;item&quot;:&quot;kale&quot;,&quot;count&quot;:10},{&quot;item&quot;:&quot;milk&quot;,&quot;count&quot;:1},{&quot;item&quot;:&quot;almonds&quot;,&quot;count&quot;:12}]&#39;
+  -d &#39;[{&quot;item&quot;:&quot;kale&quot;,&quot;count&quot;:10},{&quot;item&quot;:&quot;milk&quot;,&quot;count&quot;:1},\
+      {&quot;item&quot;:&quot;almonds&quot;,&quot;count&quot;:12}]&#39;
 </code></pre>
 
 <p>It&#39;s worth noting that you should never set both <code>allow_multi</code> and
@@ -1315,7 +1316,8 @@ query for documents that contain a word starting with <code>zez</code>, request 
 results to be in json format (<code>wt=json</code>), only return the Riak key
 (<code>fl=_yz_rk</code>).</p>
 
-<pre><code class="bash">curl &quot;http://localhost:8091/search/people?wt=json&amp;omitHeader=true&amp;fl=_yz_rk&amp;q=zez*&quot; | jsonpp
+<pre><code class="bash">curl &quot;http://localhost:8091/search/people?wt=json&amp;\
+      omitHeader=true&amp;fl=_yz_rk&amp;q=zez*&quot; | jsonpp
 {
   &quot;response&quot;: {
     &quot;numFound&quot;: 1,
@@ -1357,7 +1359,8 @@ a special header named <code>X-Riak-Meta-yz-tags</code>.</p>
 <p>To search by the <code>nickname_s</code> tag, just prefix the query string followed
 by a colon.</p>
 
-<pre><code class="bash">curl &#39;http://localhost:8091/search/people?wt=json&amp;omitHeader=true&amp;q=nickname_s:dizzy&#39; | jsonpp
+<pre><code class="bash">curl &#39;http://localhost:8091/search/people?wt=json&amp;\
+      omitHeader=true&amp;q=nickname_s:dizzy&#39; | jsonpp
 {
   &quot;response&quot;: {
     &quot;numFound&quot;: 1,
@@ -1519,7 +1522,8 @@ number we named <code>DocIdx</code> (document index).</p>
 <p>Just to illustrate that Erlang binary value is a real number, the next line makes it a more
 readable format, similar to the ring partition numbers.</p>
 
-<pre><code>(A@10.0.1.1)3&gt; DocIdx = riak_core_util:chash_key({&lt;&lt;&quot;food&quot;&gt;&gt;, &lt;&lt;&quot;favorite&quot;&gt;&gt;}).
+<pre><code>(A@10.0.1.1)3&gt; DocIdx = 
+(A@10.0.1.1)3&gt; riak_core_util:chash_key({&lt;&lt;&quot;food&quot;&gt;&gt;,&lt;&lt;&quot;favorite&quot;&gt;&gt;}).
 &lt;&lt;80,250,1,193,88,87,95,235,103,144,152,2,21,102,201,9,156,102,128,3&gt;&gt;
 
 (A@10.0.1.1)4&gt; &lt;&lt;I:160/integer&gt;&gt; = DocIdx. I.
@@ -1634,9 +1638,10 @@ You should now have a 5 node cluster running locally.
 <pre><code class="bash">Usage: riak-admin { cluster | join | leave | backup | restore | test |
                     reip | js-reload | erl-reload | wait-for-service |
                     ringready | transfers | force-remove | down |
-                    cluster-info | member-status | ring-status | vnode-status |
-                    diag | status | transfer-limit |
-                    top [-interval N] [-sort reductions|memory|msg_q] [-lines N] }
+                    cluster-info | member-status | ring-status | 
+                    vnode-status | diag | status | transfer-limit |
+                    top [-interval N] [-sort reductions|memory|msg_q]
+                    [-lines N] }
 </code></pre>
 
 <p>Many of these commands are deprecated, and many don&#39;t make sense without a

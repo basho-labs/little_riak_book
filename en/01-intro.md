@@ -32,7 +32,7 @@ It's a hard number to pin down, because Big Data is a personal figure. What's bi
 
 <blockquote>Big Data are high-volume, high-velocity, and/or high-variety information assets that require new forms of processing to enable enhanced decision making, insight discovery and process optimization.</blockquote></aside>
 
-### Always Bet on Riak
+<h3>Always Bet on Riak</h3>
 
 The sweet spot of Riak is high-volume (data that's available to read and write when you need it), high-velocity (easily responds to growth), and high-variety information assets (you can store any type of data as a value).
 

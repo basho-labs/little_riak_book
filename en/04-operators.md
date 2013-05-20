@@ -125,7 +125,8 @@ Just to illustrate that Erlang binary value is a real number, the next line make
 readable format, similar to the ring partition numbers.
 
 ```
-(A@10.0.1.1)3> DocIdx = riak_core_util:chash_key({<<"food">>, <<"favorite">>}).
+(A@10.0.1.1)3> DocIdx = 
+(A@10.0.1.1)3> riak_core_util:chash_key({<<"food">>,<<"favorite">>}).
 <<80,250,1,193,88,87,95,235,103,144,152,2,21,102,201,9,156,102,128,3>>
 
 (A@10.0.1.1)4> <<I:160/integer>> = DocIdx. I.
@@ -241,9 +242,10 @@ The `riak-admin` command is the meat operations, the tool you'll use most often.
 Usage: riak-admin { cluster | join | leave | backup | restore | test |
                     reip | js-reload | erl-reload | wait-for-service |
                     ringready | transfers | force-remove | down |
-                    cluster-info | member-status | ring-status | vnode-status |
-                    diag | status | transfer-limit |
-                    top [-interval N] [-sort reductions|memory|msg_q] [-lines N] }
+                    cluster-info | member-status | ring-status | 
+                    vnode-status | diag | status | transfer-limit |
+                    top [-interval N] [-sort reductions|memory|msg_q]
+                    [-lines N] }
 ```
 
 Many of these commands are deprecated, and many don't make sense without a
