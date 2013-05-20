@@ -41,15 +41,16 @@ img {
 }
 h1 {
   font-family: 'Milonga', cursive;
-}
-h1 {
   border-bottom:1px solid #666;
-}
-h1, h2 {
   margin-top:2em;
+  text-shadow: 1px 1px 2px #666699;
 }
 h2 {
   margin-top:1.68em;
+  text-shadow: 0px 1px 1px #666699;
+}
+h3 {
+  text-shadow: 0px 1px 1px #666699;
 }
 h1.title {
   margin-bottom:0.05em;
@@ -58,14 +59,22 @@ h1.title {
   font-size:400%;
   line-height: 1.1;
   font-family: 'Playfair Display', serif;
+  text-shadow: 1px 1px 3px #666699;
 }
 h3.author {
   margin-top:0.25em;
   padding-left:1em;
 }
 
-a.pdf, 
-a.epub, 
+a {
+  color:blue;
+}
+a:hover {
+  color:red;
+}
+
+a.pdf,
+a.epub,
 a.mobi {
   padding: 0 0 1px 20px;
   min-height:16px;
@@ -85,9 +94,21 @@ a.mobi {
   padding-bottom:0.68em;
   font-size:80%;
   border-bottom:1px solid #666;
+  text-shadow: 0px 1px 1px #eee;
 }
 .intro p {
   margin-top:0.25em;
   margin-bottom:0.25em;
   font-style:italic;
+}
+
+body{
+ background-color:#e1eef7;
+ filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#e1eef7, endColorstr=#aee1f2);
+ background-image:-moz-linear-gradient(top, #e1eef7 0%, #aee1f2 100%);
+ background-image:-webkit-linear-gradient(top, #e1eef7 0%, #aee1f2 100%);
+ background-image:-ms-linear-gradient(top, #e1eef7 0%, #aee1f2 100%);
+ background-image:linear-gradient(top, #e1eef7 0%, #aee1f2 100%);
+ background-image:-o-linear-gradient(top, #e1eef7 0%, #aee1f2 100%);
+ background-image:-webkit-gradient(linear, right top, right bottom, color-stop(0%,#e1eef7), color-stop(100%,#aee1f2));
 }
