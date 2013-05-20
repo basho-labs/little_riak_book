@@ -33,7 +33,7 @@ Eu tenho 6 Terabytes em minha casa para guarar vídeos e outros backups. Isso co
 
 <blockquote>Big Data é informação de elevado volume, de alta velocidade, e/ou de grande variedade, que exigem novas formas de processamento para permitir tomar decisões inteligentes, compreender os dados e otimizar processos.</blockquote></aside>
 
-### Conte sempre com o Riak
+<h3>Conte sempre com o Riak</h3>
 
 O cenário ideal para usar o Riak é com um elevado volume de dados (que estão disponíveis para ler e escrever quando for preciso), a alta velocidade (responde facilmente ao crescimento) e com grande variedade (pode armazenar qualquer tipo de dados como um valor).
 

@@ -542,7 +542,8 @@ Leituras subsequentes receberão um único valor (fruto da nossa "fusão").
 curl -i -XPUT http://localhost:8098/riak/carrinho/fridge-97207?returnbody=true \
   -H "Content-Type:application/json" \
   -H "X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTInMfKoG7LdoovCwA=" \
-  -d '[{"item":"couve","contador":10},{"item":"leite","contador":1},{"item":"amêndoas","contador":12}]'
+  -d '[{"item":"couve","contador":10},{"item":"leite","contador":1},\
+      {"item":"amêndoas","contador":12}]'
 ```
 
 Definir ambos `allow_multi` e `last_write_wins` como `true`, vai resultar em efeitos indefinidos e não suportados.
@@ -798,7 +799,8 @@ curl -XPUT http://localhost:8091/riak/pessoas/ryan \
 Para executar uma pesquisa, temos que pedir: `/search/[bucket]` junto com qualquer [parâmetro do Solr](http://wiki.apache.org/solr/CommonQueryParameters) distribuído. Vamos consultar os documentos que contêm uma palavra que começa com 'zez`, pedindo que os resultados sejam no formato JSON (`wt=json`) e que apenas devolva a chave Riak (`fl=_yz_rk`).
 
 ```bash
-curl "http://localhost:8091/search/pessoas?wt=json&omitHeader=true&fl=_yz_rk&q=zez*" | jsonpp
+curl "http://localhost:8091/search/pessoas?wt=json&\
+      omitHeader=true&fl=_yz_rk&q=zez*" | jsonpp
 {
   "response": {
     "numFound": 1,
@@ -833,7 +835,8 @@ curl -XPUT http://localhost:8091/riak/pessoas/dave \
 Para procurar pela tag `nickname_s`, basta usar essa tag como prefixo e acrescentar a palavra para a pesquisa, septada por ":".
 
 ```bash
-curl 'http://localhost:8091/search/pessoas?wt=json&omitHeader=true&q=nickname_s:dizzy' | jsonpp
+curl 'http://localhost:8091/search/pessoas?wt=json&\
+      omitHeader=true&q=nickname_s:dizzy' | jsonpp
 {
   "response": {
     "numFound": 1,
