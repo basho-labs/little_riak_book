@@ -1,2 +1,11 @@
 <h1 class="title">A Little Riak Book</h1>
 <h3 class="author"><em>Eric Redmond</em></h3>
+
+<div class="intro">
+Here's a free little book about [Riak](http://docs.basho.com/riak/latest/), a scalable, high availability NoSQL datastore. 
+
+Other formats:
+<a href="https://github.com/coderoshi/little_riak_book/blob/master/rendered/riaklil-en.epub?raw=true" class="epub">ePub</a>
+<a href="https://github.com/coderoshi/little_riak_book/blob/master/rendered/riaklil-en.mobi?raw=true" class="mobi">mobi</a>
+<a href="https://github.com/coderoshi/little_riak_book/blob/master/rendered/riaklil-en.pdf?raw=true" class="pdf">PDF</a>
+</div>

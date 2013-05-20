@@ -55,8 +55,39 @@ h1.title {
   margin-bottom:0.05em;
   margin-top:0em;
   border-bottom:0px;
+  font-size:400%;
+  line-height: 1.1;
+  font-family: 'Playfair Display', serif;
 }
 h3.author {
-  margin-top:0.05em;
+  margin-top:0.25em;
   padding-left:1em;
+}
+
+a.pdf, 
+a.epub, 
+a.mobi {
+  padding: 0 0 1px 20px;
+  min-height:16px;
+}
+a.pdf {
+  background: url(assets/document-pdf.png) no-repeat 0 50%;
+}
+a.epub {
+  background: url(assets/document-epub.png) no-repeat 0 50%;
+}
+a.mobi {
+  background: url(assets/document-mobi.png) no-repeat 0 50%;
+}
+
+.intro {
+  padding-top:0.68em;
+  padding-bottom:0.68em;
+  font-size:80%;
+  border-bottom:1px solid #666;
+}
+.intro p {
+  margin-top:0.25em;
+  margin-bottom:0.25em;
+  font-style:italic;
 }
