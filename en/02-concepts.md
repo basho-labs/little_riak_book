@@ -272,11 +272,13 @@ In general terms, the N/R/W values are Riak's way of allowing you to trade lower
 
 If you've followed thus far, I only have one more conceptual wrench to throw at you. I wrote earlier that with `r=all`, we can "compare all nodes against each other and choose the latest one." But how do we know which is the latest value? This is where *vector clocks* (aka *vclocks*) come into play.
 
-Vector clocks measure a sequence of events, just like a normal clock. But since we can't reasonably keep dozens, or hundreds, or thousands of servers in sync (without really exotic hardware, like geosynchronized atomic clocks, or quantum entanglement), we instead keep track of how, and who, modifies an object. It's as easy as keeping a vector (or array) of which clients change an object in which order. That way we can tell if an object is being updated or if a write conflict has occurred.
+Vector clocks measure a sequence of events, just like a normal clock. But since we can't reasonably keep the clocks on dozens, or hundreds, or thousands of servers in sync (without really exotic hardware, like geosynchronized atomic clocks, or quantum entanglement), we instead keep a running history of updates.
 
 Let's use our `favorite` example again, but this time we have 3 people trying to come to a consensus on their favorite food: Aaron, Britney, and Carrie. We'll track the value each has chosen along with the relevant vector clock.
 
-When Aaron sets the `favorite` object to `pizza`, a hypothetical vector clock could contain his name, and the number of updates he's performed.
+(To illustrate vector clocks in action, we'll cheat a bit. By default, Riak no longer tracks vector clocks using client information, but rather via the server that coordinates a write request; nonetheless, the concept is the same. We'll cheat further by disregarding the timestamp that is stored with vector clocks.)
+
+When Aaron sets the `favorite` object to `pizza`, a vector clock could contain his name and the number of updates he's performed.
 
 ```
 vclock: [Aaron: 1]
@@ -290,16 +292,16 @@ vclock: [Aaron: 1, Britney: 1]
 value:  cold pizza
 ```
 
-At the same time as Britney, Carrie decides that pizza was a terrible choice, and tried to change Aaron's value to `lasagna`.
+At the same time as Britney, Carrie decides that pizza was a terrible choice, and tried to change the value to `lasagna`.
 
 ```
 vclock: [Aaron: 1, Carrie: 1]
 value:  lasagna
 ```
 
-This presents a problem, because there are now two vector clocks in play that diverge from `[Aaron: 1]`. So Riak can store both values and both vclocks.
+This presents a problem, because there are now two vector clocks in play that diverge from `[Aaron: 1]`. If previously configured to do so, Riak will store both values.
 
-Later in the day Britney checks again, but this time she gets the two conflicting values, with two vclocks.
+Later in the day Britney checks again, but this time she gets the two conflicting values (aka *siblings*, which we'll discuss in more detail in the next chapter), with two vclocks.
 
 ```
 vclock: [Aaron: 1, Britney: 1]
@@ -309,7 +311,7 @@ vclock: [Aaron: 1, Carrie: 1]
 value:  lasagna
 ```
 
-It's clear that a decision must be made. Since two people generally agreed on `pizza`, Britney resolves the conflict by deciding on Aaron's original `pizza` value, and merging their vclocks.
+It's clear that a decision must be made. Perhaps Britney knows that Aaron's original request was for `pizza`, and thus two people generally agreed on `pizza`, so she resolves the conflict choosing that and providing a new vclock.
 
 ```
 vclock: [Aaron: 1, Carrie: 1, Britney: 2]
@@ -318,11 +320,9 @@ value:  pizza
 
 Now we are back to the simple case, where requesting the value of `favorite` will just return the agreed upon `pizza`.
 
-Beyond the ability for vector clocks to provide a reasonable history of updates, is also used when reading values from two conflicting nodes. This is how we can compare the reads of multiple nodes and decide upon the most recent version.
-
 If you're a programmer, you may notice that this is not unlike a version control system, like **git**, where conflicting branches may require manual merging into one.
 
-The Riak mechanism uses internal hashing and system clocks to stop unbounded vclock growth. We'll dig into more details of Riak's vclocks in the next chapter.
+As mentioned above, we disregarded timestamps for this illustration, but they come into play if Riak is **not** configured to retain conflicting data. If conflicting writes are received on either side of a network partition, the most recently-written object (as determined by the timestamps) will be chosen when the network heals.
 
 <h3>Riak and ACID</h3>
 
