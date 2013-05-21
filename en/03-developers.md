@@ -371,23 +371,21 @@ Entropy is a byproduct of eventual consistency. In other words: although eventua
 
 That difference is *entropy*, and so Riak has created several *anti-entropy* strategies (abbreviated as *AE*). We've already talked about how an R/W quorum can deal with differing values when write/read requests overlap at least one node. Riak can repair entropy, or allow you the option to do so yourself.
 
-Riak has a couple strategies related to the case of nodes that do not agree on value.
+Riak has two basic strategies to address conflicting writes.
 
 <h3>Last Write Wins</h3>
 
-The most basic, and least reliable, strategy for curing entropy is called *last write wins*. It's the simple idea that the last write based on a node's system clock will overwrite an older one. You can turn this on in the bucket by setting the `last_write_wins` property to `true`.
+The most basic, and least reliable, strategy for curing entropy is called *last write wins*. It's the simple idea that the last write based on a node's system clock will overwrite an older one. This is currently the default behavior in Riak (by virtue of the `allow_mult` property defaulting to `false`). You can also set the `last_write_wins` property to `true`, which improves performance by never retaining vector clock history.
 
-Realistically, this exists for speed and simplicity, when you really don't care about true order of operations, or the slight possibility of losing data. Since it's impossible to keep server clocks truly in sync (without the proverbial geosynchronized atomic clocks), this is a best guess as to what "last" means, to the nearest millisecond.
+Realistically, this exists for speed and simplicity, when you really don't care about true order of operations, or the possibility of losing data. Since it's impossible to keep server clocks truly in sync (without the proverbial geosynchronized atomic clocks), this is a best guess as to what "last" means, to the nearest millisecond.
 
-<h3>Vector Clock</h3>
+<h3>Vector Clocks</h3>
 
-As we saw under [Concepts](#practical-tradeoffs), *vector clocks* are Riak's way of tracking a true sequence of events of an object. We went over the concept, but let's see how and when Riak vclocks are used.
-
-Every node in Riak has its own unique id, which it uses to denote where an update happens as the vector clock key.
+As we saw under [Concepts](#practical-tradeoffs), *vector clocks* are Riak's way of tracking a true sequence of events of an object. Let's take a look at using vector clocks to allow for a more sophisticated conflict resolution approach than simply retaining the last-written value.
 
 <h4>Siblings</h4>
 
-*Siblings* occur when you have conflicting values, with no clear way for Riak to know which value is correct. Riak will try and resolve these conflicts itself, however, you can instead choose for Riak to create siblings if you set a bucket's `allow_mult` property to `true`.
+*Siblings* occur when you have conflicting values, with no clear way for Riak to know which value is correct. Riak will try to resolve these conflicts itself if the `allow_mult` parameter is configured to `false`, but you can instead ask Riak to retain siblings to be resolved by the client if you set `allow_mult` to `true`.
 
 ```bash
 curl -i -XPUT http://localhost:8098/riak/cart \
@@ -397,16 +395,16 @@ curl -i -XPUT http://localhost:8098/riak/cart \
 
 Siblings arise in a couple cases.
 
-1. A client writes a value passing a stale vector clock, or missing one altogether.
-2. Two clients write at the same time with two different client IDs with the same vector clock value.
+1. A client writes a value using a stale (or missing) vector clock.
+2. Two clients write at the same time with the same vector clock value.
 
-We'll use the second case to manufacture our own conflict.
+We used the second scenario to manufacture a conflict in the previous chapter when we introduced the concept of vector clocks, and we'll do so again here.
 
 <h4>Creating an Example Conflict</h4>
 
-Imagine a shopping cart exists for a single refrigerator, but several people in a household are able to order food for it.
+Imagine we create a shopping cart for a single refrigerator, but several people in a household are able to order food for it. Because losing orders would result in an unhappy household, Riak is configured with `allow_mult=true`.
 
-First `casey` (a vegan) places 10 orders of kale in his cart. To track who is adding to the refrigerator with ID `fridge-97207`, his PUT adds his name as a client id.
+First Casey (a vegan) places 10 orders of kale in the cart.
 
 Casey writes `[{"item":"kale","count":10}]`.
 
@@ -428,7 +426,9 @@ Content-Length: 28
 [{"item":"kale","count":10}]
 ```
 
-His roommate `mark`, reads what's in the order, and updates with his own addition. In order for Riak to know the order of operations, Mark adds the most recent vector clock to his PUT.
+Note the opaque vector clock (via the `X-Riak-Vclock` header) returned by Riak. That same value will be returned with any read request issued for that key until another write occurs.
+
+His roommate Mark, reads the order and adds milk. In order to allow Riak to track the update history properly, Mark includes the most recent vector clock with his PUT.
 
 Mark writes `[{"item":"kale","count":10},{"item":"milk","count":1}]`.
 
@@ -451,14 +451,12 @@ Content-Length: 54
 [{"item":"kale","count":10},{"item":"milk","count":1}]
 ```
 
-If you look closely, you'll notice that the vclock sent is not actually identical with the one returned.
+If you look closely, you'll notice that the vector clock changed with the second write request
 
-* <code>a85hYGBgzGDKBVIcypz/fgaUHjmTwZTI<strong>mMfKsMK</strong>K7RRfFgA=</code>
-* <code>a85hYGBgzGDKBVIcypz/fgaUHjmTwZTI<strong>lMfKcMa</strong>K7RRfFgA=</code>
+* <code>a85hYGBgzGDKBVIcypz/fgaUHjmTwZTI<strong>mMfKsMK</strong>K7RRfFgA=</code> (after the write by Casey)
+* <code>a85hYGBgzGDKBVIcypz/fgaUHjmTwZTI<strong>lMfKcMa</strong>K7RRfFgA=</code> (after the write by Mark)
 
-The vclock was incremented to keep track of the change over time.
-
-Now let's add a third roommate, `andy`, who loves almonds. Before Mark updates the shared cart with milk, Andy adds his own order to Casey's kale, using the vector clock from Casey's order (the last order Andy was aware of).
+Now let's consider a third roommate, Andy, who loves almonds. Before Mark updates the shared cart with milk, Andy retrieved Casey's kale order and appends almonds. As with Mark, Andy's update includes the vector clock as it existed after Casey's original write.
 
 Andy writes `[{"item":"kale","count":10},{"item":"almonds","count":12}]`.
 
@@ -497,11 +495,11 @@ Last-Modified: Thu, 01 Nov 2012 00:24:07 GMT
 
 Whoa! What's all that?
 
-Since there was a conflict between what Mark and Andy both set the fridge value to be, Riak kept both values.
+Since there was a conflict between what Mark and Andy set the fridge value to be, Riak kept both values.
 
-<h4>V-Tag</h4>
+<h4>VTag</h4>
 
-Since we're using the HTTP client, Riak returned a `300 Multiple Choices` code with a `multipart/mixed` MIME type. It's up to you to separate the results, however, you can request a specific value by its Etag, also called a Vtag.
+Since we're using the HTTP client, Riak returned a `300 Multiple Choices` code with a `multipart/mixed` MIME type. It's up to you to parse the results (or you can request a specific value by its Etag, also called a Vtag).
 
 Issuing a plain get on the `/cart/fridge-97207` key will also return the vtags of all siblings.
 
@@ -522,7 +520,7 @@ curl http://localhost:8098/riak/cart/fridge-97207?vtag=62NRijQH3mRYPRybFneZaY
 If you want to retrieve all sibling data, tell Riak that you'll accept the multipart message by adding `-H "Accept:multipart/mixed"`.
 
 ```bash
-curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207 \
+curl http://localhost:8098/riak/cart/fridge-97207 \
   -H "Accept:multipart/mixed"
 ```
 
@@ -538,9 +536,9 @@ Riak not to resolve this conflict automatically... we want this flexibility.
 
 <h4>Resolving Conflicts</h4>
 
-With all of our options available, we want to resolve this conflict. Since the way of resolving this conflict is largely *use-case specific*, our application can decide how to proceed.
+When we have conflicting writes, we want to resolve them. Since that problem is typically *use-case specific*, Riak defers it to us, and our application must decide how to proceed.
 
-Let's merge the values into a single result set, taking the larger *count* if the *item* is the same. Pass in the vclock of the multipart object, so Riak knows you're resolving the conflict, and you'll get back a new vector clock.
+For our example, let's merge the values into a single result set, taking the larger *count* if the *item* is the same. When done, write the new results back to Riak with the vclock of the multipart object, so Riak knows you're resolving the conflict, and you'll get back a new vector clock.
 
 Successive reads will receive a single (merged) result.
 
@@ -551,8 +549,17 @@ curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
   -d '[{"item":"kale","count":10},{"item":"milk","count":1},{"item":"almonds","count":12}]'
 ```
 
-Setting both `allow_mult` and `last_write_wins` to `true` will result
-in undefined, unsupported behavior.
+<h3>Last write wins vs. siblings</h3>
+
+Your data and your business needs will dictate which approach to conflict resolution is appropriate. You don't need to choose one strategy globally; instead, feel free to take advantage of Riak's buckets to specify which data uses siblings and which blindly retains the last value written.
+
+A quick recap of the two configuration values you'll want to set:
+
+* `allow_mult` defaults to `false`, which means that the last write wins.
+* Setting `allow_mult` to `true` instructs Riak to retain conflicting writes as siblings.
+* `last_write_wins` defaults to `false`, which (perhaps counter-intuitively) still can mean that the behavior is last write wins: `allow_mult` is the key parameter for the behavioral toggle.
+* Setting `last_write_wins` to true will optimize writes by assuming that previous vector clocks have no inherent value.
+* Setting both `allow_mult` and `last_write_wins` to `true` is unsupported and will result in undefined behavior.
 
 <h3>Read Repair</h3>
 
