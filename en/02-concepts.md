@@ -39,7 +39,7 @@ This limitation changes how you model data. Relational normalization (organizing
     Examples: *PostgreSQL*, *MySQL*, *Oracle*
   2. **Graph**. These exist for highly interconnected data. They excel in
     modeling complex relationships between nodes, and many implementations can
-    handle multiple billions of nodes and relationships (or edges and vertices). I tend to include *triplestores* and *object DBs* to be specialized variants.
+    handle multiple billions of nodes and relationships (or edges and vertices). I tend to include *triplestores* and *object DBs* as specialized variants.
 
     Examples: *Neo4j*, *Graphbase*, *InfiniteGraph*
   3. **Document**. Document datastores model hierarchical values called documents,
@@ -98,7 +98,7 @@ Successive requests for `5124` will now return `Claire`.
 
 Addresses in Riakville are more than a house number, but also a street. There could be another 5124 on another street, so the way we can ensure a unique address is by requiring both, as in *5124 Main Street*.
 
-*Buckets* are like streets in Riak. But rather than mere geography, you can group multiple key/values into logical [namespaces](http://en.wikipedia.org/wiki/Namespace_(computer_science\)) (like residential streets, industrial streets, commercial streets, etc), where identical keys will not overlap between buckets.
+*Buckets* in Riak are analogous to street names: they provide logical [namespaces](http://en.wikipedia.org/wiki/Namespace_(computer_science\)) so that identical keys in different buckets will not conflict.
 
 For example, while Alice may live at *5122 Main Street*, there may be a gas station at *5122 Bagshot Row*.
 
@@ -161,9 +161,9 @@ The Riak team suggests a minimum of 5 nodes for a Riak cluster, and replicating 
 
 <h3>The Ring</h3>
 
-Riak follows the *consistent hashing* technique, that conceptually maps objects to the edge of a circle or ring. It has the benefit of reducing the amount of data that must be rebalanced when a node goes down.
+Riak applies *consistent hashing* to map objects along the edge of a circle (the ring).
 
-Riak partitions are not mapped alphabetically (as we used in the examples above), but instead, a partition marks a range of key hashes (SHA-1 function applied to a key). The maximum hash value is 2^160, and divided into some number of partitions---64 partitions by default (the Riak config setting is `ring_creation_size`).
+Riak partitions are not mapped alphabetically (as we used in the examples above), but instead a partition marks a range of key hashes (SHA-1 function applied to a key). The maximum hash value is 2^160, and divided into some number of partitions---64 partitions by default (the Riak config setting is `ring_creation_size`).
 
 Let's walk through what all that means. If you have the key `favorite`, applying the SHA-1 algorithm would return `7501 7a36 ec07 fd4c 377a 0d2a 0114 00ab 193e 61db` in hexadecimal. With 64 partitions, each has 1/64 of the 2^160 possible values, making the first partition range from 0 to 2^154-1, the second range is 2^154 to 2\*2^154-1, and so on, up to the last partition 63\*2^154-1 to 2^160-1.
 
@@ -176,7 +176,7 @@ If we visualize our 64 partitions as a ring, `favorite` falls here.
 
 ![Riak Ring](../assets/ring0.svg)
 
-You may have wondered, "Didn't he say that Riak suggests a minimum of 5 nodes? How can we put 64 partitions on 5 nodes?" We just give each node more than one partition, which Riak calls a *vnode*, or *virtual node*.
+You may have wondered, "Didn't he say that Riak suggests a minimum of 5 nodes? How can we put 64 partitions on 5 nodes?" We just give each node more than one partition, each of which is managed by a *vnode*, or *virtual node*.
 
 We count around the ring of vnodes in order, assigning each node to the next available vnode, until all vnodes are accounted for. So partition/vnode 1 would be owned by Node A, vnode 2 owned by Node B, up to vnode 5 owned by Node E. Then we continue by giving Node A vnode 6, Node B vnode 7, and so on, until our vnodes have been exhausted, leaving us this list.
 
@@ -255,13 +255,15 @@ In general terms, the N/R/W values are Riak's way of allowing you to trade lower
 
 <h3>Vector Clock</h3>
 
-If you've followed thus far, I only have one more conceptual wrench to throw at you. I wrote earlier that with `r=all`, we can "compare all nodes against each other and choose the latest one." But how do we know which is the latest value? This is where Vector Clocks come into play.
+If you've followed thus far, I only have one more conceptual wrench to throw at you. I wrote earlier that with `r=all`, we can "compare all nodes against each other and choose the latest one." But how do we know which is the latest value? This is where *vector clocks* (aka *vclocks*) come into play.
 
-Vector clocks measure a sequence of events, just like a normal clock. But since we can't reasonably keep dozens, or hundreds, or thousands of servers in sync (without really exotic hardware, like geosynchronized atomic clocks, or quantum entanglement), we instead keep track of how, and who, modifies an object. It's as easy as keeping a vector (or array) of which clients change an object in which order. That way we can tell if an object is being updated or if a write conflict has occurred.
+Vector clocks measure a sequence of events, just like a normal clock. But since we can't reasonably keep the clocks on dozens, or hundreds, or thousands of servers in sync (without really exotic hardware, like geosynchronized atomic clocks, or quantum entanglement), we instead keep a running history of updates.
 
-Let's use our `favorite` example again, but this time we have 3 people trying to come to a consensus on their favorite food: Aaron, Britney, and Carrie. We'll track the value each has chosen, and the relevant vector clock, or *vclock*.
+Let's use our `favorite` example again, but this time we have 3 people trying to come to a consensus on their favorite food: Aaron, Britney, and Carrie. We'll track the value each has chosen along with the relevant vector clock.
 
-When Aaron sets the `favorite` object to `pizza`, a hypothetical vector clock could contain his name, and the number of updates he's performed.
+(To illustrate vector clocks in action, we'll cheat a bit. By default, Riak no longer tracks vector clocks using client information, but rather via the server that coordinates a write request; nonetheless, the concept is the same. We'll cheat further by disregarding the timestamp that is stored with vector clocks.)
+
+When Aaron sets the `favorite` object to `pizza`, a vector clock could contain his name and the number of updates he's performed.
 
 ```
 vclock: [Aaron: 1]
@@ -275,16 +277,16 @@ vclock: [Aaron: 1, Britney: 1]
 value:  cold pizza
 ```
 
-At the same time as Britney, Carrie decides that pizza was a terrible choice, and tried to change Aaron's value to `lasagna`.
+At the same time as Britney, Carrie decides that pizza was a terrible choice, and tried to change the value to `lasagna`.
 
 ```
 vclock: [Aaron: 1, Carrie: 1]
 value:  lasagna
 ```
 
-This presents a problem, because there are now two vector clocks in play that diverge from `[Aaron: 1]`. So Riak can store both values and both vclocks.
+This presents a problem, because there are now two vector clocks in play that diverge from `[Aaron: 1]`. If previously configured to do so, Riak will store both values.
 
-Later in the day Britney checks again, but this time she gets the two conflicting values, with two vclocks.
+Later in the day Britney checks again, but this time she gets the two conflicting values (aka *siblings*, which we'll discuss in more detail in the next chapter), with two vclocks.
 
 ```
 vclock: [Aaron: 1, Britney: 1]
@@ -294,7 +296,7 @@ vclock: [Aaron: 1, Carrie: 1]
 value:  lasagna
 ```
 
-It's clear that a decision must be made. Since two people generally agreed on `pizza`, Britney resolves the conflict by deciding on Aaron's original `pizza` value, and merging their vclocks.
+It's clear that a decision must be made. Perhaps Britney knows that Aaron's original request was for `pizza`, and thus two people generally agreed on `pizza`, so she resolves the conflict choosing that and providing a new vclock.
 
 ```
 vclock: [Aaron: 1, Carrie: 1, Britney: 2]
@@ -303,11 +305,9 @@ value:  pizza
 
 Now we are back to the simple case, where requesting the value of `favorite` will just return the agreed upon `pizza`.
 
-Beyond the ability for vector clocks to provide a reasonable history of updates, is also used when reading values from two conflicting nodes. This is how we can compare the reads of multiple nodes and decide upon the most recent version.
-
 If you're a programmer, you may notice that this is not unlike a version control system, like **git**, where conflicting branches may require manual merging into one.
 
-The Riak mechanism uses internal hashing and system clocks to stop unbounded vclock growth. We'll dig into more details of Riak's vclocks in the next chapter.
+As mentioned above, we disregarded timestamps for this illustration, but they come into play if Riak is **not** configured to retain conflicting data. If conflicting writes are received on either side of a network partition, the most recently-written object (as determined by the timestamps) will be chosen when the network heals.
 
 <h3>Riak and ACID</h3>
 
@@ -332,6 +332,6 @@ As your server count grows---especially as you introduce multiple datacenters---
 
 Riak is designed to bestow a range of real-world benefits, but equally, to handle the fallout of wielding such power. Consistent hashing and vnodes are an elegant solution to horizontally scaling across servers. N/R/W allows you to dance with the CAP theorem by fine-tuning against its constraints. And vector clocks allow another step closer to true consistency by allowing you to manage conflicts that will occur at high load.
 
-We'll cover other technical concepts as needed, including the gossip protocol, hinted handoff, or read-repair.
+We'll cover other technical concepts as needed, including the gossip protocol, hinted handoff, and read-repair.
 
-Next we'll go through Riak as a user. We'll check out lookups, take advantage of write hooks, and alternative query options like secondary indexing, search, and MapReduce.
+Next we'll review Riak from the user (developer) perspective. We'll check out lookups, take advantage of write hooks, and examine alternative query options like secondary indexing, search, and MapReduce.
