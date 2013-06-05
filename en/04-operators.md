@@ -763,8 +763,8 @@ path, you can also change HTTP from `/mapred` to a custom path.
 
 <h4>JavaScript</h4>
 
-Though not implemented in Pipe, Riak KV's MapReduce implementation is the
-primary user of the Spidermonkey JavaScript engine---the second use is
+Riak KV's MapReduce implementation (under riak_kv, though implemented in Pipe) is the
+primary user of the Spidermonkey JavaScript engine---the second user is
 precommit hooks.
 
 ```bash
