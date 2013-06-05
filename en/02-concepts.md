@@ -313,7 +313,7 @@ As mentioned above, we disregarded timestamps for this illustration, but they co
 
 <aside id="acid" class="sidebar"><h3>Distributed Relational is Not Exempt</h3>
 
-You may have wondered why we don't just distribute a standard relational database. After all, MySQL has the ability to cluster, and it's ACID (*Atomic*, *Consistent*, *Isolated*, and *Durable*), right? Yes and no.
+You may have wondered why we don't just distribute a standard relational database. After all, MySQL has the ability to cluster, and it's ACID (<em>Atomic</em>, *Consistent*, *Isolated*, and *Durable*), right? Yes and no.
 
 A single node in the cluster is ACID, but the entire cluster is not without a loss of availability, and often worse, increased latency. When you write to a primary node, and a secondary node is replicated to, a network partition can occur. To remain available, the secondary will not be in sync (eventually consistent). Have you ever loaded from a backup on database failure, but the dataset was incomplete by a few hours? Same idea.
 

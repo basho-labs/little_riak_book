@@ -192,7 +192,7 @@ do, in fact, I didn't bother discussing it for most of this book.
 The Riak docs have all of the information you need to [Install](http://docs.basho.com/riak/latest/tutorials/installation/) it per operating system. The general sequence is:
 
 1. Install Erlang
-2. Get Riak from a package manager (*a la* `apt-get` or Homebrew), or build from source (the results end up under `rel/riak`, with the binaries under `bin`).
+2. Get Riak from a package manager (<em>a la</em> `apt-get` or Homebrew), or build from source (the results end up under `rel/riak`, with the binaries under `bin`).
 3. Run `riak start`
 
 Install Riak on four or five nodes---five being the recommended safe minimum for production. Fewer nodes are OK during software development and testing.
@@ -821,8 +821,8 @@ it, you can choose which `solr_port` will be used.
 ![Tech Stack Backend](../assets/riak-stack-backend.svg)
 
 Several modern databases have swappable backends, and Riak is no different in that
-respect. Riak currently supports three different storage engines---*Bitcask*,
-*eLevelDB*, and *Memory*---and one hybrid called *Multi*.
+respect. Riak currently supports three different storage engines: *Bitcask*,
+*eLevelDB*, and *Memory* --- and one hybrid called *Multi*.
 
 Using a backend is simply a matter of setting the `storage_backend` with one of the following values.
 
