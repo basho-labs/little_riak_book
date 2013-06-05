@@ -218,7 +218,7 @@ This tradeoff is known as Brewer's CAP theorem. CAP loosely states that you can 
 
 <aside class="sidebar"><h3>Not Quite C</h3>
 
-Strictly speaking, Riak has a tunable latency-availability tradeoff. The concession is similar to tuning A/C. To decrease read/write latency effectively improves the odds of consistency, by making requests unavailable in certain circumstances in the way a CP system would.
+Strictly speaking, Riak has a tunable availability/latency tradeoff, rather than availability/consistency. Making Riak run faster by keeping R and W values low will increase the likelihood of temporarily inconsistent results (higher availability). Setting those values higher will improving the <em>odds</e> of consistent responses (never quite reaching strict consistency), but will slow down those responses and increase the likelihood that Riak will fail to respond (in the event of a partition).
 
 Currently, no setting can make Riak truly CP in the general case, but features for a few strict cases are being researched.
 </aside>
