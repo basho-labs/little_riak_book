@@ -186,7 +186,12 @@
 \frontmatter
 <%= "\\includepdf{assets/cover.pdf}" if !isprint %>
 \maketitle
-\thispagestyle{empty}
+\vspace*{2.5in}
+\begin{center}
+    <%= config['license'] %>
+
+    <%= config['typeface'] %>
+\end{center}
 \setcounter{tocdepth}{4}
 \tableofcontents\newpage\thispagestyle{empty}
 
