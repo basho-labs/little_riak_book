@@ -13,7 +13,7 @@ default:
   fig: "Figure "
   tab: "Table "
   indent: "\\qquad"
-  thanks: "Special thanks to editor John Daily."
+  thanks: "Special thanks to editor John Daily, to everyone who helped, and Basho Press"
   license: "This book is licensed under the Creative Commons Attribution-Non Commercial-Share Alike 3.0 license."
   typeface: "Body typeface is Crimson."
 zh:
