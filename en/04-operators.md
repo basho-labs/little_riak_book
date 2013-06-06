@@ -882,7 +882,7 @@ remain resident (use memory).
   {multi_backend_default, <<"bitcask_multi">>},
 
   {multi_backend, [
-    %% Here's where you set the individual backends
+    %% Heres where you set the individual backends
     {<<"bitcask_multi">>,  riak_kv_bitcask_backend, [
       %% bitcask configuration
       {config1, ConfigValue1},
