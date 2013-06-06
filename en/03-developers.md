@@ -315,7 +315,7 @@ Functions that run before a write is called precommit, and has the ability to ca
 
 I put my custom Erlang code files under the riak installation `./custom/my_validators.erl`.
 
-```bash
+```java
 -module(my_validators).
 -export([value_exists/1]).
 
@@ -646,18 +646,19 @@ prefixed by either INFO or ERROR. We want to count the number of INFO
 logs that contain the word "cart".
 
 ```bash
-curl -XPOST http://localhost:8098/riak/logs -d "INFO: New user added"
-curl -XPOST http://localhost:8098/riak/logs -d "INFO: Kale added to shopping cart"
-curl -XPOST http://localhost:8098/riak/logs -d "INFO: Milk added to shopping cart"
-curl -XPOST http://localhost:8098/riak/logs -d "ERROR: shopping cart cancelled"
+LOGS=http://localhost:8098/riak/logs
+curl -XPOST $LOGS -d "INFO: New user added"
+curl -XPOST $LOGS -d "INFO: Kale added to shopping cart"
+curl -XPOST $LOGS -d "INFO: Milk added to shopping cart"
+curl -XPOST $LOGS -d "ERROR: shopping cart cancelled"
 ```
 
 MapReduce jobs can be either Erlang or JavaScript code. This time we'll go the
-easy route and write JavaScript. You execute MapReduce by posting JSON to the
+easy route and write JavaScript. You execute Map-Reduce by posting JSON to the
 `/mapred` path.
 
 ```bash
-curl -XPOST http://localhost:8098/mapred \
+curl -XPOST "http://localhost:8098/mapred" \
   -H "Content-Type: application/json" \
   -d @- \
 <<EOF

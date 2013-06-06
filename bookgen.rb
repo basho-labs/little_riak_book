@@ -100,6 +100,7 @@ def gen_pdf(languages)
       s %r{(\n\n)\t(http:\/\/[A-Za-z0-9\/\%\&\=\-\_\\\.]+)\n([^\t]|\t\n)}, '\1<\2>\1'
 
       # Process figures
+      s /^\!\[(.*?)\]\(..\/(.*?\/decor\/drinks.*?)\)/, 'DEC2: \2'
       s /^\!\[(.*?)\]\(..\/(.*?\/decor\/.*?)\)/, 'DEC: \2'
       s /^\!\[(.*?)\]\((.*?)\)/, 'FIG: \1'
     end
@@ -126,7 +127,9 @@ def gen_pdf(languages)
       s /#{config['prechap'].gsub(space, '\s')}\s*(\d+)(\s*)#{config['postchap'].gsub(space, '\s')}/, '\chapref{\1}\2'
 
       # Miscellaneous fixes
-      s /DEC: (.*)/, "\\begin{wrapfigure}{r}{.3\\textwidth}\n  \\includegraphics[scale=1.0]{\\1}\n\\end{wrapfigure}"
+      # s /DEC: (.*)/, "\\begin{wrapfigure}{r}{.3\\textwidth}\n  \\includegraphics[scale=1.0]{\\1}\n\\end{wrapfigure}"
+      s /DEC: (.*)/, "\\begin{wrapfigure}{r}{.4\\textwidth}\n  \\includegraphics[scale=1.0]{\\1}\n\\end{wrapfigure}"
+      s /DEC2: (.*)/, "\\begin{wrapfigure}{r}{.65\\textwidth}\n  \\includegraphics[scale=1.0]{\\1}\n\\end{wrapfigure}"
       s /FIG: (.*)/, '\img{\1}'
       s '\begin{enumerate}[1.]', '\begin{enumerate}'
       s /(\w)--(\w)/, '\1-\2'
@@ -166,6 +169,7 @@ def gen_pdf(languages)
       s %r"\\\{\"paid\"\:true\\\}", '\'\{"paid":true\}\''
       s %r"\\\{\"props\"\:\\\{\"n_val\"\:5\\\}\\\}", '\'\{"props":\{"n_val":5\}\}\''
       s %r"\\\{\"props\"\:\\\{\"backend\"\:\"memory_multi\"\\\}\\\}", '\'\{"props":\{"backend":"memory_multi"\}\}\''
+      s /we\ execute /, "we execute \\linebreak[4]"
 
       # Shaded verbatim block
       s /(\\begin\{verbatim\}.*?\\end\{verbatim\})/m, '\begin{shaded}\1\end{shaded}'
@@ -322,14 +326,14 @@ languages = [ARGV[0] || "en"]
 # generate the pdf
 gen_pdf(languages)
 
-# generate the ebooks
-languages.each do |language|
-  formats = %w{mobi epub}
+# # generate the ebooks
+# languages.each do |language|
+#   formats = %w{mobi epub}
 
-  html_file = gen_html(language)
-  formats.each do |format|
-    gen_book(language, html_file, format)
-  end
+#   html_file = gen_html(language)
+#   formats.each do |format|
+#     gen_book(language, html_file, format)
+#   end
 
-  gen_html(language, true)
-end
+#   gen_html(language, true)
+# end

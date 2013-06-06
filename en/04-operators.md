@@ -300,25 +300,25 @@ The following commands stage changes to cluster membership. These commands
 do not take effect immediately. After staging a set of changes, the staged
 plan must be committed to take effect:
 
-   join <node>                    Join node to the cluster containing <node>
-   leave                          Have this node leave the cluster and shutdown
-   leave <node>                   Have <node> leave the cluster and shutdown
+ join <node>                  Join node to the cluster containing <node>
+ leave                        Have this node leave the cluster and shutdown
+ leave <node>                 Have <node> leave the cluster and shutdown
 
-   force-remove <node>            Remove <node> from the cluster without
-                                  first handing off data. Designed for
-                                  crashed, unrecoverable nodes
+ force-remove <node>          Remove <node> from the cluster without
+                              first handing off data. Designed for
+                              crashed, unrecoverable nodes
 
-   replace <node1> <node2>        Have <node1> transfer all data to <node2>,
-                                  and then leave the cluster and shutdown
+ replace <node1> <node2>      Have <node1> transfer all data to <node2>,
+                              and then leave the cluster and shutdown
 
-   force-replace <node1> <node2>  Reassign all partitions owned by <node1> to
-                                  <node2> without first handing off data, and
-                                  remove <node1> from the cluster.
+ force-replace <node1> <node2>  Reassign all partitions owned by <node1>
+                              to <node2> without first handing off data,
+                              and remove <node1> from the cluster.
 
 Staging commands:
-   plan                           Display the staged changes to the cluster
-   commit                         Commit the staged changes
-   clear                          Clear the staged changes
+ plan                         Display the staged changes to the cluster
+ commit                       Commit the staged changes
+ clear                        Clear the staged changes
 ```
 
 To create a new cluster, you must `join` another node (any will do). Taking a
