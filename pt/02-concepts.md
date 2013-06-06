@@ -210,7 +210,7 @@ Este compromisso é conhecido como o teorema de CAP, de Eric Brewer. O teorema a
 
 <aside class="sidebar"><h3>Não exatamente C</h3>
 
-Estritamente falando, o Riak tem um compromisso entre latência e disponibilidade ajustável. A concessão é similar ao compromisso A/C. A diminuição da latência das leituras e escritas melhora efetivamente as chances de coerência, fazendo com que pedidos fiquem indisponíveis em certas circunstâncias, da mesma forma que um sistema CP faria.
+Estritamente falando, o Riak tem um compromisso ajustável entre latência e disponibilidade, em vez de coerência e disponibilidade. Acelerando o Riak ao manter os valores e R e W baixos, vai aumentar a probabilidade de haver dados temporariamente incoerentes (alta disponibilidade). Pelo contrário, manter esses valores de R e W altos, vai melhorar a probabilidade de encontrar leituras mais recentes (mas ainda não é bem coerência forte); no entanto, vai atrasar um pouco o Riak e fazer com que seja mais provável um pedido (leitura ou escrita) falhe (em casos de partições).
 
 Atualmente, nenhuma configuração pode fazer do Riak verdadeiramente CP no caso geral, mas opções para alguns casos especiais estão a ser pesquisados.
 
@@ -252,54 +252,54 @@ Em termos gerais, os valores N/R/W são a maneira do Riak permitir que você tro
 
 Se acompanhou até agora, eu só tenho mais um conceito novo para lhe explicar. Escrevi anteriormente que com `r=all`, nós podemos "comparar os valores de todos os nós uns com os outros e escolher o mais recente." Mas como realmente sabemos qual é o último valor, ou valor correto? É aqui que os *vetores versão* (ou *vclocks*) entram em jogo.
 
-Os vetores versão medem uma sequência de eventos, assim como um relógio normal. Mas uma vez que não se pode razoavelmente manter dezenas, centenas, ou milhares de servidores em sincronia (sem hardware realmente exótico, como relógios atómicos geo-sincronizados, ou capacidades quânticas), em vez disso, matemos a informação de quem e como modificou um objeto. É tão fácil como manter um vetor (ou array) dos clientes que alteraram um objeto e em que ordem. Dessa forma, podemos dizer se um objeto está a ser atualizado ou se existe um conflito na escrita.
+Os vetores versão medem uma sequência de eventos, assim como um relógio normal. Mas uma vez que não se pode razoavelmente manter os relógios de dezenas, centenas, ou milhares de servidores em sincronia (sem hardware realmente exótico, como relógios atómicos geo-sincronizados, ou capacidades quânticas), em vez disso, mantemos uma atualizada história de eventos.
 
 Vamos usar o nosso exemplo `favorito` novamente, mas desta vez temos 3 pessoas a tentar chegar a um consenso sobre a sua comida favorita: Aaron, Britney, e Carrie. Vamos acompanhar o valor que cada um escolheu e o seu respetivo vclock.
 
-Quando o Aaron define o objeto `favorito` para `pizza`, um hipotético vetor versão poderia conter o seu nome e o número de atualizações por ele realizadas.
+(Para ilustrar os vetores versão, vamos fazer um pouco de batota. Por defeito, o Riak já não usa informação dos clientes nos vetores versão. Em troca, usa informação do servidor que coordenou essa escrita. No entanto, o conceito é o mesmo. Vamos também ignorar os tempos reais que estão também guardados em cada vetor versão.)
 
-```
-vclock: [Aaron: 1]
+Quando o Aaron define o objeto `favorito` para `pizza`, um vetor versão poderia conter o seu nome e o número de atualizações por ele realizadas.
+
+```yaml
+vclock: {Aaron: 1}
 value:  pizza
 ```
 Entretanto a Britney chega e lê o objeto `favorito`, mas decide atualizar de `pizza` para `pizza fria`. Ao utilizar vclocks, ela deve fornecer o vclock devolvido na leitura que fez anteriormente e que quer atualizar. É assim que o Riak pode ajudar a garantir que você está a atualizar um valor que já existia, e que não está apenas a inserir o seu próprio valor (sem ler o que já existia).
 
-```
-vclock: [Aaron: 1, Britney: 1]
+```yaml
+vclock: {Aaron: 1, Britney: 1}
 value:  pizza fria
 ```
-Ao mesmo tempo que a Britney, a Carrie decide que a pizza foi uma escolha terrível, e tentou alterar o valor do Aaron para `lasanha`.
+Ao mesmo tempo que a Britney, a Carrie decide que a pizza foi uma escolha terrível, e tentou alterar o valor para `lasanha`.
 
-```
-vclock: [Aaron: 1, Carrie: 1]
+```yaml
+vclock: {Aaron: 1, Carrie: 1}
 value:  lasanha
 ```
-Isto representa um problema, porque agora existem dois vetores versão em jogo que divergem do original `[Aaron: 1]`. Assim, o Riak pode armazenar os dois valores e os dois vclocks.
+Isto representa um problema, porque agora existem dois vetores versão em jogo que divergem do original `{Aaron: 1}`. Se configurado assim, o Riak vai armazenar os dois valores e os dois vclocks.
 
-Mais tarde no dia, a Britney verifica novamente, mas desta vez ela vê os dois valores conflituosos, com dois vclocks.
+Mais tarde no dia, a Britney verifica novamente, mas desta vez ela vê os dois valores conflituosos (os chamados *siblings*, que vamos discutir no próximo capítulo), com dois vclocks.
 
-```
-vclock: [Aaron: 1, Britney: 1]
+```yaml
+vclock: {Aaron: 1, Britney: 1}
 value:  pizza fria
 ---
-vclock: [Aaron: 1, Carrie: 1]
+vclock: {Aaron: 1, Carrie: 1}
 value:  lasanha
 ```
-Fica claro que uma decisão deve ser tomada. Dado que duas pessoas concordaram em geral na `pizza`, a Britney resolve o conflito ao decidir que deve ficar a `pizza`, o valor original de Aaron, e atualiza com o seu vetor versão.
 
-```
-vclock: [Aaron: 1, Britney: 2]
+Fica claro que uma decisão deve ser tomada. Talvez a Britney saiba que o pedido original do Aaron foi `pizza` e portanto duas pessoas concordaram com pizza, então ela resolve o conflito ao escolher novamente pizza e atualizando o vetor versão.
+
+```yaml
+vclock: {Aaron: 1, Britney: 2}
 value:  pizza
 ```
 
 Agora estamos de volta ao caso simples, onde pedindo o valor do `favorito` só vai devolver o valor acordado `pizza`.
 
-Além da funcionalidade do vetores versão de fornecer um histórico razoável de atualizações, também é usado quando a leitura de valores em dois nós resulta em conflito. É assim que se pode comparar as leituras de vários nós e decidir sobre a versão mais recente.
-
 Se você é um programador, pode perceber que isso não é muito diferente de um sistema de controle de versões, como o **git**, onde ramos conflituosos podem exigir resolução manual.
 
-O Riak usa relógios de tempo real do sistema e funções de hash internas para evitar o crescimento ilimitado dos vetores versão. Nós vamos aprofundar os detalhes dos vclocks no Riak no próximo capítulo.
-
+Como foi mencionado antes, nós ignoramos os tempos reais para este exemplo, mas eles têm o seu propósito se o Riak não estiver configurado para guardar valores em conflito. Neste caso, é apenas guardado o valor mais recente, determinado pelo tempo real que cada um dos vclocks guarda internamente.
 
 <h3>O Riak e o ACID</h3>
 
@@ -312,7 +312,7 @@ Um nó por si só é ACID, mas o cluster inteiro não consegue ser, a não ser q
 Ou toda a transação pode falhar, fazendo com que todo o cluster fique indisponível. Mesmo as base de dados ACID não podem escapar ao teorema de CAP.
 </aside>
 
-Ao contrário de base de dados de um único nó como o Neo4j ou o PostgreSQL, o Riak não suporta transações *ACID*. O bloqueio de vários servidores ia matar a disponibilidade das escritas, e igualmente preocupante, ia aumentar a latência. Enquanto as transações ACID prometem *Atomicidade*, *Coerência*, *Isolamento* e *Durabilidade*---o Riak e as outras base de dados NoSQL seguem o *BASE*, ou *Basicamente Disponível*, *Estado Transiente* e *Inevitavelmente Coerente*.
+Ao contrário de base de dados de um único nó como o Neo4j ou o PostgreSQL, o Riak não suporta transações *ACID*. O bloqueio de vários servidores ia matar a disponibilidade das escritas, e igualmente preocupante, ia aumentar a latência. Enquanto as transações ACID prometem <em>Atomicidade</em>, *Coerência*, *Isolamento* e *Durabilidade*---o Riak e as outras base de dados NoSQL seguem o *BASE*, ou *Basicamente Disponível*, *Estado Transiente* e *Inevitavelmente Coerente*.
 
 A sigla BASE foi concebida como um sinónimo para as metas das bases de dados não transacionais/ACID como o Riak. É dado como aceite que a disponibilidade nunca é perfeita (basicamente disponível), todos os dados estão em mudança (estado transiente), e que a coerência é geralmente inatingível (inevitavelmente coerente).
 

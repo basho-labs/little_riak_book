@@ -27,7 +27,7 @@ Já que o Riak é uma base de dados chave/valor, os comandos mais básicos são 
 
 Os tipos básicos de pedidos sobre o Riak são: ler, escrever e eliminar valores. Estas ações estão relacionadas com métodos HTTP (PUT, GET, POST, DELETE).
 
-```
+```bash
 PUT    /riak/bucket/chave
 GET    /riak/bucket/chave
 DELETE /riak/bucket/chave
@@ -38,9 +38,9 @@ DELETE /riak/bucket/chave
 O comando mais simples de escrita no Riak é fazer *PUT* de um valor. Isto exige uma chave, um valor e um bucket. Usando o *curl*, todos os métodos HTTP têm o prefixo `-X`. Colocar o valor `pizza` na chave `favorito` sobre o bucket `alimento` é feito assim:
 
 ```bash
-curl -XPUT 'http://localhost:8098/riak/alimento/favorito' \
-  -H 'Content-Type:text/plain' \
-  -d 'pizza'
+curl -XPUT "http://localhost:8098/riak/alimento/favorito" \
+  -H "Content-Type:text/plain" \
+  -d "pizza"
 ```
 
 Eu escrevi algumas coisas estranhas aqui. A flag `-d` denota que a próxima *string* vai ser o valor. Mantivemos as coisas simples com a string `pizza`, declarando-a como texto com o comando `-H 'Content-Type:text/plain'`. Isto define o tipo HTTP MIME deste valor como texto simples. Nós podíamos ter definido qualquer valor, seja XML ou JSON---até mesmo uma imagem ou um vídeo. O Riak não se interessa pelo tipo de dados que armazena, desde que o tamanho de cada objeto não seja muito maior que 4MB (um limite teórico, mas recomendável que não se ultrapasse).
@@ -50,7 +50,7 @@ Eu escrevi algumas coisas estranhas aqui. A flag `-d` denota que a próxima *str
 O próximo comando lê o valor `pizza` que está no par bucket/chave `alimento`/`favorito`.
 
 ```bash
-curl -XGET 'http://localhost:8098/riak/alimento/favorito'
+curl -XGET "http://localhost:8098/riak/alimento/favorito"
 pizza
 ```
 Esta é a forma mais simples de leitura, devolvendo apenas o valor. O Riak contém muito mais informação, que você pode aceder se ler a resposta completa, incluindo o cabeçalho HTTP.
@@ -58,7 +58,7 @@ Esta é a forma mais simples de leitura, devolvendo apenas o valor. O Riak cont�
 No `curl` você pode aceder a uma resposta completa usando a flag `-i`. Vamos executar novamente a leitura acima, acrescentando esta flag.
 
 ```bash
-curl -i -XGET 'http://localhost:8098/riak/alimento/favorito'
+curl -i -XGET "http://localhost:8098/riak/alimento/favorito"
 HTTP/1.1 200 OK
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmdwZTImMfKcN3h1Um+LAA=
 Vary: Accept-Encoding
@@ -105,9 +105,9 @@ Semelhante ao PUT, o POST vai escrever um valor. Mas com o POST a chave é opcio
 Vamos adicionar um valor JSON para representar uma pessoa no bucket `pessoas`. O cabeçalho da resposta é o lugar onde um POST devolve a chave gerada para si.
 
 ```bash
-curl -i -XPOST 'http://localhost:8098/riak/pessoas' \
-  -H 'Content-Type:application/json' \
-  -d '{"name":"aaron"}'
+curl -i -XPOST "http://localhost:8098/riak/pessoas" \
+  -H "Content-Type:application/json" \
+  -d "{"name":"aaron"}""
 HTTP/1.1 201 Created
 Vary: Accept-Encoding
 Server: MochiWeb/1.1 WebMachine/1.9.2 (someone had painted...
@@ -124,8 +124,8 @@ Você pode extrair essa chave do valor do `Location`. Tirando o facto de não se
 Você pode observar que nenhum corpo foi devolvido com a resposta. Para qualquer tipo de escrita, você pode adicionar o parâmetro `returnbody=true` para forçar devolução de um valor, juntamente com outros cabeçalhos relacionados com o valor, como o `X-Riak-Vclock` e `ETag`.
 
 ```bash
-curl -i -XPOST 'http://localhost:8098/riak/pessoas?returnbody=true' \
-  -H 'Content-Type:application/json' \
+curl -i -XPOST "http://localhost:8098/riak/pessoas?returnbody=true" \
+  -H "Content-Type:application/json" \
   -d '{"name":"billy"}'
 HTTP/1.1 201 Created
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmdwZTImMfKkD3z10m+LAA=
@@ -148,7 +148,7 @@ Isto é verdade para PUTs e POSTs.
 A operação básica final é remoção de chaves, que é semelhante a obter um valor, mas usa-se o método DELETE em vez do GET para o `url`/`bucket`/`chave`.
 
 ```bash
-curl -XDELETE 'http://localhost:8098/riak/pessoas/DNQGJY0KtcHMirkidasA066yj5V'
+curl -XDELETE "http://localhost:8098/riak/pessoas/DNQGJY0KtcHMirkidasA066yj5V"
 ```
 Um objeto removido é marcado internamente no Riak como removido, ao escrever um marcador conhecido como *tombstone* (lápide). Por defeito, outro processo chamado de *reaper* (ceifador) mais tarde irá eliminar os objetos marcados no servidor.
 
@@ -164,14 +164,14 @@ Riak fornece dois tipos de listagens. A primeira listagem fornece uma lista de t
 O seguinte código vai-nos dar todos os nossos buckets como um objeto JSON.
 
 ```bash
-curl 'http://localhost:8098/riak?buckets=true'
+curl "http://localhost:8098/riak?buckets=true"
 {"buckets":["alimentos"]}
 ```
 
 E isso vai-nos dar todas as chaves dentro do bucket `alimentos`.
 
 ```bash
-curl 'http://localhost:8098/riak/alimentos?keys=true'
+curl "http://localhost:8098/riak/alimentos?keys=true"
 {
   ...
   "keys": [
@@ -183,7 +183,7 @@ curl 'http://localhost:8098/riak/alimentos?keys=true'
 Se tivéssemos muitas chaves, isto pode claramente demorar muito tempo. Então, o Riak também oferece a capacidade de transmitir a sua lista de chaves. `keys=stream` irá manter a conexão aberta, devolvendo os resultados em blocos de arrays. Quando a lista acaba, ele vai fechar a conexão. Você pode ver os detalhes através do *curl* em modo verboso (`-v`) (grande parte dessa resposta foi simplificada a seguir).
 
 ```bash
-curl -v 'http://localhost:8098/riak/alimentos?list=stream'
+curl -v "http://localhost:8098/riak/alimentos?list=stream"
 ...
 
 * Connection #0 to host localhost left intact
@@ -214,7 +214,7 @@ N é o número total de nós que um valor deve ser replicado, sendo 3 por defeit
 Qualquer propriedade de um bucket, incluindo o `n_val`, pode ser definido através do envio dessa propriedade atrás do valor `props`, como um objeto JSON para o URL do bucket. Vamos definir o `n_val` como 5 nós, o que significa que os objetos escritos para `carrinho` serão replicada por 5 nós.
 
 ```bash
-curl -i -XPUT http://localhost:8098/riak/carrinho \
+curl -i -XPUT "http://localhost:8098/riak/carrinho" \
   -H "Content-Type: application/json" \
   -d '{"props":{"n_val":5}}'
 ```
@@ -224,7 +224,7 @@ Você pode ver as propriedades de um bucket através de um GET para esse bucket.
 
 
 ```bash
-curl http://localhost:8098/riak/carrinho | jsonpp
+curl "http://localhost:8098/riak/carrinho" | jsonpp
 {
   "props": {
     ...
@@ -365,26 +365,23 @@ A entropia é um subproduto da *coerência inevitável*. Por outras palavras: ap
 
 Essa diferença é a *entropia*, e assim Riak criou várias estratégias de *anti-entropia* (também chamado *AE*). Nós já falamos sobre como um quorum R/W pode lidar com diferentes valores ao ler ou escrever, se os pedidos se sobrepuserem em pelo menos um nó. O Riak pode "reparar" a entropia, ou permitir que você o faça sozinho.
 
-O Riak tem um par de estratégias relacionadas com o caso em que os nós não concordam sobre um valor.
+O Riak tem duas estratégias para lidar com nós que não concordam sobre um valor.
 
 <h3>Last Write Wins (Última Escrita Ganha)</h3>
 
-A estratégia mais básica e menos confiável para tratar da entropia é chamada de *Last Write Wins (Última Escrita Ganha)*. É a simples ideia de que a última escrita de acordo com o relógio de sistema do nó local irá substituir uma escrita mais antiga. Você pode ativar isso num bucket, definindo a propriedade `last_write_wins` como `true`.
+A estratégia mais básica e menos confiável para tratar da entropia é chamada de *Last Write Wins (Última Escrita Ganha)*. É a simples ideia de que a última escrita irá substituir uma escrita mais antiga, de acordo com o relógio real do nó local. Este é o comportamento por defeito do Riak atualmente (`allow_mult` está a falso). Alternativamente, pode-se ativar o `last_write_wins` para `true`e obter o mesmo resultado, mas sem guardar qualquer informação causal (vclocks), aumentando o desempenho.
 
-Realisticamente, esta opção existe por uma questão de desempenho e simplicidade, ou quando você realmente não se importa com a verdadeira ordem das operações, ou a pequena possibilidade da perda de dados. Uma vez que é impossível para manter os relógios dos servidores em sincronia (sem os famosos relógios atómicos geo-sincronizados), este é o melhor palpite sobre o que "último" significa, com a precisão ao milissegundo.
+Realisticamente, esta opção existe por uma questão de desempenho e simplicidade, ou quando você realmente não se importa com a verdadeira ordem das operações, ou a possibilidade da perda de dados. Uma vez que é impossível para manter os relógios dos servidores em sincronia (sem os famosos relógios atómicos geo-sincronizados), este é o melhor palpite sobre o que "último" significa, com a precisão ao milissegundo.
 
 <h3>Vetores Versão</h3>
 
-Nós vimos em [Conceitos](#Compromissos-na-prática)), que os *vetores versão* são a maneira do Riak de saber a verdadeira sequência de eventos sobre um objeto. Nós abordamos levemente o conceito, mas vamos ver como e quando os vetores versão (*vclocks* no Riak) são usados.
+Nós vimos em [Conceitos](#Compromissos-na-prática)), que os *vetores versão* (vclocks) são a maneira do Riak de saber a verdadeira sequência de eventos sobre um objeto. Vamos ver como usar os vclocks para resolver conflitos de uma maneira mais sofisticada que apenas aceitar o mais recente.
 
 Cada nó do Riak tem seu próprio ID único, que é usado para indicar onde uma atualização acontece como a chave do vetor versão.
 
-
-Every node in Riak has its own unique id, which it uses to denote where an update happens as the vector clock key.
-
 <h4>Siblings ("Irmãos")</h4>
 
-Os *siblings* ocorrerem quando há valores em conflito, sem nenhuma maneira clara de o Riak saber qual valor está correto. O Riak vai tentar resolver estes conflitos por si, no entanto, pode-se optar que o Riak crie *siblings*, se definir a propriedade `allow_mult` de um bucket para `true`.
+Os *siblings* ocorrerem quando há valores em conflito, sem nenhuma maneira clara de o Riak saber qual valor está correto. O Riak vai tentar resolver estes conflitos por si se o `allow_mult` estiver a falso. No entanto, pode optar que o Riak crie *siblings*, se definir o `allow_mult` de um bucket para `true`.
 
 ```bash
 curl -i -XPUT http://localhost:8098/riak/carrinho \
@@ -394,16 +391,16 @@ curl -i -XPUT http://localhost:8098/riak/carrinho \
 
 Os *siblings* aparecem em dois casos:
 
-1. Um cliente escreve um valor, fornecendo um vetor versão obsoleto, ou mesmo nenhum.
-2. Dois clientes escrevem ao mesmo tempo com as duas identificações de clientes diferentes, mas com o mesmo vetor versão.
+1. Um cliente escreve um valor, fornecendo um vetor versão opaco (ou nenhum).
+2. Dois clientes escrevem ao mesmo tempo com o mesmo vetor versão.
 
-Vamos usar o segundo caso para criar o nosso próprio conflito.
+Usamos o segundo caso para fabricar um conflito no último capítulo e vamos voltar a usar agora.
 
 <h4>Exemplo de Conflito</h4>
 
-Imagine que existe um carrinho de compras para um frigorífico, e várias pessoas numa casa podem pedir comida através desse carrinho.
+Imagine que criámos um carrinho de compras para um único frigorífico, e que várias pessoas numa casa podem pedir comida através desse carrinho. Como não queremos perder compras para não causar mau ambiente na casa, vamos configurar o Riak com `allow_mult=true`.
 
-Primeiro o `Casey` (vegetariano) coloca 10 pedidos de couve no seu carrinho. Para controlar quem está a adicionar ao frigorífico, com o ID `fridge-97207` neste caso, o seu PUT usa o seu nome como um ID de cliente.
+Primeiro o Casey (vegetariano) coloca 10 pedidos de couve no seu carrinho.
 
 O Casey escreve `[{"item":"couve","contador":10}]`.
 
@@ -425,7 +422,9 @@ Content-Length: 28
 [{"item":"couve","contador":10}]
 ```
 
-O seu colega de quarto `mark`, lê o que está no carrinho, e atualiza-o com o seu próprio pedido. Para que o Riak saiba a ordem das operações, o Mark fornece o vetor versão mais recente no seu PUT.
+Repare no vclock opaco devolvido pelo Riak através do cabeçalho `X-Riak-Vclock`. O mesmo clock será devolvido para qualquer outra leitura, até que haja uma nova escrita nesta chave.
+
+O seu colega de quarto `mark`, lê o carrinho e adiciona leite. Para que o Riak saiba a ordem das operações, o Mark fornece o vetor versão mais recente no seu PUT.
 
 O Mark escreve `[{"item":"couve","contador":10},{"item":"leite","contador":1}]`.
 
@@ -448,14 +447,12 @@ Content-Length: 54
 [{"item":"couve","contador":10},{"item":"leite","contador":1}]
 ```
 
-Se reparar bem, vai perceber que o *vclock* enviado não é idêntico ao devolvido.
+Se reparar bem, o vclock mudou com a segunda escrita.
 
-* <code>a85hYGBgzGDKBVIcypz/fgaUHjmTwZTI<strong>mMfKsMK</strong>K7RRfFgA=</code>
-* <code>a85hYGBgzGDKBVIcypz/fgaUHjmTwZTI<strong>lMfKcMa</strong>K7RRfFgA=</code>
+* <code>a85hYGBgzGDKBVIcypz/fgaUHjmTwZTI<strong>mMfKsMK</strong>K7RRfFgA=</code> (depois da escrita do Casey)
+* <code>a85hYGBgzGDKBVIcypz/fgaUHjmTwZTI<strong>lMfKcMa</strong>K7RRfFgA=</code> (depois da escrita do Mark)
 
-O vclock foi incrementado para acompanhar a mudança do valor.
-
-Agora vamos adicionar um terceiro companheiro de quarto, o `andy`, que adora amêndoas. Antes do Mark ter adicionado o leite ao carrinho partilhado, o Andy adiciona o seu próprio pedido às couves do Casey, usando o vetor versão do primeiro pedido do Casey (que é o último pedido que Andy conhecia).
+Agora consideremos um terceiro companheiro de quarto, o Andy, que adora amêndoas. Antes do Mark ter adicionado o leite ao carrinho partilhado, o Andy leu o pedido das couves do Casey e adicionou amêndoas. Tal como o pedido do Mark, a escrita do Andy vai atualizar o vclock que inclui a informação do pedido do Casey, que é o último pedido que Andy conhecia à data da escrita.
 
 O Andy escreve `[{"item":"couve","contador":10},{"item":"amêndoas","contador":12}]`.
 
@@ -496,9 +493,9 @@ Uau! Que é isto tudo?
 
 Como houve um conflito entre o Mark e Andy sobre o que devia ter o carrinho, o Riak manteve ambos os valores.
 
-<h4>V-Tag</h4>
+<h4>VTag</h4>
 
-Como estamos a utilizar o cliente HTTP, o Riak devolveu o código `300 Multiple Choices` com o tipo MIME de `multipart/mixed`. Cabe agora ao utilizador separar os resultados; No entanto, você pode pedir um valor específico usando o Etag, ou também chamado de Vtag.
+Como estamos a utilizar o cliente HTTP, o Riak devolveu o código `300 Multiple Choices` com o tipo MIME de `multipart/mixed`. Cabe agora ao utilizador analisar os resultados (ou pode pedir um valor específico usando o Etag, também chamado de Vtag).
 
 Executar um simples GET sobre a chave `/carrinho/fridge-97207` vai devolver os vtags de todos os siblings.
 
@@ -519,7 +516,7 @@ curl http://localhost:8098/riak/carrinho/fridge-97207?vtag=62NRijQH3mRYPRybFneZa
 Se quiser recuperar todos os siblings, diga ao Riak que aceita uma mensagem com múltiplos valores adicionando `-H "Accept:multipart/mixed"`.
 
 ```bash
-curl -i -XPUT http://localhost:8098/riak/carrinho/fridge-97207 \
+curl http://localhost:8098/riak/carrinho/fridge-97207 \
   -H "Accept:multipart/mixed"
 ```
 
@@ -530,11 +527,11 @@ Devemos calcular o mais barato dos dois e manter a opção mais barata?
 Devemos juntar todos os resultados num único pedido? É por isso que podemos pedir ao Riak para não resolver este conflito automaticamente... queremos ter esta flexibilidade.
 </aside>
 
-<h4>Revolver Conflitos</h4>
+<h4>Revolvendo Conflitos</h4>
 
-Com todas as nossas opções disponíveis, queremos resolver este conflito. Uma vez que a resolução deste conflito é em grande parte específico ao cenário em causa, a nossa aplicação pode decidir como proceder.
+Quando temos conflitos, queremos resolvê-los. Uma vez que a resolução deste conflito é em grande parte específico a cada caso, o Riak permite que o utilizador escolha como a nossa aplicação deve proceder.
 
-Vamos juntar todos os valores num único conjunto de resultados, ficando com o maior *contador* caso o *item* seja o mesmo. Forneça o vclock do objeto com múltiplos valores que recebeu, assim o Riak sabe que você está a resolver o conflito, e você vai receber de volta um novo vetor versão.
+Por exemplo, vamos juntar todos os valores num único conjunto de resultados, ficando com o maior *contador* caso o *item* seja o mesmo. Quando acabar, escreva o resultado no Riak juntamente com o vclock do objeto com múltiplos valores que recebeu, assim o Riak sabe que você está a resolver o conflito, e você vai receber de volta um novo vetor versão.
 
 Leituras subsequentes receberão um único valor (fruto da nossa "fusão").
 
@@ -546,7 +543,18 @@ curl -i -XPUT http://localhost:8098/riak/carrinho/fridge-97207?returnbody=true \
       {"item":"amêndoas","contador":12}]'
 ```
 
-Definir ambos `allow_multi` e `last_write_wins` como `true`, vai resultar em efeitos indefinidos e não suportados.
+<h3>Último ganha (LWW) vs. Siblings</h3>
+
+Os seus dados e as suas necessidades de negócio irão ditar a abordagem apropriada à resolução de conflitos. Não é preciso escolher uma estratégia global, em vez disso, sinta-se livre para tirar proveito dos buckets no riak para especificar quais dados usam siblings e quais guardam cegamente o último valor escrito.
+
+Um pequeno resumo de dois valores de configuração que lhe deve interessar modificar:
+
+* `allow_mult` por defeito é `false`, que significa que a última escrita ganha sempre.
+* Mudando o `allow_mult` para `true` diz ao Riak para guardar valores em conflito como siblings (irmãos).
+* `last_write_wins` por defeito é `false`, mas, talvez contra o que é era esperado, ainda podemos ter *last write wins*: o `allow_mult` é o parâmetro chave nesta escolhe.
+* Mudando o `last_write_wins` para `true` vai otimizar as escritas ao ignorar todos os vclocks.
+* Mudando o `allow_mult` e o `last_write_wins` para `true` não é suportado e vai resultar em efeitos imprevisíveis.
+
 
 <h3>Read Repair (Reparação na Leitura)</h3>
 
@@ -554,6 +562,14 @@ Quando uma leitura bem sucedida acontece, mas nem todas as réplicas concordam s
 
 Se os seus nós ficarem dessincronizados (por exemplo, se se aumentar o `n_val` num bucket), você pode forçar o read repair através da realização de uma operação de leitura de todas as chaves do bucket. Pode devolver `not found` (não encontrado) da primeira vez, mas leituras posteriores vão devolver os valores mais recentes.
 
+<h3>Anti-Entropia Ativa (AAE)</h3>
+
+Embora resolver conflitos durante leituras usando *read repair* seja suficiente para a maioria dos casos, os dados que nunca são lidos podem eventualmente ser perdidos devido a esses nós falharem e serem substituídos.
+
+Com o Riak 1.3, foi introduzido a anti-entropia ativa (*active anti-entropy*) para pro-ativamente identificar e reparar dados incoerentes. Este mecanismo é útil também para recuperar da perda de dados quando os discos falham ou houve erros administrativos.
+
+
+O custo desta funcionalidade é minimizado ao manter árvores de hashes sofisticadas ("Merkle Trees"), que facilitam a comparação do conjunto de dados entre nós virtuais. Esta funcionalidade pode ser desligada, caso seja desejado.
 
 ## Consultas
 
@@ -791,7 +807,7 @@ Antes de utilizar o Yokozuna, você terá que o instalar e ter um bucket com um 
 O exemplo mais simples é uma pesquisa completa de texto. Vamos adicionar o `ryan` na tabela de `pessoas` (com um índice por defeito).
 
 ```bash
-curl -XPUT http://localhost:8091/riak/pessoas/ryan \
+curl -XPUT http://localhost:8098/riak/pessoas/ryan \
   -H "Content-Type:text/plain" \
   -d "Ryan Zezeski"
 ```
@@ -799,7 +815,7 @@ curl -XPUT http://localhost:8091/riak/pessoas/ryan \
 Para executar uma pesquisa, temos que pedir: `/search/[bucket]` junto com qualquer [parâmetro do Solr](http://wiki.apache.org/solr/CommonQueryParameters) distribuído. Vamos consultar os documentos que contêm uma palavra que começa com 'zez`, pedindo que os resultados sejam no formato JSON (`wt=json`) e que apenas devolva a chave Riak (`fl=_yz_rk`).
 
 ```bash
-curl "http://localhost:8091/search/pessoas?wt=json&\
+curl "http://localhost:8098/search/pessoas?wt=json&\
       omitHeader=true&fl=_yz_rk&q=zez*" | jsonpp
 {
   "response": {
@@ -825,7 +841,7 @@ O Yokozuna suporta o Solr 4.0, que inclui consultas com filtro, gamas de valores
 Outro recurso útil do Solr e do Yokozuna é a *tagging* (marcação) de valores. Dar tags a valores dá um contexto adicional a um valor no Riak. A implementação atual exige que todos os valores marcados comecem com `X-Riak-Meta`, e podem ser listados num cabeçalho especial chamado `X-Riak-Meta-yz-tags`.
 
 ```bash
-curl -XPUT http://localhost:8091/riak/pessoas/dave \
+curl -XPUT "http://localhost:8098/riak/pessoas/dave" \
   -H "Content-Type:text/plain" \
   -H "X-Riak-Meta-yz-tags: X-Riak-Meta-nickname_s" \
   -H "X-Riak-Meta-nickname_s:dizzy" \
@@ -835,8 +851,8 @@ curl -XPUT http://localhost:8091/riak/pessoas/dave \
 Para procurar pela tag `nickname_s`, basta usar essa tag como prefixo e acrescentar a palavra para a pesquisa, septada por ":".
 
 ```bash
-curl 'http://localhost:8091/search/pessoas?wt=json&\
-      omitHeader=true&q=nickname_s:dizzy' | jsonpp
+curl "http://localhost:8098/search/pessoas?wt=json&\
+      omitHeader=true&q=nickname_s:dizzy" | jsonpp
 {
   "response": {
     "numFound": 1,
