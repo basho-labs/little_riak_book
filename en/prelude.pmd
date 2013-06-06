@@ -2,7 +2,7 @@
 <h3 class="author">Eric Redmond</h3>
 
 <div class="intro">
-Here's a free little book about [Riak](http://docs.basho.com/riak/latest/), a scalable, high availability NoSQL datastore. 
+Here's a free little book about <a href="http://docs.basho.com/riak/latest/">Riak</a>, a scalable, high availability NoSQL datastore. 
 
 Other formats:
 <a href="https://github.com/coderoshi/little_riak_book/blob/master/rendered/riaklil-en.epub?raw=true" class="epub">ePub</a>

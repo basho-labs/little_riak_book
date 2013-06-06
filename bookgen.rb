@@ -160,6 +160,13 @@ def gen_pdf(languages)
         \\end{table}")
       end
 
+      # hack fixs of bad bash renderer
+      s %r"\\\{\"name\"\:\"billy\"\\\}", '\'\{"name":"billy"\}\''
+      s %r"\\\{\"name\"\:\"aaron\"\\\}", '\'\{"name":"aaron"\}\''
+      s %r"\\\{\"paid\"\:true\\\}", '\'\{"paid":true\}\''
+      s %r"\\\{\"props\"\:\\\{\"n_val\"\:5\\\}\\\}", '\'\{"props":\{"n_val":5\}\}\''
+      s %r"\\\{\"props\"\:\\\{\"backend\"\:\"memory_multi\"\\\}\\\}", '\'\{"props":\{"backend":"memory_multi"\}\}\''
+
       # Shaded verbatim block
       s /(\\begin\{verbatim\}.*?\\end\{verbatim\})/m, '\begin{shaded}\1\end{shaded}'
       # s /\\begin\{shaded\}(.*?)\\end\{shaded\}/im, '\1'
