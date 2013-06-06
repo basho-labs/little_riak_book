@@ -265,22 +265,22 @@ Let's use our `favorite` example again, but this time we have 3 people trying to
 
 When Aaron sets the `favorite` object to `pizza`, a vector clock could contain his name and the number of updates he's performed.
 
-```
-vclock: [Aaron: 1]
+```yaml
+vclock: {Aaron: 1}
 value:  pizza
 ```
 
 Britney now comes along, and reads `favorite`, but decides to update `pizza` to `cold pizza`. When using vclocks, she must provide the vclock returned from the request she wants to update. This is how Riak can help ensure you're updating a previous value, and not merely overwriting with your own.
 
-```
-vclock: [Aaron: 1, Britney: 1]
+```yaml
+vclock: {Aaron: 1, Britney: 1}
 value:  cold pizza
 ```
 
 At the same time as Britney, Carrie decides that pizza was a terrible choice, and tried to change the value to `lasagna`.
 
-```
-vclock: [Aaron: 1, Carrie: 1]
+```yaml
+vclock: {Aaron: 1, Carrie: 1}
 value:  lasagna
 ```
 
@@ -288,18 +288,18 @@ This presents a problem, because there are now two vector clocks in play that di
 
 Later in the day Britney checks again, but this time she gets the two conflicting values (aka *siblings*, which we'll discuss in more detail in the next chapter), with two vclocks.
 
-```
-vclock: [Aaron: 1, Britney: 1]
+```yaml
+vclock: {Aaron: 1, Britney: 1}
 value:  cold pizza
 ---
-vclock: [Aaron: 1, Carrie: 1]
+vclock: {Aaron: 1, Carrie: 1}
 value:  lasagna
 ```
 
 It's clear that a decision must be made. Perhaps Britney knows that Aaron's original request was for `pizza`, and thus two people generally agreed on `pizza`, so she resolves the conflict choosing that and providing a new vclock.
 
-```
-vclock: [Aaron: 1, Carrie: 1, Britney: 2]
+```yaml
+vclock: {Aaron: 1, Carrie: 1, Britney: 2}
 value:  pizza
 ```
 

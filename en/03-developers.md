@@ -29,7 +29,7 @@ The basic structure of a Riak request is setting a value, reading it,
 and maybe eventually deleting it. The actions are related to HTTP methods
 (PUT, GET, POST, DELETE).
 
-```
+```bash
 PUT    /riak/bucket/key
 GET    /riak/bucket/key
 DELETE /riak/bucket/key
@@ -40,9 +40,9 @@ DELETE /riak/bucket/key
 The simplest write command in Riak is putting a value. It requires a key, value, and a bucket. In curl, all HTTP methods are prefixed with `-X`. Putting the value `pizza` into the key `favorite` under the `food` bucket is done like this:
 
 ```bash
-curl -XPUT 'http://localhost:8098/riak/food/favorite' \
-  -H 'Content-Type:text/plain' \
-  -d 'pizza'
+curl -XPUT "http://localhost:8098/riak/food/favorite" \
+  -H "Content-Type:text/plain" \
+  -d "pizza"
 ```
 
 I threw a few curveballs in there. The `-d` flag denotes the next string will be the value. We've kept things simple with the string `pizza`, declaring it as text with the proceeding line `-H 'Content-Type:text/plain'`. This defines the HTTP MIME type of this value as plain text. We could have set any value at all, be it XML or JSON---even an image or a video. Riak does not care at all what data is uploaded, so long as the object size doesn't get much larger than 4MB (a soft limit but one that it is unwise to exceed).
@@ -52,7 +52,7 @@ I threw a few curveballs in there. The `-d` flag denotes the next string will be
 The next command reads the value `pizza` under the bucket/key `food`/`favorite`.
 
 ```bash
-curl -XGET 'http://localhost:8098/riak/food/favorite'
+curl -XGET "http://localhost:8098/riak/food/favorite"
 pizza
 ```
 
@@ -61,7 +61,7 @@ This is the simplest form of read, responding with only the value. Riak contains
 In `curl` you can access a full response by way of the `-i` flag. Let's perform the above query again, adding that flag.
 
 ```bash
-curl -i -XGET 'http://localhost:8098/riak/food/favorite'
+curl -i -XGET "http://localhost:8098/riak/food/favorite"
 HTTP/1.1 200 OK
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmdwZTImMfKcN3h1Um+LAA=
 Vary: Accept-Encoding
@@ -110,8 +110,8 @@ Similar to PUT, POST will save a value. But with POST a key is optional. All it 
 Let's add a JSON value to represent a person under the `people` bucket. The response header is where a POST will return the key it generated for you.
 
 ```bash
-curl -i -XPOST 'http://localhost:8098/riak/people' \
-  -H 'Content-Type:application/json' \
+curl -i -XPOST "http://localhost:8098/riak/people" \
+  -H "Content-Type:application/json" \
   -d '{"name":"aaron"}'
 HTTP/1.1 201 Created
 Vary: Accept-Encoding
@@ -129,8 +129,8 @@ You can extract this key from the `Location` value. Other than not being pretty,
 You may note that no body was returned with the response. For any kind of write, you can add the `returnbody=true` parameter to force a value to return, along with value-related headers like `X-Riak-Vclock` and `ETag`.
 
 ```bash
-curl -i -XPOST 'http://localhost:8098/riak/people?returnbody=true' \
-  -H 'Content-Type:application/json' \
+curl -i -XPOST "http://localhost:8098/riak/people?returnbody=true" \
+  -H "Content-Type:application/json" \
   -d '{"name":"billy"}'
 HTTP/1.1 201 Created
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmdwZTImMfKkD3z10m+LAA=
@@ -154,7 +154,7 @@ This is true for PUTs and POSTs.
 The final basic operation is deleting keys, which is similar to getting a value, but sending the DELETE method to the `url`/`bucket`/`key`.
 
 ```bash
-curl -XDELETE 'http://localhost:8098/riak/people/DNQGJY0KtcHMirkidasA066yj5V'
+curl -XDELETE "http://localhost:8098/riak/people/DNQGJY0KtcHMirkidasA066yj5V"
 ```
 
 A deleted object in Riak is internally marked as deleted, by writing a marker known as a *tombstone*. Unless configured otherwise, another process called a *reaper* will later finish deleting the marked objects.
@@ -171,14 +171,15 @@ Riak provides two kinds of lists. The first lists all *buckets* in your cluster,
 The following will give us all of our buckets as a JSON object.
 
 ```bash
-curl 'http://localhost:8098/riak?buckets=true'
+curl "http://localhost:8098/riak?buckets=true"
+
 {"buckets":["food"]}
 ```
 
 And this will give us all of our keys under the `food` bucket.
 
 ```bash
-curl 'http://localhost:8098/riak/food?keys=true'
+curl "http://localhost:8098/riak/food?keys=true"
 {
   ...
   "keys": [
@@ -190,7 +191,7 @@ curl 'http://localhost:8098/riak/food?keys=true'
 If we had very many keys, clearly this might take a while. So Riak also provides the ability to stream your list of keys. `keys=stream` will keep the connection open, returning results in chunks of arrays. When it has exhausted its list, it will close the connection. You can see the details through curl in verbose (`-v`) mode (much of that response has been stripped out below).
 
 ```bash
-curl -v 'http://localhost:8098/riak/food?list=stream'
+curl -v "http://localhost:8098/riak/food?list=stream"
 ...
 
 * Connection #0 to host localhost left intact
@@ -221,7 +222,7 @@ N is the number of total nodes that a value should be replicated to, defaulting 
 Any bucket property, including `n_val`, can be set by sending a `props` value as a JSON object to the bucket URL. Let's set the `n_val` to 5 nodes, meaning that objects written to `cart` will be replicated to 5 nodes.
 
 ```bash
-curl -i -XPUT http://localhost:8098/riak/cart \
+curl -i -XPUT "http://localhost:8098/riak/cart" \
   -H "Content-Type: application/json" \
   -d '{"props":{"n_val":5}}'
 ```
@@ -231,7 +232,7 @@ You can take a peek at the bucket's properties by issuing a GET to the bucket.
 *Note: Riak returns unformatted JSON. If you have a command-line tool like jsonpp (or json_pp) installed, you can pipe the output there for easier reading. The results below are a subset of all the `props` values.*
 
 ```bash
-curl http://localhost:8098/riak/cart | jsonpp
+curl "http://localhost:8098/riak/cart" | jsonpp
 {
   "props": {
     ...
@@ -872,7 +873,7 @@ The simplest example is a full-text search. Here we add `ryan` to the
 `people` table (with a default index).
 
 ```bash
-curl -XPUT http://localhost:8091/riak/people/ryan \
+curl -XPUT http://localhost:8098/riak/people/ryan \
   -H "Content-Type:text/plain" \
   -d "Ryan Zezeski"
 ```
@@ -883,7 +884,7 @@ results to be in json format (`wt=json`), only return the Riak key
 (`fl=_yz_rk`).
 
 ```bash
-curl "http://localhost:8091/search/people?wt=json&\
+curl "http://localhost:8098/search/people?wt=json&\
       omitHeader=true&fl=_yz_rk&q=zez*" | jsonpp
 {
   "response": {
@@ -918,7 +919,7 @@ requires all tagged values begin with `X-Riak-Meta`, and be listed under
 a special header named `X-Riak-Meta-yz-tags`.
 
 ```bash
-curl -XPUT http://localhost:8091/riak/people/dave \
+curl -XPUT "http://localhost:8098/riak/people/dave" \
   -H "Content-Type:text/plain" \
   -H "X-Riak-Meta-yz-tags: X-Riak-Meta-nickname_s" \
   -H "X-Riak-Meta-nickname_s:dizzy" \
@@ -929,8 +930,8 @@ To search by the `nickname_s` tag, just prefix the query string followed
 by a colon.
 
 ```bash
-curl 'http://localhost:8091/search/people?wt=json&\
-      omitHeader=true&q=nickname_s:dizzy' | jsonpp
+curl "http://localhost:8098/search/people?wt=json&\
+      omitHeader=true&q=nickname_s:dizzy" | jsonpp
 {
   "response": {
     "numFound": 1,

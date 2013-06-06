@@ -102,7 +102,7 @@ The `riak_core_ring:chash(Ring)` function extracts the total count of partitions
 of numbers representing the start of the partition, some fraction of the 2^160 number, and the node
 name that represents a particular Riak server in the cluster.
 
-```
+```bash
 $ bin/riak attach
 (A@10.0.1.1)1> {ok,Ring} = riak_core_ring_manager:get_my_ring().
 (A@10.0.1.1)2> riak_core_ring:chash(Ring).
@@ -124,7 +124,7 @@ number we named `DocIdx` (document index).
 Just to illustrate that Erlang binary value is a real number, the next line makes it a more
 readable format, similar to the ring partition numbers.
 
-```
+```bash
 (A@10.0.1.1)3> DocIdx = 
 (A@10.0.1.1)3> riak_core_util:chash_key({<<"food">>,<<"favorite">>}).
 <<80,250,1,193,88,87,95,235,103,144,152,2,21,102,201,9,156,102,128,3>>
@@ -137,7 +137,7 @@ With this `DocIdx` number, we can order the partitions, starting with first numb
 `DocIdx`. The remaining partitions are in numerical order, until we reach zero, then
 we loop around and continue to exhaust the list.
 
-```
+```bash
 (A@10.0.1.1)5> Preflist = riak_core_ring:preflist(DocIdx, Ring).
 [{548063113999088594326381812268606132370974703616, 'D@10.0.1.4'},
  {730750818665451459101842416358141509827966271488, 'A@10.0.1.1'},
@@ -253,7 +253,7 @@ cluster, but a few we can look at now.
 
 `status` outputs a list of information about this cluster. It's mostly the same information you can get from getting `/stats` via HTTP, although the coverage of information is not exact (for example, riak-admin status returns `disk`, and `/stats` returns some computed values like `gossip_received`).
 
-```
+```bash
 $ riak-admin status
 1-minute stats for 'A@10.0.1.1'
 -------------------------------------------
@@ -285,7 +285,7 @@ queue up so many messages at a time (MsgQ), and so on. This is useful for advanc
 and is especially useful if you know Erlang or need help from other users, the Riak team, or
 Basho.
 
-![Top](../assets/top.pdf)
+![Top](../assets/top.png)
 
 <h3>Making a Cluster</h3>
 
@@ -294,7 +294,7 @@ each other---launching a cluster is the simplest part.
 
 Executing the `cluster` command will output a descriptive set of commands.
 
-```
+```bash
 $ riak-admin cluster
 The following commands stage changes to cluster membership. These commands
 do not take effect immediately. After staging a set of changes, the staged
@@ -338,17 +338,6 @@ Success: staged join request for 'B@10.0.1.2' to 'A@10.0.1.1'
 $ riak-admin cluster join A@10.0.1.1
 Success: staged join request for 'C@10.0.1.3' to 'A@10.0.1.1'
 ```
-
-<aside class="sidebar"><h3>Don't Wait Too Long</h3>
-
-You should always keep in mind the general pattern Riak
-follows when you make a change to the cluster:
-
-*Join/Leave/Down -> Commit -> Ring state change -> Gossiped -> Hinted handoff*
-
-Large amounts of data can take time and cause system strain to transfer, so
-don't wait until it's too late to grow.
-</aside>
 
 Once all changes are staged, you must review the cluster `plan`. It will give you
 all of the details of the nodes that are joining the cluster, and what it
@@ -400,7 +389,7 @@ impinged.
 At this point, if you find a mistake in the plan, you have the chance to `clear` it and try
 again. When you are ready, `commit` the cluster to enact the plan.
 
-```
+```bash
 $ dev1/bin/riak-admin cluster commit
 Cluster changes committed
 ```
@@ -414,7 +403,7 @@ To check on a launching node's progress, you can run the `wait-for-service` comm
 output the status of the service and stop when it's finally up. In this example, we check
 the `riak_kv` service.
 
-```
+```bash
 $ riak-admin wait-for-service riak_kv C@10.0.1.3
 riak_kv is not up: []
 riak_kv is not up: []
@@ -426,7 +415,7 @@ You can get a list of available services with the `services` command.
 You can also see if the whole ring is ready to go with `ringready`. If the nodes do not agree
 on the state of the ring, it will output `FALSE`, otherwise `TRUE`.
 
-```
+```bash
 $ riak-admin ringready
 TRUE All nodes agree on the ring ['A@10.0.1.1','B@10.0.1.2',
                                   'C@10.0.1.3']
@@ -583,7 +572,7 @@ less likely to accidentally conflict, like `hihohihoitsofftoworkwego`.
 
 My `vm.args` starts with this:
 
-```
+```bash
 ## Name of the riak node
 -name A@10.0.1.1
 

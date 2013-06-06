@@ -20,7 +20,7 @@
 \usepackage{pdfpages}
 \usepackage{wrapfig}
 
-\definecolor{shadecolor}{gray}{0.90}
+\definecolor{shadecolor}{gray}{1.00}
 
 \setromanfont[Mapping=tex-text,BoldFont=<%= config['bold'] %>]{<%= config['font'] %>}
 \setmonofont[Scale=.85]{<%= config['mono'] %>}
@@ -48,17 +48,17 @@
 \renewcommand{\thefootnote}{\fnsymbol{footnote}}
 
 \makeatletter
-  \setlength\paperheight{9in}
-  \setlength\paperwidth{6in}
-  
+  <%= "\\setlength\\paperheight{9in}" if isprint %>
+  <%= "\\setlength\\paperwidth{6in}" if isprint %>
+
   \setlength\headheight{12\p@}
   \setlength\headsep   {.25in}
   \setlength\topskip   {10\p@}
   \setlength\footskip{.35in}
-  \setlength\textwidth{300\p@}
+  \setlength\textwidth{<%= isprint ? 300 : 400 %>\p@}
   
   \setlength\@tempdima{\paperheight}
-  \addtolength\@tempdima{-1.8in}
+  \addtolength\@tempdima{-<%= isprint ? 1.8 : 2 %>in}
   \divide\@tempdima\baselineskip
   \@tempcnta=\@tempdima
   \setlength\textheight{\@tempcnta\baselineskip}
@@ -67,13 +67,13 @@
   \setlength\@tempdima        {\paperwidth}
   \addtolength\@tempdima      {-\textwidth}
   \setlength\oddsidemargin    {\paperwidth}
-  \addtolength\oddsidemargin  {-2.05in}
+  \addtolength\oddsidemargin  {-<%= isprint ? 2.05 : 2.35 %>in}
   \addtolength\oddsidemargin  {-\textwidth}
   \setlength\marginparwidth   {0pt}
   \@settopoint\oddsidemargin
   \@settopoint\marginparwidth
   \setlength\evensidemargin  {\paperwidth}
-  \addtolength\evensidemargin{-2.05in}
+  \addtolength\evensidemargin{-<%= isprint ? 2.05 : 2.35 %>in}
   \addtolength\evensidemargin{-\textwidth}
   \@settopoint\evensidemargin
   
@@ -122,7 +122,7 @@
 
 \makeatletter
 \def\@makechapterhead#1{%
-  \vspace*{40\p@}%
+  \vspace*{<%= isprint ? 40 : 50 %>\p@}%
   {\parindent \z@ \raggedright \normalfont
     \ifnum \c@secnumdepth >\m@ne
       \if@mainmatter
@@ -133,13 +133,12 @@
     \fi
     \interlinepenalty\@M
     \Huge \bfseries #1\par\nobreak
-    \vskip 30\p@
+    \vskip <%= isprint ? 30 : 40 %>\p@
   }}
 \makeatother
 
 \DefineShortVerb[commandchars=\\\{\}]{\|}
-\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
-% Add ',fontsize=\small' for more characters per line
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\},fontsize=\small}
 \newenvironment{Shaded}{}{}
 \newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
 \newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{{#1}}}
