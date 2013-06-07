@@ -1,4 +1,4 @@
-# Administradores
+# Programadores
 
 <aside class="sidebar"><h3>Uma nota sobre o "Nó"</h3>
 Vale a pena mencionar que eu uso a palavra "nó" muitas vezes. Realisticamente, isso significa um servidor físico/virtual, mas realmente, o Riak interessa-se por vnodes.
@@ -7,9 +7,9 @@ Quando se escreve para múltiplos vnodes , o Riak vai tentar difundir os valores
 
 </aside>
 
-_Vamos adiar os detalhes da instalação do Riak para já. Se quiser acompanhar, é fácil começar ao seguir a [documentação de instalação](http://docs.basho.com/riak/latest/) no site. Se não, esta é uma secção perfeita para ler enquanto você está sentado no comboio sem Internet._
+_Vamos adiar os detalhes da instalação do Riak para já. Se quiser acompanhar, é fácil começar ao seguir a [documentação de instalação](http://docs.basho.com/riak/latest/) no site (http://docs.basho.com). Se não, esta é uma secção perfeita para ler enquanto você está sentado no comboio sem Internet._
 
-Administrar uma base de dados do Riak é muito fácil de fazer, uma vez entendidos alguns dos seus pormenores. É um BD chave/valor no sentido técnico (você associa valores com chaves, e recupera-os usando as mesmas chaves), mas oferece muito mais. Você pode escrever funções para executar antes ou depois de uma escrita, ou indexar dados para uma leitura rápida. O Riak tem um motor de pesquisa baseado no SOLR, que permite executar funções MapReduce para extrair e agregar dados num cluster enorme, num período de tempo relativamente curto. Vamos mostrar algumas das configurações específicas para buckets, que os administradores podem configurar.
+Configurar o Riak é muito fácil de fazer, uma vez entendidos alguns dos seus pormenores. É um BD chave/valor no sentido técnico (você associa valores com chaves, e recupera-os usando as mesmas chaves), mas oferece muito mais. Você pode escrever funções para executar antes ou depois de uma escrita, ou indexar dados para uma leitura rápida. O Riak uma pesquisa idêntica ao [SOLR](http://lucene.apache.org/solr/), que permite executar funções MapReduce para extrair e agregar dados num cluster enorme, num período de tempo relativamente curto. Vamos mostrar algumas das configurações específicas para buckets, que os administradores podem configurar.
 
 ## Pesquisa
 
@@ -307,7 +307,7 @@ Funções que são executadas antes de uma escrita são chamadas de *pré-commit
 
 Eu coloco os meus próprios ficheiros dentro da instalação do Riak `./custom/my_validators.erl`.
 
-```bash
+```java
 -module(my_validators).
 -export([value_exists/1]).
 
@@ -622,17 +622,18 @@ Vamos supor que temos um bucket para registos que armazena mensagens prefixadas 
 
 
 ```bash
-curl -XPOST http://localhost:8098/riak/logs -d "INFO: Novo utilizador"
-curl -XPOST http://localhost:8098/riak/logs -d "INFO: couve adicionada ao carrinho"
-curl -XPOST http://localhost:8098/riak/logs -d "INFO: leite adicionado ao carrinho"
-curl -XPOST http://localhost:8098/riak/logs -d "ERROR: carrinho cancelado"
+LOGS=http://localhost:8098/riak/logs
+curl -XPOST $LOGS -d "INFO: Novo utilizador"
+curl -XPOST $LOGS -d "INFO: couve adicionada ao carrinho"
+curl -XPOST $LOGS -d "INFO: leite adicionado ao carrinho"
+curl -XPOST $LOGS -d "ERROR: carrinho cancelado"
 ```
 
 Os trabalhos de MapReduce tanto podem ser código Erlang como JavaScript. Desta vez, vamos usar JavaScript. Executa-se um trabalho MapReduce ao enviar um JSON para o caminho `/mapred`.
 
 
 ```bash
-curl -XPOST http://localhost:8098/mapred \
+curl -XPOST "http://localhost:8098/mapred" \
   -H "Content-Type: application/json" \
   -d @- \
 <<EOF

@@ -64,9 +64,9 @@ O Riak funciona de forma semelhante a uma tabela de hash muito grande. Dependend
 
 <h3>Chave e o Valor</h3>
 
-Chave/valor é a construção mais básica de todas na informática. Você pode pensar numa chave como um endereço de uma casa, como por exemplo, a casa do Bob com a chave única de 5124, enquanto o valor seria talvez Bob (e o seu material).
-
 ![Uma Chave é um Endereço](../assets/decor/addresses.png)
+
+Chave/valor é a construção mais básica de todas na informática. Você pode pensar numa chave como um endereço de uma casa, como por exemplo, a casa do Bob com a chave única de 5124, enquanto o valor seria talvez Bob (e o seu material).
 
 ```javascript
 hashtable["5124"] = "Bob"
@@ -168,7 +168,7 @@ Se visualizarmos as nossas 64 partições como um anel, `favorite` recai aqui:
 
 ![Anel do Riak](../assets/ring0.svg)
 
-Pode-se ter perguntado: "Ele não acabou de dizer que o Riak sugere um mínimo de 5 nós? Como podemos colocar 64 partições em 5 nós?". Na verdade, cada nó tem mais que uma partição, cada uma gerida por um *vnode*, ou *nó virtual*.
+"Ele não acabou de dizer que o Riak sugere um mínimo de 5 nós? Como podemos colocar 64 partições em 5 nós?". Na verdade, cada nó tem mais que uma partição, cada uma gerida por um *vnode*, ou *nó virtual*.
 
 Contamos à volta do anel de vnodes por ordem, atribuindo a cada nó o próximo vnode disponível, até que todos os vnodes sejam contabilizados. Logo a partição/vnode 1 seria do Nó A, o vnode 2 seria do Nó B, até ao vnode 5 que seria do Nó E. De seguida continuamos a dar ao Nó A o vnode 6, ao Nó B o vnode 7, e assim por diante, até que os vnodes estejam esgotados, resultando nesta lista:
 
@@ -305,14 +305,14 @@ Como foi mencionado antes, nós ignoramos os tempos reais para este exemplo, mas
 
 <aside id="acid" class="sidebar"><h3>O Relacional Distribuído não está Isento</h3>
 
-Você pode-se ter perguntado por que não distribuir uma comum base de dados relacional. Afinal, o MySQL tem a capacidade de formar clusters, e é ACID, certo? Sim e não.
+Então porque não instalar uma comum base de dados relacional. Afinal, o MySQL tem a capacidade de formar clusters, e é ACID (<em>Atómico</em>, *Coerente*, *Isolável* e *Durável*), certo? Sim e não.
 
 Um nó por si só é ACID, mas o cluster inteiro não consegue ser, a não ser que haja perda de disponibilidade, e muitas vezes ainda pior, um aumento na latência. Quando se escreve para um nó primário e existe replicação para um nó secundário, pode ocorrer uma partição de rede. Para continuar disponível, o nó secundário vai deixar de estar sincronizado (mas será inevitavelmente coerente).
 
 Ou toda a transação pode falhar, fazendo com que todo o cluster fique indisponível. Mesmo as base de dados ACID não podem escapar ao teorema de CAP.
 </aside>
 
-Ao contrário de base de dados de um único nó como o Neo4j ou o PostgreSQL, o Riak não suporta transações *ACID*. O bloqueio de vários servidores ia matar a disponibilidade das escritas, e igualmente preocupante, ia aumentar a latência. Enquanto as transações ACID prometem <em>Atomicidade</em>, *Coerência*, *Isolamento* e *Durabilidade*---o Riak e as outras base de dados NoSQL seguem o *BASE*, ou *Basicamente Disponível*, *Estado Transiente* e *Inevitavelmente Coerente*.
+Ao contrário de base de dados de um único nó como o Neo4j ou o PostgreSQL, o Riak não suporta transações *ACID*. O bloqueio de vários servidores ia matar a disponibilidade das escritas, e igualmente preocupante, ia aumentar a latência. Enquanto as transações ACID prometem *Atomicidade*, *Coerência*, *Isolamento* e *Durabilidade*---o Riak e as outras base de dados NoSQL seguem o *BASE*, ou *Basicamente Disponível*, *Estado Transiente* e *Inevitavelmente Coerente*.
 
 A sigla BASE foi concebida como um sinónimo para as metas das bases de dados não transacionais/ACID como o Riak. É dado como aceite que a disponibilidade nunca é perfeita (basicamente disponível), todos os dados estão em mudança (estado transiente), e que a coerência é geralmente inatingível (inevitavelmente coerente).
 
