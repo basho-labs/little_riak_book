@@ -110,7 +110,7 @@
 \newcommand{\presect}{<%= config['presect'] %>}
 \newcommand{\postsect}{<%= config['postsect'] %>}
 \renewcommand{\chaptermark}[1]{\markboth{\textbf{\prechap \thechapter \postchap}\hspace*{1ex}#1}{}}
-\renewcommand{\sectionmark}[1]{\markright{\textbf{\presect \thesection \postsect}\hspace*{1ex}#1}}
+% \renewcommand{\sectionmark}[1]{\markright{\textbf{\presect \thesection \postsect}\hspace*{1ex}#1}}
 \newcommand{\chap}[1]{\newpage\thispagestyle{empty}\chapter{#1}\label{chap:\thechapter}}
 \newcommand{\chapref}[1]{\hyperref[chap:#1]{\prechap #1\postchap}}
 \newcommand{\imgref}[1]{\hyperref[img:#1]{<%= config['fig'] %>#1}}
