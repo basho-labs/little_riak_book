@@ -70,9 +70,9 @@ Riak functions similarly to a very large hash space. Depending on your backgroun
 
 <h3>Key and Value</h3>
 
-Key/value is the most basic construct in all of computerdom. You can think of a key like a home address, such as Bob's house with the unique key 5124, while the value would be maybe Bob (and his stuff).
-
 ![A Key is an Address](../assets/decor/addresses.png)
+
+Key/value is the most basic construct in all of computerdom. You can think of a key like a home address, such as Bob's house with the unique key 5124, while the value would be maybe Bob (and his stuff).
 
 ```javascript
 hashtable["5124"] = "Bob"
@@ -176,7 +176,7 @@ If we visualize our 64 partitions as a ring, `favorite` falls here.
 
 ![Riak Ring](../assets/ring0.svg)
 
-You may have wondered, "Didn't he say that Riak suggests a minimum of 5 nodes? How can we put 64 partitions on 5 nodes?" We just give each node more than one partition, each of which is managed by a *vnode*, or *virtual node*.
+"Didn't he say that Riak suggests a minimum of 5 nodes? How can we put 64 partitions on 5 nodes?" We just give each node more than one partition, each of which is managed by a *vnode*, or *virtual node*.
 
 We count around the ring of vnodes in order, assigning each node to the next available vnode, until all vnodes are accounted for. So partition/vnode 1 would be owned by Node A, vnode 2 owned by Node B, up to vnode 5 owned by Node E. Then we continue by giving Node A vnode 6, Node B vnode 7, and so on, until our vnodes have been exhausted, leaving us this list.
 
@@ -313,9 +313,9 @@ As mentioned above, we disregarded timestamps for this illustration, but they co
 
 <aside id="acid" class="sidebar"><h3>Distributed Relational is Not Exempt</h3>
 
-You may have wondered why we don't just distribute a standard relational database. After all, MySQL has the ability to cluster, and it's ACID (<em>Atomic</em>, *Consistent*, *Isolated*, and *Durable*), right? Yes and no.
+So why don't we just distribute a standard relational database? MySQL has the ability to cluster, and it's ACID (<em>Atomic</em>, *Consistent*, *Isolated*, *Durable*), right? Yes and no.
 
-A single node in the cluster is ACID, but the entire cluster is not without a loss of availability, and often worse, increased latency. When you write to a primary node, and a secondary node is replicated to, a network partition can occur. To remain available, the secondary will not be in sync (eventually consistent). Have you ever loaded from a backup on database failure, but the dataset was incomplete by a few hours? Same idea.
+A single node in the cluster is ACID, but the entire cluster is not without a loss of availability and (often worse) increased latency. When you write to a primary node, and a secondary node is replicated to, a network partition can occur. To remain available, the secondary will not be in sync (eventually consistent). Have you ever loaded from a backup on database failure, but the dataset was incomplete by a few hours? Same idea.
 
 Or, the entire transaction can fail, making the whole cluster unavailable. Even ACID databases cannot escape the scourge of CAP.
 </aside>
