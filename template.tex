@@ -22,6 +22,7 @@
 \usepackage{caption}
 \usepackage{pdfpages}
 \usepackage{wrapfig}
+\usepackage{perpage}
 
 \definecolor{shadecolor}{gray}{1.00}
 
@@ -221,6 +222,8 @@
 \end{center}
 \setcounter{tocdepth}{4}
 \tableofcontents\newpage\thispagestyle{empty}
+
+\renewcommand{\thefootnote}{\arabic{footnote}}
 
 \mainmatter
 \fancyhf{}

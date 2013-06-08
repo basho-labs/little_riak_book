@@ -15,7 +15,7 @@ $root = $here #File.join($here, '..')
 $outDir = File.join($root, 'pdf')
 
 def gen_pdf(languages)
-  # I hate this with a passion. How can we fix the 'svg' name issue with ?
+  # I hate this with a passion. Need to fix the 'svg' suffix failure issue
   def figures(&block)
     begin
       Dir::mkdir("#$root/figures") rescue nil
@@ -60,7 +60,7 @@ def gen_pdf(languages)
       gsub(/([\$\#\_\^\%])/, '\\\\' + '\1{}')
   end
 
-  def pre_pandoc(string, config)
+  def pre_pandoc(string, config, isprint)
     replace(string) do
       # Pandoc discards #### subsubsections - this hack recovers them
       # be careful to try to match the longest sharp string first
@@ -74,21 +74,27 @@ def gen_pdf(languages)
       # s %r{\<aside.*?\>.*?\<h3\>(.+?)\<\/h3\>(.+?)\<\/aside\>}im, "ASIDE: \\1\n\\2\nENDASIDE"
       s %r{\<aside.*?\>(.+?)\<\/aside\>}im, "ASIDE: \\1\n:ENDASIDE"
 
-      # Turns URLs into clickable links
-      s %r{\`(http:\/\/[A-Za-z0-9\/\%\&\=\-\_\\\.]+)\`}, '<\1>'
-      s %r{(\n\n)\t(http:\/\/[A-Za-z0-9\/\%\&\=\-\_\\\.]+)\n([^\t]|\t\n)}, '\1<\2>\1'
-
       # Process figures
       s /^\!\[(.*?)\]\(\.\.\/(.*?\/decor\/drinks.*?)\)/, 'DEC2: \2'
       s /^\!\[(.*?)\]\(\.\.\/(.*?\/decor\/.*?)\)/, 'DEC: \2'
       s /^\!\[(.*?)\]\(\.\.\/assets\/(.*?)\.\w{3}\)/, 'FIG: \2 --- \1'
+
+      # TODO: perhaps this should be post pandoc?
+      if isprint
+        # Extract absolute any clickable links to be a footnote
+        # ignore any local links
+        s %r{\[(.*?)\]\((https?\:\/\/.*?)\)}, 'LINK: \2 ---*\1*---'
+        s %r{\<a\s+.*?href=['"]?(https?\:\/\/.*?)['"]?\>(.*?)\<\/a\>}, 'LINK: \1 ---*\2*---'
+      else
+        # Make any URL a clickable links
+        s %r{\`(https?:\/\/[A-Za-z0-9\/\%\&\=\-\_\\\.]+)\`}, '<\1>'
+        s %r{(\n\n)\t(https?:\/\/[A-Za-z0-9\/\%\&\=\-\_\\\.]+)\n([^\t]|\t\n)}, '\1<\2>\1'
+      end
     end
   end
 
-  def post_pandoc(string, config)
+  def post_pandoc(string, config, isprint)
     replace(string) do
-      space = /\s/
-
       # Reformat for the book documentclass as opposed to article
       s '\section', '\chap'
       s '\sub', '\\'
@@ -101,9 +107,9 @@ def gen_pdf(languages)
       s /ASIDE: (.+?)\:ENDASIDE/m, "\\begin{aside}\n\\1\\end{aside}"
 
       # Enable proper cross-reference
-      s /#{config['fig'].gsub(space, '\s')}\s*(\d+)\-\-(\d+)/, '\imgref{\1.\2}'
-      s /#{config['tab'].gsub(space, '\s')}\s*(\d+)\-\-(\d+)/, '\tabref{\1.\2}'
-      s /#{config['prechap'].gsub(space, '\s')}\s*(\d+)(\s*)#{config['postchap'].gsub(space, '\s')}/, '\chapref{\1}\2'
+      s /#{config['fig'].gsub(/\s/, '\s')}\s*(\d+)\-\-(\d+)/, '\imgref{\1.\2}'
+      s /#{config['tab'].gsub(/\s/, '\s')}\s*(\d+)\-\-(\d+)/, '\tabref{\1.\2}'
+      s /#{config['prechap'].gsub(/\s/, '\s')}\s*(\d+)(\s*)#{config['postchap'].gsub(/\s/, '\s')}/, '\chapref{\1}\2'
 
       # Miscellaneous fixes
       # s /DEC: (.*)/, "\\begin{wrapfigure}{r}{.3\\textwidth}\n  \\includegraphics[scale=1.0]{\\1}\n\\end{wrapfigure}"
@@ -113,6 +119,11 @@ def gen_pdf(languages)
       s '\begin{enumerate}[1.]', '\begin{enumerate}'
       s /(\w)--(\w)/, '\1-\2'
       s /``(.*?)''/, "#{config['dql']}\\1#{config['dqr']}"
+
+      if isprint
+        # Extract any clickable links to become a footnote
+        s /LINK\: (.*?) \-{3}(.*?)\-{3}/, '\2\\footnote{\1}'
+      end
 
       # Typeset the maths in the book with TeX
       s '\verb!p = (n(n-1)/2) * (1/2^160))!', '$p = \frac{n(n-1)}{2} \times \frac{1}{2^{160}}$)'
@@ -176,18 +187,18 @@ def gen_pdf(languages)
       end.join("\n\n")
 
       ### Output a PDF suitable for a 8.5x11 PDF
+      isprint = false
       print "\tParsing markdown... "
       latex = IO.popen('pandoc -p --no-wrap -f markdown -t latex', 'w+') do |pipe|
-        pipe.write(pre_pandoc(markdown, config))
+        pipe.write(pre_pandoc(markdown, config, isprint))
         pipe.close_write
-        post_pandoc(pipe.read, config)
+        post_pandoc(pipe.read, config, isprint)
       end
       puts "done"
 
       print "\tCreating riaklil-#{lang}.tex... "
       dir = "#$here/rendered"
       File.open("#{dir}/riaklil-#{lang}.tex", 'w') do |file|
-        isprint = false
         file.write(template.result(binding))
       end
       puts "done"
@@ -213,18 +224,18 @@ def gen_pdf(languages)
       end
 
       ### Output a PDF suitable for a 6x9 print book 
+      isprint = true
       print "\tParsing markdown for print... "
       latex = IO.popen('pandoc -p --no-wrap -f markdown -t latex', 'w+') do |pipe|
-        pipe.write(pre_pandoc(markdown, config))
+        pipe.write(pre_pandoc(markdown, config, isprint))
         pipe.close_write
-        post_pandoc(pipe.read, config)
+        post_pandoc(pipe.read, config, isprint)
       end
       puts "done"
 
       print "\tCreating riaklil-print-#{lang}.tex... "
       dir = "#$here/rendered"
       File.open("#{dir}/riaklil-print-#{lang}.tex", 'w') do |file|
-        isprint = true
         file.write(template.result(binding))
       end
       puts "done"

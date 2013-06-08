@@ -189,7 +189,7 @@ do, in fact, I didn't bother discussing it for most of this book.
 
 <h3>Install</h3>
 
-The Riak docs have all of the information you need to [Install](http://docs.basho.com/riak/latest/tutorials/installation/) it per operating system. The general sequence is:
+The Riak docs have all of the information you need to [install](http://docs.basho.com/riak/latest/tutorials/installation/) it per operating system. The general sequence is:
 
 1. Install Erlang
 2. Get Riak from a package manager (<em>a la</em> `apt-get` or Homebrew), or build from source (the results end up under `rel/riak`, with the binaries under `bin`).
@@ -948,8 +948,8 @@ these projects are lager, for logging, and riak_sysmon, for
 monitoring. Both have reasonable defaults and well-documented
 settings.
 
-* [https://github.com/basho/lager](https://github.com/basho/lager)
-* [https://github.com/basho/riak_sysmon](https://github.com/basho/riak_sysmon)
+* https://github.com/basho/lager
+* https://github.com/basho/riak_sysmon
 
 ```bash
 %% Lager Config
@@ -1017,7 +1017,7 @@ you run across deprecated configuration, or documentation.
 You may recall that we skipped the `diag` command while looking through
 `riak-admin`, but it's time to circle back around.
 
-[Riaknostic](http://http://riaknostic.basho.com/) is a diagnostic tool
+[Riaknostic](http://riaknostic.basho.com/) is a diagnostic tool
 for Riak, meant to run a suite of checks against an installation to
 discover potential problems. If it finds any, it also recommends
 potential resolutions.

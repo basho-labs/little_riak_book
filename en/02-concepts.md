@@ -98,7 +98,7 @@ Successive requests for `5124` will now return `Claire`.
 
 Addresses in Riakville are more than a house number, but also a street. There could be another 5124 on another street, so the way we can ensure a unique address is by requiring both, as in *5124 Main Street*.
 
-*Buckets* in Riak are analogous to street names: they provide logical [namespaces](http://en.wikipedia.org/wiki/Namespace_(computer_science\)) so that identical keys in different buckets will not conflict.
+*Buckets* in Riak are analogous to street names: they provide logical [namespaces](http://en.wikipedia.org/wiki/Namespace) so that identical keys in different buckets will not conflict.
 
 For example, while Alice may live at *5122 Main Street*, there may be a gas station at *5122 Bagshot Row*.
 
@@ -115,7 +115,7 @@ For convenience, we call a *bucket/key + value* pair an *object*, sparing oursel
 
 ## Replication and Partitions
 
-Distributing data across several nodes is how Riak is able to remain highly available, tolerating outages and network partitions. Riak combines two styles of distribution to achieve this: [replication](http://en.wikipedia.org/wiki/Replication_(computing\)) and [partitions](http://en.wikipedia.org/wiki/Partition_(database\)).
+Distributing data across several nodes is how Riak is able to remain highly available, tolerating outages and network partitions. Riak combines two styles of distribution to achieve this: [replication](http://en.wikipedia.org/wiki/Replication) and [partitions](http://en.wikipedia.org/wiki/Partition).
 
 <h3>Replication</h3>
 

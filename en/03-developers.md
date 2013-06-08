@@ -879,7 +879,8 @@ curl -XPUT http://localhost:8098/riak/people/ryan \
   -d "Ryan Zezeski"
 ```
 
-To execute a search, request `/search/[bucket]` along with any distributed [Solr parameters](http://wiki.apache.org/solr/CommonQueryParameters). Here we
+To execute a search, request `/search/[bucket]` along with any distributed
+[Solr parameters](http://wiki.apache.org/solr/CommonQueryParameters). Here we
 query for documents that contain a word starting with `zez`, request the
 results to be in json format (`wt=json`), only return the Riak key
 (`fl=_yz_rk`).
