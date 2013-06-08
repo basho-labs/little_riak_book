@@ -20,7 +20,7 @@ Erlang, Java, PHP, Python, Ruby
 
 Including community-supplied drivers, supported languages are even more numerous: C/C++, Clojure, Common Lisp, Dart, Go, Groovy, Haskell, JavaScript (jQuery and NodeJS), Lisp Flavored Erlang, .NET, Perl, PHP, Play, Racket, Scala, Smalltalk.
 
-There are also dozens of other [project-specific addons](http://docs.basho.com/riak/latest/references/Community-Developed-Libraries-and-Projects/).
+Dozens of other project-specific addons can be found in the [docs](http://docs.basho.com/riak/latest/).
 </aside>
 
 Since Riak is a KV database, the most basic commands are setting and getting values. We'll use the HTTP interface, via curl, but we could just as easily use Erlang, Ruby, Java, or any other supported language.

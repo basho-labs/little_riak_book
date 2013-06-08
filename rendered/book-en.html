@@ -131,11 +131,11 @@ Other formats:
 
 <p>There&#39;s a lot of discussion around what constitutes <em>Big Data</em>.</p>
 
-<p>I have a 6 Terabyte RAID in my house to store videos and other backups. Does that count? On the other hand, CERN grabbed about <a href="http://www.itbusinessedge.com/cm/blogs/lawson/the-big-data-software-problem-behind-cerns-higgs-boson-hunt/?cs=50736">200 Petabytes</a> looking for the Higgs boson.</p>
+<p>I have a 6 Terabyte RAID in my house to store videos and other backups. Does that count? On the other hand, CERN grabbed about 200 Petabytes looking for the Higgs boson.</p>
 
 <!-- image: raid box -->
 
-<p>It&#39;s a hard number to pin down, because Big Data is a personal figure. What&#39;s big to one might be small to another. This is why many definitions don&#39;t refer to byte count at all, but instead about relative potentials. A reasonable, albeit wordy, <a href="http://www.gartner.com/DisplayDocument?ref=clientFriendlyUrl&amp;id=2057415">definition of Big Data</a> is given by Gartner:</p>
+<p>It&#39;s a hard number to pin down, because Big Data is a personal figure. What&#39;s big to one might be small to another. This is why many definitions don&#39;t refer to byte count at all, but instead about relative potentials. A reasonable, albeit wordy, definition of Big Data is provided by Gartner:</p>
 
 <p><blockquote><em>Big Data are high-volume, high-velocity, and/or high-variety information figures that require new forms of processing to enable enhanced decision making, insight discovery and process optimization.</em></blockquote></aside></p>
 
@@ -151,7 +151,7 @@ Other formats:
 
 <h2 id="toc_3">About This Book</h2>
 
-<p>This is not an &quot;install and follow along&quot; guide. This is a &quot;read and comprehend&quot; guide. Don&#39;t feel compelled to have Riak, or even have a computer handy, when starting this book. You may feel like installing at some point, and if so, instructions can be found on the <a href="http://docs.basho.com">Riak docs</a>.</p>
+<p>This is not an &quot;install and follow along&quot; guide. This is a &quot;read and comprehend&quot; guide. Don&#39;t feel compelled to have Riak, or even have a computer handy, when starting this book. You may feel like installing at some point, and if so, instructions can be found in the <a href="http://docs.basho.com">Riak docs</a>.</p>
 
 <p>In my opinion, the most important section of this book is the <a href="#concepts">concepts chapter</a>. If you already have a little knowledge it may start slow, but it picks up in a hurry. After laying the theoretical groundwork, we&#39;ll move onto helping <a href="#developers">developers</a> use Riak, by learning how to query it and tinker with some settings. Finally, we&#39;ll go over the basic details that <a href="#operators">operators</a> should know, such as how to set up a Riak cluster, configure some values, use optional tools, and more.</p>
 <h1 id="toc_4">Concepts</h1>
@@ -253,7 +253,7 @@ multi-datacenter distributed systems like <em>Riak Enterprise</em>.</p>
 
 <p>Addresses in Riakville are more than a house number, but also a street. There could be another 5124 on another street, so the way we can ensure a unique address is by requiring both, as in <em>5124 Main Street</em>.</p>
 
-<p><em>Buckets</em> in Riak are analogous to street names: they provide logical <a href="http://en.wikipedia.org/wiki/Namespace_(computer_science)">namespaces</a> so that identical keys in different buckets will not conflict.</p>
+<p><em>Buckets</em> in Riak are analogous to street names: they provide logical <a href="http://en.wikipedia.org/wiki/Namespace">namespaces</a> so that identical keys in different buckets will not conflict.</p>
 
 <p>For example, while Alice may live at <em>5122 Main Street</em>, there may be a gas station at <em>5122 Bagshot Row</em>.</p>
 
@@ -269,7 +269,7 @@ bagshot[&quot;5122&quot;] = &quot;Gas&quot;
 
 <h2 id="toc_7">Replication and Partitions</h2>
 
-<p>Distributing data across several nodes is how Riak is able to remain highly available, tolerating outages and network partitions. Riak combines two styles of distribution to achieve this: <a href="http://en.wikipedia.org/wiki/Replication_(computing)">replication</a> and <a href="http://en.wikipedia.org/wiki/Partition_(database)">partitions</a>.</p>
+<p>Distributing data across several nodes is how Riak is able to remain highly available, tolerating outages and network partitions. Riak combines two styles of distribution to achieve this: <a href="http://en.wikipedia.org/wiki/Replication">replication</a> and <a href="http://en.wikipedia.org/wiki/Partition">partitions</a>.</p>
 
 <h3>Replication</h3>
 
@@ -508,7 +508,7 @@ Erlang, Java, PHP, Python, Ruby</p>
 
 <p>Including community-supplied drivers, supported languages are even more numerous: C/C++, Clojure, Common Lisp, Dart, Go, Groovy, Haskell, JavaScript (jQuery and NodeJS), Lisp Flavored Erlang, .NET, Perl, PHP, Play, Racket, Scala, Smalltalk.</p>
 
-<p>There are also dozens of other <a href="http://docs.basho.com/riak/latest/references/Community-Developed-Libraries-and-Projects/">project-specific addons</a>.
+<p>Dozens of other project-specific addons can be found in the <a href="http://docs.basho.com/riak/latest/">docs</a>.
 </aside></p>
 
 <p>Since Riak is a KV database, the most basic commands are setting and getting values. We&#39;ll use the HTTP interface, via curl, but we could just as easily use Erlang, Ruby, Java, or any other supported language.</p>
@@ -1341,7 +1341,8 @@ up with an index (these details can be found in the next chapter).</p>
   -d &quot;Ryan Zezeski&quot;
 </code></pre>
 
-<p>To execute a search, request <code>/search/[bucket]</code> along with any distributed <a href="http://wiki.apache.org/solr/CommonQueryParameters">Solr parameters</a>. Here we
+<p>To execute a search, request <code>/search/[bucket]</code> along with any distributed
+<a href="http://wiki.apache.org/solr/CommonQueryParameters">Solr parameters</a>. Here we
 query for documents that contain a word starting with <code>zez</code>, request the
 results to be in json format (<code>wt=json</code>), only return the Riak key
 (<code>fl=_yz_rk</code>).</p>
@@ -1615,7 +1616,7 @@ do, in fact, I didn&#39;t bother discussing it for most of this book.</p>
 
 <h3>Install</h3>
 
-<p>The Riak docs have all of the information you need to <a href="http://docs.basho.com/riak/latest/tutorials/installation/">Install</a> it per operating system. The general sequence is:</p>
+<p>The Riak docs have all of the information you need to <a href="http://docs.basho.com/riak/latest/tutorials/installation/">install</a> it per operating system. The general sequence is:</p>
 
 <ol>
 <li>Install Erlang</li>
@@ -2421,7 +2422,7 @@ you run across deprecated configuration, or documentation.</p>
 <p>You may recall that we skipped the <code>diag</code> command while looking through
 <code>riak-admin</code>, but it&#39;s time to circle back around.</p>
 
-<p><a href="http://http://riaknostic.basho.com/">Riaknostic</a> is a diagnostic tool
+<p><a href="http://riaknostic.basho.com/">Riaknostic</a> is a diagnostic tool
 for Riak, meant to run a suite of checks against an installation to
 discover potential problems. If it finds any, it also recommends
 potential resolutions.</p>
