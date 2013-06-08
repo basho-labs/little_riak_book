@@ -318,7 +318,7 @@ bagshot[&quot;5122&quot;] = &quot;Gas&quot;
 
 <p>Riak partitions are not mapped alphabetically (as we used in the examples above), but instead a partition marks a range of key hashes (SHA-1 function applied to a key). The maximum hash value is 2^160, and divided into some number of partitions---64 partitions by default (the Riak config setting is <code>ring_creation_size</code>).</p>
 
-<p>Let&#39;s walk through what all that means. If you have the key <code>favorite</code>, applying the SHA-1 algorithm would return <code>7501 7a36 ec07 fd4c 377a 0d2a 0114 00ab 193e 61db</code> in hexadecimal. With 64 partitions, each has 1/64 of the <code>2^160</code> possible values, making the first partition range from 0 to <code>2^154-1</code>, the second range is <code>2^154</code> to <code>2\*2^154-1</code>, and so on, up to the last partition <code>63\*2^154-1</code> to <code>2^160-1</code>.</p>
+<p>Let&#39;s walk through what all that means. If you have the key <code>favorite</code>, applying the SHA-1 algorithm would return <code>7501 7a36 ec07 fd4c 377a 0d2a 0114 00ab 193e 61db</code> in hexadecimal. With 64 partitions, each has 1/64 of the <code>2^160</code> possible values, making the first partition range from 0 to <code>2^154-1</code>, the second range is <code>2^154</code> to <code>2*2^154-1</code>, and so on, up to the last partition <code>63*2^154-1</code> to <code>2^160-1</code>.</p>
 
 <!-- V=lists:sum([lists:nth(X, H)*math:pow(16, X-1) || X <- lists:seq(1,string:len(H))]) / 64. -->
 
@@ -458,8 +458,6 @@ value:  pizza
 
 <p>If you&#39;re a programmer, you may notice that this is not unlike a version control system, like <strong>git</strong>, where conflicting branches may require manual merging into one.</p>
 
-<p>As mentioned above, we disregarded timestamps for this illustration, but they come into play if Riak is <strong>not</strong> configured to retain conflicting data. If conflicting writes are received on either side of a network partition, the most recently-written object (as determined by the timestamps) will be chosen when the network heals.</p>
-
 <h3>Riak and ACID</h3>
 
 <p><aside id="acid" class="sidebar"><h3>Distributed Relational is Not Exempt</h3></p>
@@ -471,11 +469,11 @@ value:  pizza
 <p>Or, the entire transaction can fail, making the whole cluster unavailable. Even ACID databases cannot escape the scourge of CAP.
 </aside></p>
 
-<p>Unlike single node databases like Neo4j or PostgreSQL, Riak does not support <em>ACID</em> transactions. Locking across multiple servers would kill write availability, and equally concerning, increase latency. While ACID transactions promise <em>Atomicity</em>, <em>Consistency</em>, <em>Isolation</em>, and <em>Durability</em>---Riak and other NoSQL databases follow <em>BASE</em>, or <em>Basically Available</em>, <em>Soft state</em>, <em>Eventually consistent</em>.</p>
+<p>Unlike single node databases like Neo4j or PostgreSQL, Riak does not support <em>ACID</em> transactions. Locking across multiple servers would can write availability, and equally concerning, increase latency. While ACID transactions promise <em>Atomicity</em>, <em>Consistency</em>, <em>Isolation</em>, and <em>Durability</em>---Riak and other NoSQL databases follow <em>BASE</em>, or <em>Basically Available</em>, <em>Soft state</em>, <em>Eventually consistent</em>.</p>
 
 <p>The BASE acronym was meant as shorthand for the goals of non-ACID-transactional databases like Riak. It is an acceptance that distribution is never perfect (basically available), all data is in flux (soft state), and that true consistency is generally untenable (eventually consistent).</p>
 
-<p>Be wary if anyone promises highly available distributed ACID transactions---it&#39;s usually couched in some diminishing adjective or caveat like <em>row transactions</em>, or <em>per node transactions</em>, which basically mean <em>not transactional</em> in terms you would normally use to define it.</p>
+<p>Look closely at promises of distributed transactions---it&#39;s often couched in some diminishing adjective or caveat like <em>row transactions</em>, or <em>per node transactions</em>, which basically mean <em>not transactional</em> in terms you would normally use to define it. I&#39;m not claiming it&#39;s impossible, but certainly worth due consideration.</p>
 
 <p>As your server count grows---especially as you introduce multiple datacenters---the odds of partitions and node failures drastically increase. My best advice is to design for it upfront.</p>
 
