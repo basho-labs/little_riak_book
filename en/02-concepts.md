@@ -307,8 +307,6 @@ Now we are back to the simple case, where requesting the value of `favorite` wil
 
 If you're a programmer, you may notice that this is not unlike a version control system, like **git**, where conflicting branches may require manual merging into one.
 
-As mentioned above, we disregarded timestamps for this illustration, but they come into play if Riak is **not** configured to retain conflicting data. If conflicting writes are received on either side of a network partition, the most recently-written object (as determined by the timestamps) will be chosen when the network heals.
-
 <h3>Riak and ACID</h3>
 
 <aside id="acid" class="sidebar"><h3>Distributed Relational is Not Exempt</h3>
