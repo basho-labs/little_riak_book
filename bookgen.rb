@@ -14,46 +14,25 @@ $here = File.expand_path(File.dirname(__FILE__))
 $root = $here #File.join($here, '..')
 $outDir = File.join($root, 'pdf')
 
-$figures = {
-  # 'cover' => 'cover',
-  # 'decor/roulette' => '1.1',
-  # 'decor/addresses' => '2.1',
-  'replication' => '2.1',
-  'partitions' => '2.2',
-  'replpart' => '2.3',
-  'ring0' => '2.4',
-  'ring1' => '2.5',
-  'nrw' => '2.6',
-  # 'decor/drinks.png' => '3.1',
-  'mapreduce' => '3.1',
-  'top' => '4.1',
-  'riak-stack' => '4.2',
-  'riak-stack-erlang' => '4.3',
-  'riak-stack-core' => '4.4',
-  'riak-stack-kv' => '4.5',
-  'riak-stack-pipe' => '4.6',
-  'riak-stack-yokozuna' => '4.7',
-  'riak-stack-backend' => '4.8',
-  'riak-stack-api' => '4.9',
-  'control-snapshot' => '4.10',
-  'control-cluster' => '4.11',
-}
-
 def gen_pdf(languages)
+  # I hate this with a passion. How can we fix the 'svg' name issue with ?
   def figures(&block)
     begin
-      Dir::mkdir("#$root/figures")
+      Dir::mkdir("#$root/figures") rescue nil
+      Dir::mkdir("#$root/figures/decor") rescue nil
       Dir["#$root/assets/*.pdf","#$root/assets/*.png","#$root/assets/decor/*.png"].each do |file|
-        assetname = file.sub(/.*?\/assets\/(.*?)\.\w{3}$/, '\1')
-        next unless figure = $figures[assetname]
-        cp file, file.sub(/assets\/(.*?)\.\w{3}/, "figures/#{figure}.png")
+        cp file, file.sub(/assets\/(.*?)\.\w{3}/, "figures/\\1.png")
       end
       block.call
     ensure
-      Dir["#$root/figures/*"].each do |file|
-        rm(file)
+      Dir["#$root/figures/decor/*"].each do |file|
+        rm(file) rescue nil
       end
-      Dir::unlink("#$root/figures")
+      Dir::unlink("#$root/figures/decor") rescue nil
+      Dir["#$root/figures/*"].each do |file|
+        rm(file) rescue nil
+      end
+      Dir::unlink("#$root/figures") rescue nil
     end
   end
 
@@ -100,9 +79,9 @@ def gen_pdf(languages)
       s %r{(\n\n)\t(http:\/\/[A-Za-z0-9\/\%\&\=\-\_\\\.]+)\n([^\t]|\t\n)}, '\1<\2>\1'
 
       # Process figures
-      s /^\!\[(.*?)\]\(..\/(.*?\/decor\/drinks.*?)\)/, 'DEC2: \2'
-      s /^\!\[(.*?)\]\(..\/(.*?\/decor\/.*?)\)/, 'DEC: \2'
-      s /^\!\[(.*?)\]\((.*?)\)/, 'FIG: \1'
+      s /^\!\[(.*?)\]\(\.\.\/(.*?\/decor\/drinks.*?)\)/, 'DEC2: \2'
+      s /^\!\[(.*?)\]\(\.\.\/(.*?\/decor\/.*?)\)/, 'DEC: \2'
+      s /^\!\[(.*?)\]\(\.\.\/assets\/(.*?)\.\w{3}\)/, 'FIG: \2 --- \1'
     end
   end
 
@@ -130,7 +109,7 @@ def gen_pdf(languages)
       # s /DEC: (.*)/, "\\begin{wrapfigure}{r}{.3\\textwidth}\n  \\includegraphics[scale=1.0]{\\1}\n\\end{wrapfigure}"
       s /DEC: (.*)/, "\\begin{wrapfigure}{r}{.4\\textwidth}\n  \\includegraphics[scale=1.0]{\\1}\n\\end{wrapfigure}"
       s /DEC2: (.*)/, "\\begin{wrapfigure}{r}{.65\\textwidth}\n  \\includegraphics[scale=1.0]{\\1}\n\\end{wrapfigure}"
-      s /FIG: (.*)/, '\img{\1}'
+      s /FIG: (.*?) \-\-\- (.*)/, '\img{\1}{\2}'
       s '\begin{enumerate}[1.]', '\begin{enumerate}'
       s /(\w)--(\w)/, '\1-\2'
       s /``(.*?)''/, "#{config['dql']}\\1#{config['dqr']}"
@@ -163,12 +142,11 @@ def gen_pdf(languages)
         \\end{table}")
       end
 
+      # char13 doesn't render right with pandoc
+      s /\{\\char13\}/, "'"
+      s /(\d+)\\\^\{\}(\d+)/, "$\\1^{\\2}$"
+
       # hack fixs of bad bash renderer
-      s %r"\\\{\"name\"\:\"billy\"\\\}", '\'\{"name":"billy"\}\''
-      s %r"\\\{\"name\"\:\"aaron\"\\\}", '\'\{"name":"aaron"\}\''
-      s %r"\\\{\"paid\"\:true\\\}", '\'\{"paid":true\}\''
-      s %r"\\\{\"props\"\:\\\{\"n_val\"\:5\\\}\\\}", '\'\{"props":\{"n_val":5\}\}\''
-      s %r"\\\{\"props\"\:\\\{\"backend\"\:\"memory_multi\"\\\}\\\}", '\'\{"props":\{"backend":"memory_multi"\}\}\''
       s /we\ execute /, "we execute \\linebreak[4]"
 
       # Shaded verbatim block
@@ -253,11 +231,11 @@ def gen_pdf(languages)
 
       3.times do |i|
         print "\t\tPass #{i + 1}... "
-        IO.popen("xelatex -papersize=letter -output-directory=\"#{dir}\" \"#{dir}/riaklil-print-#{lang}.tex\" 2>&1") do |pipe|
+        IO.popen("xelatex --debug -papersize=letter -output-directory=\"#{dir}\" \"#{dir}/riaklil-print-#{lang}.tex\" 2>&1") do |pipe|
           unless $DEBUG
             if $_[0..1]=='! '
               puts "failed with:\n\t\t\t#{$_.strip}"
-              puts "\tConsider running this again with --debug."
+              # puts "\tConsider running this again with --debug."
               abort = true
             end while not abort and pipe.gets
           else

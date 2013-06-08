@@ -135,13 +135,13 @@ Other formats:
 
 <!-- image: raid box -->
 
-<p>It&#39;s a hard number to pin down, because Big Data is a personal figure. What&#39;s big to one might be small to another. This is why many definitions don&#39;t refer to byte count at all, but instead about relative potentials. A reasonable, albeit wordy, <a href="http://www.gartner.com/DisplayDocument?ref=clientFriendlyUrl&amp;id=2057415">definition of Big Data</a> is given by Gartner.</p>
+<p>It&#39;s a hard number to pin down, because Big Data is a personal figure. What&#39;s big to one might be small to another. This is why many definitions don&#39;t refer to byte count at all, but instead about relative potentials. A reasonable, albeit wordy, <a href="http://www.gartner.com/DisplayDocument?ref=clientFriendlyUrl&amp;id=2057415">definition of Big Data</a> is given by Gartner:</p>
 
-<p><blockquote>Big Data are high-volume, high-velocity, and/or high-variety information assets that require new forms of processing to enable enhanced decision making, insight discovery and process optimization.</blockquote></aside></p>
+<p><blockquote><em>Big Data are high-volume, high-velocity, and/or high-variety information figures that require new forms of processing to enable enhanced decision making, insight discovery and process optimization.</em></blockquote></aside></p>
 
 <h3>Always Bet on Riak</h3>
 
-<p>The sweet spot of Riak is high-volume (data that&#39;s available to read and write when you need it), high-velocity (easily responds to growth), and high-variety information assets (you can store any type of data as a value).</p>
+<p>The sweet spot of Riak is high-volume (data that&#39;s available to read and write when you need it), high-velocity (easily responds to growth), and high-variety information figures (you can store any type of data as a value).</p>
 
 <p>Riak was built as a solution to real Big Data problems, based on the <em>Amazon Dynamo</em> design. Dynamo is a highly available design---meaning that it responds to requests quickly at very large scales, even if your application is storing and serving terabytes of data a day. Riak had been used in production prior to being open-sourced in 2009. It&#39;s currently used by Github, Comcast, Voxer, Disqus and others, with the larger systems storing hundreds of TBs of data, and handling several GBs per node daily.</p>
 
@@ -228,9 +228,9 @@ multi-datacenter distributed systems like <em>Riak Enterprise</em>.</p>
 
 <h3>Key and Value</h3>
 
-<p>Key/value is the most basic construct in all of computerdom. You can think of a key like a home address, such as Bob&#39;s house with the unique key 5124, while the value would be maybe Bob (and his stuff).</p>
-
 <p><img src="../assets/decor/addresses.png" alt="A Key is an Address"></p>
+
+<p>Key/value is the most basic construct in all of computerdom. You can think of a key like a home address, such as Bob&#39;s house with the unique key 5124, while the value would be maybe Bob (and his stuff).</p>
 
 <pre><code class="javascript">hashtable[&quot;5124&quot;] = &quot;Bob&quot;
 </code></pre>
@@ -318,7 +318,7 @@ bagshot[&quot;5122&quot;] = &quot;Gas&quot;
 
 <p>Riak partitions are not mapped alphabetically (as we used in the examples above), but instead a partition marks a range of key hashes (SHA-1 function applied to a key). The maximum hash value is 2^160, and divided into some number of partitions---64 partitions by default (the Riak config setting is <code>ring_creation_size</code>).</p>
 
-<p>Let&#39;s walk through what all that means. If you have the key <code>favorite</code>, applying the SHA-1 algorithm would return <code>7501 7a36 ec07 fd4c 377a 0d2a 0114 00ab 193e 61db</code> in hexadecimal. With 64 partitions, each has 1/64 of the 2^160 possible values, making the first partition range from 0 to 2^154-1, the second range is 2^154 to 2*2^154-1, and so on, up to the last partition 63*2^154-1 to 2^160-1.</p>
+<p>Let&#39;s walk through what all that means. If you have the key <code>favorite</code>, applying the SHA-1 algorithm would return <code>7501 7a36 ec07 fd4c 377a 0d2a 0114 00ab 193e 61db</code> in hexadecimal. With 64 partitions, each has 1/64 of the <code>2^160</code> possible values, making the first partition range from 0 to <code>2^154-1</code>, the second range is <code>2^154</code> to <code>2\*2^154-1</code>, and so on, up to the last partition <code>63\*2^154-1</code> to <code>2^160-1</code>.</p>
 
 <!-- V=lists:sum([lists:nth(X, H)*math:pow(16, X-1) || X <- lists:seq(1,string:len(H))]) / 64. -->
 
@@ -330,7 +330,7 @@ bagshot[&quot;5122&quot;] = &quot;Gas&quot;
 
 <p><img src="../assets/ring0.svg" alt="Riak Ring"></p>
 
-<p>You may have wondered, &quot;Didn&#39;t he say that Riak suggests a minimum of 5 nodes? How can we put 64 partitions on 5 nodes?&quot; We just give each node more than one partition, each of which is managed by a <em>vnode</em>, or <em>virtual node</em>.</p>
+<p>&quot;Didn&#39;t he say that Riak suggests a minimum of 5 nodes? How can we put 64 partitions on 5 nodes?&quot; We just give each node more than one partition, each of which is managed by a <em>vnode</em>, or <em>virtual node</em>.</p>
 
 <p>We count around the ring of vnodes in order, assigning each node to the next available vnode, until all vnodes are accounted for. So partition/vnode 1 would be owned by Node A, vnode 2 owned by Node B, up to vnode 5 owned by Node E. Then we continue by giving Node A vnode 6, Node B vnode 7, and so on, until our vnodes have been exhausted, leaving us this list.</p>
 
@@ -464,9 +464,9 @@ value:  pizza
 
 <p><aside id="acid" class="sidebar"><h3>Distributed Relational is Not Exempt</h3></p>
 
-<p>You may have wondered why we don&#39;t just distribute a standard relational database. After all, MySQL has the ability to cluster, and it&#39;s ACID (<em>Atomic</em>, <em>Consistent</em>, <em>Isolated</em>, and <em>Durable</em>), right? Yes and no.</p>
+<p>So why don&#39;t we just distribute a standard relational database? MySQL has the ability to cluster, and it&#39;s ACID (<em>Atomic</em>, <em>Consistent</em>, <em>Isolated</em>, <em>Durable</em>), right? Yes and no.</p>
 
-<p>A single node in the cluster is ACID, but the entire cluster is not without a loss of availability, and often worse, increased latency. When you write to a primary node, and a secondary node is replicated to, a network partition can occur. To remain available, the secondary will not be in sync (eventually consistent). Have you ever loaded from a backup on database failure, but the dataset was incomplete by a few hours? Same idea.</p>
+<p>A single node in the cluster is ACID, but the entire cluster is not without a loss of availability and (often worse) increased latency. When you write to a primary node, and a secondary node is replicated to, a network partition can occur. To remain available, the secondary will not be in sync (eventually consistent). Have you ever loaded from a backup on database failure, but the dataset was incomplete by a few hours? Same idea.</p>
 
 <p>Or, the entire transaction can fail, making the whole cluster unavailable. Even ACID databases cannot escape the scourge of CAP.
 </aside></p>
@@ -492,12 +492,12 @@ value:  pizza
 
 <p>It&#39;s worth mentioning that I use the word &quot;node&quot; a lot. Realistically, this means a physical/virtual server, but really, the workhorses of Riak are vnodes.</p>
 
-<p>When you write to multiple vnodes, Riak will attempt to spread values to as many physical servers as possible. However, this isn&#39;t guaranteed (for example, if you have only 4 physical servers with the default <code>n_val</code> of 3, there will be a few cases where data is copied to the same server twice). You&#39;re safe conceptualizing nodes as Riak instances, and it&#39;s simpler than qualifying &quot;vnode&quot; all the time. If something applies specifically to a vnode, I&#39;ll mention it.
+<p>When you write to multiple vnodes, Riak will attempt to spread values to as many physical servers as possible. However, this isn&#39;t guaranteed (for example, if you have only 2 physical servers with the default <code>n_val</code> of 3, some data will be copied to the same server twice). You&#39;re safe conceptualizing nodes as Riak instances, and it&#39;s simpler than qualifying &quot;vnode&quot; all the time. If something applies specifically to a vnode, I&#39;ll mention it.
 </aside></p>
 
-<p><em>We&#39;re going to hold off on the details of installing Riak at the moment. If you&#39;d like to follow along, it&#39;s easy enough to get started by following the <a href="http://docs.basho.com/riak/latest/">install documentation</a> on the website. If not, this is a perfect section to read while you sit on a train without internet connection.</em></p>
+<p><em>We&#39;re going to hold off on the details of installing Riak at the moment. If you&#39;d like to follow along, it&#39;s easy enough to get started by following the <a href="http://docs.basho.com/riak/latest/">install documentation</a> on the website (<a href="http://docs.basho.com">http://docs.basho.com</a>). If not, this is a perfect section to read while you sit on a train without an Internet connection.</em></p>
 
-<p>Developing with a Riak database is quite easy to do, once you understand some of the finer points. It is a key/value store, in the technical sense (you associate values with keys, and retrieve them using the same keys) but it offers so much more. You can embed write hooks to fire before or after a write, or index data for quick retrieval. Riak has a SOLR-based search, and lets you run MapReduce functions to extract and aggregate data across a huge cluster in a relatively short timespan. We&#39;ll show some of the bucket-specific settings developers can configure.</p>
+<p>Developing with a Riak database is quite easy to do, once you understand some of the finer points. It is a key/value store, in the technical sense (you associate values with keys, and retrieve them using the same keys) but it offers so much more. You can embed write hooks to fire before or after a write, or index data for quick retrieval. Riak has SOLR search, and lets you run MapReduce functions to extract and aggregate data across a huge cluster in relatively short timespans. We&#39;ll show some configurable bucket-specific settings.</p>
 
 <h2 id="toc_11">Lookup</h2>
 
@@ -796,7 +796,7 @@ Content-Length: 16
 
 <p>I put my custom Erlang code files under the riak installation <code>./custom/my_validators.erl</code>.</p>
 
-<pre><code class="bash">-module(my_validators).
+<pre><code class="java">-module(my_validators).
 -export([value_exists/1]).
 
 %% Object size must be greater than 0 bytes
@@ -1118,17 +1118,18 @@ then further reduced down to the calling node and returned.</p>
 prefixed by either INFO or ERROR. We want to count the number of INFO
 logs that contain the word &quot;cart&quot;.</p>
 
-<pre><code class="bash">curl -XPOST http://localhost:8098/riak/logs -d &quot;INFO: New user added&quot;
-curl -XPOST http://localhost:8098/riak/logs -d &quot;INFO: Kale added to shopping cart&quot;
-curl -XPOST http://localhost:8098/riak/logs -d &quot;INFO: Milk added to shopping cart&quot;
-curl -XPOST http://localhost:8098/riak/logs -d &quot;ERROR: shopping cart cancelled&quot;
+<pre><code class="bash">LOGS=http://localhost:8098/riak/logs
+curl -XPOST $LOGS -d &quot;INFO: New user added&quot;
+curl -XPOST $LOGS -d &quot;INFO: Kale added to shopping cart&quot;
+curl -XPOST $LOGS -d &quot;INFO: Milk added to shopping cart&quot;
+curl -XPOST $LOGS -d &quot;ERROR: shopping cart cancelled&quot;
 </code></pre>
 
 <p>MapReduce jobs can be either Erlang or JavaScript code. This time we&#39;ll go the
 easy route and write JavaScript. You execute MapReduce by posting JSON to the
 <code>/mapred</code> path.</p>
 
-<pre><code class="bash">curl -XPOST http://localhost:8098/mapred \
+<pre><code class="bash">curl -XPOST &quot;http://localhost:8098/mapred&quot; \
   -H &quot;Content-Type: application/json&quot; \
   -d @- \
 &lt;&lt;EOF
@@ -1321,7 +1322,7 @@ search engine in its own right, it made more sense to integrate the two.
 
 <p><em>Note: This is covering a project still under development. Changes are to be
 expected, so please refer to the
-<a href="https://github.com/rzezeski/yokozuna">project page</a> for the most recent
+<a href="https://github.com/basho/yokozuna">yokozuna project page</a> for the most recent
 information.</em></p>
 
 <p>Yokozuna is an extension to Riak that lets you perform searches to find
@@ -1545,7 +1546,7 @@ name that represents a particular Riak server in the cluster.</p>
 </code></pre>
 
 <p>To discover which partition the bucket/key <code>food/favorite</code> object would be stored in, for example,
-we execute <code>riak_core_util:chash_key({&lt;&lt;&quot;food&quot;&gt;&gt;, &lt;&lt;&quot;favorite&quot;&gt;&gt;})</code> and get a wacky 160 bit Erlang
+we execute <code>riak_core_util:chash_key( {&lt;&lt;&quot;food&quot;&gt;&gt;, &lt;&lt;&quot;favorite&quot;&gt;&gt;} )</code> and get a wacky 160 bit Erlang
 number we named <code>DocIdx</code> (document index).</p>
 
 <p>Just to illustrate that Erlang binary value is a real number, the next line makes it a more
@@ -1639,7 +1640,7 @@ terribly descriptive one.</p>
 
 <p>Most of these commands are self explanatory, once you know what they mean. <code>start</code> and <code>stop</code> are simple enough. <code>restart</code> means to stop the running node and restart it inside of the same Erlang VM (virtual machine), while <code>reboot</code> will take down the Erlang VM and restart everything.</p>
 
-<p>You can print the current running <code>version</code>. <code>ping</code> will return <code>pong</code> if the server is in good shape, otherwise you&#39;ll get the <em>just-similar-enough-to-be-annoying</em> response <code>pang</code> (with an <em>a</em>), or a simple <code>Node *X* not responding to pings</code> if it&#39;s not running at all.</p>
+<p>You can print the current running <code>version</code>. <code>ping</code> will return <code>pong</code> if the server is in good shape, otherwise you&#39;ll get the <em>just-similar-enough-to-be-annoying</em> response <code>pang</code> (with an <em>a</em>), or a simple <code>Node X not responding to pings</code> if it&#39;s not running at all.</p>
 
 <p><code>chkconfig</code> is useful if you want to ensure your <code>etc/app.config</code> is not broken
 (that is to say, it&#39;s parsable). I mentioned <code>attach</code> briefly above, when
@@ -1695,9 +1696,7 @@ vnode_index_deletes : 0
 ...
 </code></pre>
 
-<p>Adding JavaScript or Erlang files to Riak (as we did in the
-<a href="#developers">developers chapter</a> ) are not usable by the nodes until they are informed
-about them by the <code>js-reload</code> or <code>erl-reload</code> command.</p>
+<p>New JavaScript or Erlang files (as we did in the <a href="#developers">developers</a> chapter) are not usable by the nodes until they are informed about them by the <code>js-reload</code> or <code>erl-reload</code> command.</p>
 
 <p><code>riak-admin</code> also provides a little <code>test</code> command, so you can perform a read/write cycle
 to a node, which I find useful for testing a client&#39;s ability to connect, and the node&#39;s
@@ -1723,25 +1722,25 @@ The following commands stage changes to cluster membership. These commands
 do not take effect immediately. After staging a set of changes, the staged
 plan must be committed to take effect:
 
-   join &lt;node&gt;                    Join node to the cluster containing &lt;node&gt;
-   leave                          Have this node leave the cluster and shutdown
-   leave &lt;node&gt;                   Have &lt;node&gt; leave the cluster and shutdown
+ join &lt;node&gt;                  Join node to the cluster containing &lt;node&gt;
+ leave                        Have this node leave the cluster and shutdown
+ leave &lt;node&gt;                 Have &lt;node&gt; leave the cluster and shutdown
 
-   force-remove &lt;node&gt;            Remove &lt;node&gt; from the cluster without
-                                  first handing off data. Designed for
-                                  crashed, unrecoverable nodes
+ force-remove &lt;node&gt;          Remove &lt;node&gt; from the cluster without
+                              first handing off data. Designed for
+                              crashed, unrecoverable nodes
 
-   replace &lt;node1&gt; &lt;node2&gt;        Have &lt;node1&gt; transfer all data to &lt;node2&gt;,
-                                  and then leave the cluster and shutdown
+ replace &lt;node1&gt; &lt;node2&gt;      Have &lt;node1&gt; transfer all data to &lt;node2&gt;,
+                              and then leave the cluster and shutdown
 
-   force-replace &lt;node1&gt; &lt;node2&gt;  Reassign all partitions owned by &lt;node1&gt; to
-                                  &lt;node2&gt; without first handing off data, and
-                                  remove &lt;node1&gt; from the cluster.
+ force-replace &lt;node1&gt; &lt;node2&gt;  Reassign all partitions owned by &lt;node1&gt;
+                              to &lt;node2&gt; without first handing off data,
+                              and remove &lt;node1&gt; from the cluster.
 
 Staging commands:
-   plan                           Display the staged changes to the cluster
-   commit                         Commit the staged changes
-   clear                          Clear the staged changes
+ plan                         Display the staged changes to the cluster
+ commit                       Commit the staged changes
+ clear                        Clear the staged changes
 </code></pre>
 
 <p>To create a new cluster, you must <code>join</code> another node (any will do). Taking a
@@ -1924,7 +1923,7 @@ equivalents (<code>join</code>, <code>leave</code>, <code>force-remove</code>, <
 flagged for future removal <code>reip</code> (use <code>cluster replace</code>).</p>
 
 <p>The last command is <code>diag</code>, which leverages <a href="http://riaknostic.basho.com/">Riaknostic</a>
-installation to give you more diagnostic tools.</p>
+to give you more diagnostic tools.</p>
 
 <p>I know this was a lot to digest, and probably pretty dry. Walking through command
 line tools usually is. There are plenty of details behind many of the <code>riak-admin</code>
@@ -2529,14 +2528,17 @@ should see a snapshot page, which communicates the health of your cluster.</p>
 <p>If something is wrong, you&#39;ll see a huge red &quot;X&quot; instead of the green check mark, along
 with a list of what the trouble is.</p>
 
-<p>From here you can drill down into a view the cluster&#39;s nodes, with details on memory usage,
-partition distribution, and other status. You can also add and configure and these nodes.</p>
+<p>From here you can drill down into a view of the cluster&#39;s nodes, with details on memory usage, partition distribution, and other status. You can also add and configure these nodes, then view the plan and status of those changes.</p>
 
 <p><img src="../assets/control-cluster.png" alt="Cluster View"></p>
 
 <p>There is more in line for Riak Control, like performing MapReduce queries, stats views,
 graphs, and more coming down the pipe. It&#39;s not a universal toolkit quite yet,
 but it has a phenomenal start.</p>
+
+<p>Once your cluster is to your liking, you can manage individual nodes, either stopping or taking them down permanently. You can also find a more detailed view of an individual node, such as what percentage of the cluster it manages, or its RAM usage.</p>
+
+<p><img src="../assets/control-node-mgmt.png" alt="Node Management View"></p>
 
 <!-- ## Scaling Riak
 Vertically (by adding bigger hardware), and Horizontally (by adding more nodes).

@@ -118,7 +118,7 @@ $ bin/riak attach
 ```
 
 To discover which partition the bucket/key `food/favorite` object would be stored in, for example,
-we execute `riak_core_util:chash_key({<<"food">>, <<"favorite">>})` and get a wacky 160 bit Erlang
+we execute `riak_core_util:chash_key( {<<"food">>, <<"favorite">>} )` and get a wacky 160 bit Erlang
 number we named `DocIdx` (document index).
 
 Just to illustrate that Erlang binary value is a real number, the next line makes it a more
@@ -213,7 +213,7 @@ Usage: riak {start|stop|restart|reboot|ping|console|\
 
 Most of these commands are self explanatory, once you know what they mean. `start` and `stop` are simple enough. `restart` means to stop the running node and restart it inside of the same Erlang VM (virtual machine), while `reboot` will take down the Erlang VM and restart everything.
 
-You can print the current running `version`. `ping` will return `pong` if the server is in good shape, otherwise you'll get the *just-similar-enough-to-be-annoying* response `pang` (with an *a*), or a simple `Node *X* not responding to pings` if it's not running at all.
+You can print the current running `version`. `ping` will return `pong` if the server is in good shape, otherwise you'll get the *just-similar-enough-to-be-annoying* response `pang` (with an *a*), or a simple `Node X not responding to pings` if it's not running at all.
 
 `chkconfig` is useful if you want to ensure your `etc/app.config` is not broken
 (that is to say, it's parsable). I mentioned `attach` briefly above, when
@@ -271,9 +271,7 @@ vnode_index_deletes : 0
 ...
 ```
 
-Adding JavaScript or Erlang files to Riak (as we did in the
-[developers chapter](#developers) ) are not usable by the nodes until they are informed
-about them by the `js-reload` or `erl-reload` command.
+New JavaScript or Erlang files (as we did in the [developers](#developers) chapter) are not usable by the nodes until they are informed about them by the `js-reload` or `erl-reload` command.
 
 `riak-admin` also provides a little `test` command, so you can perform a read/write cycle
 to a node, which I find useful for testing a client's ability to connect, and the node's
@@ -509,7 +507,7 @@ equivalents (`join`, `leave`, `force-remove`, `replace`, `force-replace`), or
 flagged for future removal `reip` (use `cluster replace`).
 
 The last command is `diag`, which leverages [Riaknostic](http://riaknostic.basho.com/)
-installation to give you more diagnostic tools.
+to give you more diagnostic tools.
 
 I know this was a lot to digest, and probably pretty dry. Walking through command
 line tools usually is. There are plenty of details behind many of the `riak-admin`
@@ -532,7 +530,7 @@ sense of how to configure it properly.
 
 <h3>Erlang</h3>
 
-![Tech Stack Erlang](../assets/riak-stack-erlang.svg)
+![Tech Stack Erlang](../assets/decor/riak-stack-erlang.png)
 
 When you fire up a Riak node, it also starts up an Erlang VM (virtual machine) to run
 and manage Riak's processes. These include vnodes, process messages, gossips, resource
@@ -588,7 +586,7 @@ some optional SSL encryption settings.
 
 <h3>riak_core</h3>
 
-![Tech Stack Core](../assets/riak-stack-core.svg)
+![Tech Stack Core](../assets/decor/riak-stack-core.png)
 
 If any single component deserves the title of "Riak proper", it would
 be *Riak Core*. Core shares responsibility with projects built atop it
@@ -654,7 +652,7 @@ in the cluster (`ring_creation_size`), and several port options.
 
 <h3>riak_kv</h3>
 
-![Tech Stack KV](../assets/riak-stack-kv.svg)
+![Tech Stack KV](../assets/decor/riak-stack-kv.png)
 
 Riak KV is a key/value implementation of Riak Core. This is where the
 magic happens, such as handling requests and coordinating them for
@@ -703,7 +701,7 @@ backend settings, MapReduce, and JavaScript integration.
 
 <h3>riak_pipe</h3>
 
-![Tech Stack Pipe](../assets/riak-stack-pipe.svg)
+![Tech Stack Pipe](../assets/decor/riak-stack-pipe.png)
 
 Riak Pipe is an input/output messaging system that forms the basis of Riak's
 MapReduce. This was not always the case, and MR used to be a dedicated
@@ -789,7 +787,7 @@ precommit hooks.
 
 <h3>yokozuna</h3>
 
-![Tech Stack Yokozuna](../assets/riak-stack-yokozuna.svg)
+![Tech Stack Yokozuna](../assets/decor/riak-stack-yokozuna.png)
 
 Yokozuna is the newest addition to the Riak ecosystem. It's an integration of
 the distributed Solr search engine into Riak, and provides some extensions
@@ -806,8 +804,6 @@ it, you can choose which `solr_port` will be used.
 ```
 
 <h3>bitcask, eleveldb, memory, multi</h3>
-
-![Tech Stack Backend](../assets/riak-stack-backend.svg)
 
 Several modern databases have swappable backends, and Riak is no different in that
 respect. Riak currently supports three different storage engines: *Bitcask*,
@@ -864,6 +860,8 @@ the following options.
 ]},
 ```
 
+![Tech Stack Backend](../assets/decor/riak-stack-backend.png)
+
 With the Multi backend, you can even choose different backends
 for different buckets. This can make sense, as one bucket may hold
 user information that you wish to index (use eleveldb), while another
@@ -907,7 +905,7 @@ $ curl -XPUT http://riaknode:8098/riak/session_data \
 
 <h3>riak_api</h3>
 
-![Tech Stack API](../assets/riak-stack-api.svg)
+![Tech Stack API](../assets/decor/riak-stack-api.png)
 
 So far, all of the components we've seen have been inside the Riak
 house. The API is the front door. *In a perfect world*, the API would
@@ -1131,14 +1129,17 @@ should see a snapshot page, which communicates the health of your cluster.
 If something is wrong, you'll see a huge red "X" instead of the green check mark, along
 with a list of what the trouble is.
 
-From here you can drill down into a view the cluster's nodes, with details on memory usage,
-partition distribution, and other status. You can also add and configure and these nodes.
+From here you can drill down into a view of the cluster's nodes, with details on memory usage, partition distribution, and other status. You can also add and configure these nodes, then view the plan and status of those changes.
 
 ![Cluster View](../assets/control-cluster.png)
 
 There is more in line for Riak Control, like performing MapReduce queries, stats views,
 graphs, and more coming down the pipe. It's not a universal toolkit quite yet,
 but it has a phenomenal start.
+
+Once your cluster is to your liking, you can manage individual nodes, either stopping or taking them down permanently. You can also find a more detailed view of an individual node, such as what percentage of the cluster it manages, or its RAM usage.
+
+![Node Management View](../assets/control-node-mgmt.png)
 
 <!-- ## Scaling Riak
 Vertically (by adding bigger hardware), and Horizontally (by adding more nodes).
