@@ -3,7 +3,7 @@
 <aside class="sidebar"><h3>Uma nota sobre o "Nó"</h3>
 Vale a pena mencionar que eu uso a palavra "nó" muitas vezes. Realisticamente, isso significa um servidor físico/virtual, mas realmente, o Riak interessa-se por vnodes.
 
-Quando se escreve para múltiplos vnodes , o Riak vai tentar difundir os valores para o maior número de servidores físicos possível. No entanto, isto não é garantido (por exemplo, se só tiver 4 nós físicos com o `n_val` por defeito igual a 3, vai haver alguns casos onde os dados serão copiados duas vezes para o mesmo servidor). É mais fácil pensar nos vnodes como instâncias do Riak, e é mais simples do que estar sempre qualificar "vnode". Se alguma coisa se aplicar especificamente a um vnode, eu dizê-lo-ei explicitamente.
+Quando se escreve para múltiplos vnodes , o Riak vai tentar difundir os valores para o maior número de servidores físicos possível. No entanto, isto não é garantido (por exemplo, se só tiver 2 nós físicos com o `n_val` por defeito igual a 3, alguns dados serão copiados duas vezes para o mesmo servidor). É mais fácil pensar nos vnodes como instâncias do Riak, e é mais simples do que estar sempre qualificar "vnode". Se alguma coisa se aplicar especificamente a um vnode, eu dizê-lo-ei explicitamente.
 
 </aside>
 
@@ -20,7 +20,7 @@ Erlang, Java, PHP, Python, Ruby
 
 Incluindo os drivers fornecidos pela comunidade, as linguagens suportadas são ainda mais numerosas: C/C++, Clojure, Common Lisp, Dart, Go, Groovy, Haskell, JavaScript (jquery and nodejs), Lisp Flavored Erlang, .NET, Perl, PHP, Play, Racket, Scala, Smalltalk
 
-Há ainda dezenas de [funcionalidades específicas de variados projetos](http://docs.basho.com/riak/latest/references/Community-Developed-Libraries-and-Projects/).
+Há ainda dezenas de funcionalidades extras que podem ser encontradas na [documentação](http://docs.basho.com/riak/latest/).
 </aside>
 
 Já que o Riak é uma base de dados chave/valor, os comandos mais básicos são escrever e ler valores. Nós vamos usar a interface HTTP, através do *curl*, mas poderíamos facilmente usar Erlang, Ruby, Java ou qualquer outra linguagem suportada.
@@ -799,7 +799,7 @@ Numa tentativa de tornar o Riak Search agradável para os utilizadores, ele foi 
 
 <h3>Pesquisa (Yokozuna)</h3>
 
-*Nota: Isto cobre um projeto que ainda está sob desenvolvimento. Mudanças são esperadas, por isso vejam a [página do projeto](https://github.com/rzezeski/yokozuna) para saber das últimas novidades.*
+*Nota: Isto cobre um projeto que ainda está sob desenvolvimento. Mudanças são esperadas, por isso vejam a [página do projeto do yokozuna](https://github.com/basho/yokozuna) para saber das últimas novidades.*
 
 O Yokozuna é uma extensão para o Riak que permite realizar pesquisas para encontrar dados num cluster Riak. Ao contrário do original Riak Search, o Yokozuna aproveita o Solr distribuído para executar a indexação invertida e recuperação de valores correspondentes.
 
@@ -813,7 +813,7 @@ curl -XPUT http://localhost:8098/riak/pessoas/ryan \
   -d "Ryan Zezeski"
 ```
 
-Para executar uma pesquisa, temos que pedir: `/search/[bucket]` junto com qualquer [parâmetro do Solr](http://wiki.apache.org/solr/CommonQueryParameters) distribuído. Vamos consultar os documentos que contêm uma palavra que começa com 'zez`, pedindo que os resultados sejam no formato JSON (`wt=json`) e que apenas devolva a chave Riak (`fl=_yz_rk`).
+Para executar uma pesquisa, temos que pedir: `/search/[bucket]` junto com qualquer [parâmetro do Solr](http://wiki.apache.org/solr/CommonQueryParameters) distribuído. Vamos consultar os documentos que contêm uma palavra que começa com `zez`, pedindo que os resultados sejam no formato JSON (`wt=json`) e que apenas devolva a chave Riak (`fl=_yz_rk`).
 
 ```bash
 curl "http://localhost:8098/search/pessoas?wt=json&\
