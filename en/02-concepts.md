@@ -98,7 +98,7 @@ Successive requests for `5124` will now return `Claire`.
 
 Addresses in Riakville are more than a house number, but also a street. There could be another 5124 on another street, so the way we can ensure a unique address is by requiring both, as in *5124 Main Street*.
 
-*Buckets* in Riak are analogous to street names: they provide logical [namespaces](http://en.wikipedia.org/wiki/Namespace_(computer_science\)) so that identical keys in different buckets will not conflict.
+*Buckets* in Riak are analogous to street names: they provide logical [namespaces](http://en.wikipedia.org/wiki/Namespace) so that identical keys in different buckets will not conflict.
 
 For example, while Alice may live at *5122 Main Street*, there may be a gas station at *5122 Bagshot Row*.
 
@@ -115,7 +115,7 @@ For convenience, we call a *bucket/key + value* pair an *object*, sparing oursel
 
 ## Replication and Partitions
 
-Distributing data across several nodes is how Riak is able to remain highly available, tolerating outages and network partitions. Riak combines two styles of distribution to achieve this: [replication](http://en.wikipedia.org/wiki/Replication_(computing\)) and [partitions](http://en.wikipedia.org/wiki/Partition_(database\)).
+Distributing data across several nodes is how Riak is able to remain highly available, tolerating outages and network partitions. Riak combines two styles of distribution to achieve this: [replication](http://en.wikipedia.org/wiki/Replication) and [partitions](http://en.wikipedia.org/wiki/Partition).
 
 <h3>Replication</h3>
 
@@ -165,7 +165,7 @@ Riak applies *consistent hashing* to map objects along the edge of a circle (the
 
 Riak partitions are not mapped alphabetically (as we used in the examples above), but instead a partition marks a range of key hashes (SHA-1 function applied to a key). The maximum hash value is 2^160, and divided into some number of partitions---64 partitions by default (the Riak config setting is `ring_creation_size`).
 
-Let's walk through what all that means. If you have the key `favorite`, applying the SHA-1 algorithm would return `7501 7a36 ec07 fd4c 377a 0d2a 0114 00ab 193e 61db` in hexadecimal. With 64 partitions, each has 1/64 of the 2^160 possible values, making the first partition range from 0 to 2^154-1, the second range is 2^154 to 2\*2^154-1, and so on, up to the last partition 63\*2^154-1 to 2^160-1.
+Let's walk through what all that means. If you have the key `favorite`, applying the SHA-1 algorithm would return `7501 7a36 ec07 fd4c 377a 0d2a 0114 00ab 193e 61db` in hexadecimal. With 64 partitions, each has 1/64 of the `2^160` possible values, making the first partition range from 0 to `2^154-1`, the second range is `2^154` to `2*2^154-1`, and so on, up to the last partition `63*2^154-1` to `2^160-1`.
 
 <!-- V=lists:sum([lists:nth(X, H)*math:pow(16, X-1) || X <- lists:seq(1,string:len(H))]) / 64. -->
 <!-- V / 2.28359630832954E46. // 2.2.. is 2^154 -->
@@ -307,8 +307,6 @@ Now we are back to the simple case, where requesting the value of `favorite` wil
 
 If you're a programmer, you may notice that this is not unlike a version control system, like **git**, where conflicting branches may require manual merging into one.
 
-As mentioned above, we disregarded timestamps for this illustration, but they come into play if Riak is **not** configured to retain conflicting data. If conflicting writes are received on either side of a network partition, the most recently-written object (as determined by the timestamps) will be chosen when the network heals.
-
 <h3>Riak and ACID</h3>
 
 <aside id="acid" class="sidebar"><h3>Distributed Relational is Not Exempt</h3>
@@ -320,11 +318,11 @@ A single node in the cluster is ACID, but the entire cluster is not without a lo
 Or, the entire transaction can fail, making the whole cluster unavailable. Even ACID databases cannot escape the scourge of CAP.
 </aside>
 
-Unlike single node databases like Neo4j or PostgreSQL, Riak does not support *ACID* transactions. Locking across multiple servers would kill write availability, and equally concerning, increase latency. While ACID transactions promise *Atomicity*, *Consistency*, *Isolation*, and *Durability*---Riak and other NoSQL databases follow *BASE*, or *Basically Available*, *Soft state*, *Eventually consistent*.
+Unlike single node databases like Neo4j or PostgreSQL, Riak does not support *ACID* transactions. Locking across multiple servers would can write availability, and equally concerning, increase latency. While ACID transactions promise *Atomicity*, *Consistency*, *Isolation*, and *Durability*---Riak and other NoSQL databases follow *BASE*, or *Basically Available*, *Soft state*, *Eventually consistent*.
 
 The BASE acronym was meant as shorthand for the goals of non-ACID-transactional databases like Riak. It is an acceptance that distribution is never perfect (basically available), all data is in flux (soft state), and that true consistency is generally untenable (eventually consistent).
 
-Be wary if anyone promises highly available distributed ACID transactions---it's usually couched in some diminishing adjective or caveat like *row transactions*, or *per node transactions*, which basically mean *not transactional* in terms you would normally use to define it.
+Look closely at promises of distributed transactions---it's often couched in some diminishing adjective or caveat like *row transactions*, or *per node transactions*, which basically mean *not transactional* in terms you would normally use to define it. I'm not claiming it's impossible, but certainly worth due consideration.
 
 As your server count grows---especially as you introduce multiple datacenters---the odds of partitions and node failures drastically increase. My best advice is to design for it upfront.
 

@@ -14,46 +14,25 @@ $here = File.expand_path(File.dirname(__FILE__))
 $root = $here #File.join($here, '..')
 $outDir = File.join($root, 'pdf')
 
-$figures = {
-  # 'cover' => 'cover',
-  # 'decor/roulette' => '1.1',
-  # 'decor/addresses' => '2.1',
-  'replication' => '2.1',
-  'partitions' => '2.2',
-  'replpart' => '2.3',
-  'ring0' => '2.4',
-  'ring1' => '2.5',
-  'nrw' => '2.6',
-  # 'decor/drinks.png' => '3.1',
-  'mapreduce' => '3.1',
-  'top' => '4.1',
-  'riak-stack' => '4.2',
-  'riak-stack-erlang' => '4.3',
-  'riak-stack-core' => '4.4',
-  'riak-stack-kv' => '4.5',
-  'riak-stack-pipe' => '4.6',
-  'riak-stack-yokozuna' => '4.7',
-  'riak-stack-backend' => '4.8',
-  'riak-stack-api' => '4.9',
-  'control-snapshot' => '4.10',
-  'control-cluster' => '4.11',
-}
-
 def gen_pdf(languages)
+  # I hate this with a passion. Need to fix the 'svg' suffix failure issue
   def figures(&block)
     begin
-      Dir::mkdir("#$root/figures")
+      Dir::mkdir("#$root/figures") rescue nil
+      Dir::mkdir("#$root/figures/decor") rescue nil
       Dir["#$root/assets/*.pdf","#$root/assets/*.png","#$root/assets/decor/*.png"].each do |file|
-        assetname = file.sub(/.*?\/assets\/(.*?)\.\w{3}$/, '\1')
-        next unless figure = $figures[assetname]
-        cp file, file.sub(/assets\/(.*?)\.\w{3}/, "figures/#{figure}.png")
+        cp file, file.sub(/assets\/(.*?)\.\w{3}/, "figures/\\1.png")
       end
       block.call
     ensure
-      Dir["#$root/figures/*"].each do |file|
-        rm(file)
+      Dir["#$root/figures/decor/*"].each do |file|
+        rm(file) rescue nil
       end
-      Dir::unlink("#$root/figures")
+      Dir::unlink("#$root/figures/decor") rescue nil
+      Dir["#$root/figures/*"].each do |file|
+        rm(file) rescue nil
+      end
+      Dir::unlink("#$root/figures") rescue nil
     end
   end
 
@@ -81,7 +60,7 @@ def gen_pdf(languages)
       gsub(/([\$\#\_\^\%])/, '\\\\' + '\1{}')
   end
 
-  def pre_pandoc(string, config)
+  def pre_pandoc(string, config, isprint)
     replace(string) do
       # Pandoc discards #### subsubsections - this hack recovers them
       # be careful to try to match the longest sharp string first
@@ -95,21 +74,27 @@ def gen_pdf(languages)
       # s %r{\<aside.*?\>.*?\<h3\>(.+?)\<\/h3\>(.+?)\<\/aside\>}im, "ASIDE: \\1\n\\2\nENDASIDE"
       s %r{\<aside.*?\>(.+?)\<\/aside\>}im, "ASIDE: \\1\n:ENDASIDE"
 
-      # Turns URLs into clickable links
-      s %r{\`(http:\/\/[A-Za-z0-9\/\%\&\=\-\_\\\.]+)\`}, '<\1>'
-      s %r{(\n\n)\t(http:\/\/[A-Za-z0-9\/\%\&\=\-\_\\\.]+)\n([^\t]|\t\n)}, '\1<\2>\1'
-
       # Process figures
-      s /^\!\[(.*?)\]\(..\/(.*?\/decor\/drinks.*?)\)/, 'DEC2: \2'
-      s /^\!\[(.*?)\]\(..\/(.*?\/decor\/.*?)\)/, 'DEC: \2'
-      s /^\!\[(.*?)\]\((.*?)\)/, 'FIG: \1'
+      s /^\!\[(.*?)\]\(\.\.\/(.*?\/decor\/drinks.*?)\)/, 'DEC2: \2'
+      s /^\!\[(.*?)\]\(\.\.\/(.*?\/decor\/.*?)\)/, 'DEC: \2'
+      s /^\!\[(.*?)\]\(\.\.\/assets\/(.*?)\.\w{3}\)/, 'FIG: \2 --- \1'
+
+      # TODO: perhaps this should be post pandoc?
+      if isprint
+        # Extract absolute any clickable links to be a footnote
+        # ignore any local links
+        s %r{\[(.*?)\]\((https?\:\/\/.*?)\)}, 'LINK: \2 ---*\1*---'
+        s %r{\<a\s+.*?href=['"]?(https?\:\/\/.*?)['"]?\>(.*?)\<\/a\>}, 'LINK: \1 ---*\2*---'
+      else
+        # Make any URL a clickable links
+        s %r{\`(https?:\/\/[A-Za-z0-9\/\%\&\=\-\_\\\.]+)\`}, '<\1>'
+        s %r{(\n\n)\t(https?:\/\/[A-Za-z0-9\/\%\&\=\-\_\\\.]+)\n([^\t]|\t\n)}, '\1<\2>\1'
+      end
     end
   end
 
-  def post_pandoc(string, config)
+  def post_pandoc(string, config, isprint)
     replace(string) do
-      space = /\s/
-
       # Reformat for the book documentclass as opposed to article
       s '\section', '\chap'
       s '\sub', '\\'
@@ -122,18 +107,23 @@ def gen_pdf(languages)
       s /ASIDE: (.+?)\:ENDASIDE/m, "\\begin{aside}\n\\1\\end{aside}"
 
       # Enable proper cross-reference
-      s /#{config['fig'].gsub(space, '\s')}\s*(\d+)\-\-(\d+)/, '\imgref{\1.\2}'
-      s /#{config['tab'].gsub(space, '\s')}\s*(\d+)\-\-(\d+)/, '\tabref{\1.\2}'
-      s /#{config['prechap'].gsub(space, '\s')}\s*(\d+)(\s*)#{config['postchap'].gsub(space, '\s')}/, '\chapref{\1}\2'
+      s /#{config['fig'].gsub(/\s/, '\s')}\s*(\d+)\-\-(\d+)/, '\imgref{\1.\2}'
+      s /#{config['tab'].gsub(/\s/, '\s')}\s*(\d+)\-\-(\d+)/, '\tabref{\1.\2}'
+      s /#{config['prechap'].gsub(/\s/, '\s')}\s*(\d+)(\s*)#{config['postchap'].gsub(/\s/, '\s')}/, '\chapref{\1}\2'
 
       # Miscellaneous fixes
       # s /DEC: (.*)/, "\\begin{wrapfigure}{r}{.3\\textwidth}\n  \\includegraphics[scale=1.0]{\\1}\n\\end{wrapfigure}"
       s /DEC: (.*)/, "\\begin{wrapfigure}{r}{.4\\textwidth}\n  \\includegraphics[scale=1.0]{\\1}\n\\end{wrapfigure}"
       s /DEC2: (.*)/, "\\begin{wrapfigure}{r}{.65\\textwidth}\n  \\includegraphics[scale=1.0]{\\1}\n\\end{wrapfigure}"
-      s /FIG: (.*)/, '\img{\1}'
+      s /FIG: (.*?) \-\-\- (.*)/, '\img{\1}{\2}'
       s '\begin{enumerate}[1.]', '\begin{enumerate}'
       s /(\w)--(\w)/, '\1-\2'
       s /``(.*?)''/, "#{config['dql']}\\1#{config['dqr']}"
+
+      if isprint
+        # Extract any clickable links to become a footnote
+        s /LINK\: (.*?) \-{3}(.*?)\-{3}/, '\2\\footnote{\1}'
+      end
 
       # Typeset the maths in the book with TeX
       s '\verb!p = (n(n-1)/2) * (1/2^160))!', '$p = \frac{n(n-1)}{2} \times \frac{1}{2^{160}}$)'
@@ -163,12 +153,11 @@ def gen_pdf(languages)
         \\end{table}")
       end
 
+      # char13 doesn't render right with pandoc
+      s /\{\\char13\}/, "'"
+      s /(\d+)\\\^\{\}(\d+)/, "$\\1^{\\2}$"
+
       # hack fixs of bad bash renderer
-      s %r"\\\{\"name\"\:\"billy\"\\\}", '\'\{"name":"billy"\}\''
-      s %r"\\\{\"name\"\:\"aaron\"\\\}", '\'\{"name":"aaron"\}\''
-      s %r"\\\{\"paid\"\:true\\\}", '\'\{"paid":true\}\''
-      s %r"\\\{\"props\"\:\\\{\"n_val\"\:5\\\}\\\}", '\'\{"props":\{"n_val":5\}\}\''
-      s %r"\\\{\"props\"\:\\\{\"backend\"\:\"memory_multi\"\\\}\\\}", '\'\{"props":\{"backend":"memory_multi"\}\}\''
       s /we\ execute /, "we execute \\linebreak[4]"
 
       # Shaded verbatim block
@@ -198,18 +187,18 @@ def gen_pdf(languages)
       end.join("\n\n")
 
       ### Output a PDF suitable for a 8.5x11 PDF
+      isprint = false
       print "\tParsing markdown... "
       latex = IO.popen('pandoc -p --no-wrap -f markdown -t latex', 'w+') do |pipe|
-        pipe.write(pre_pandoc(markdown, config))
+        pipe.write(pre_pandoc(markdown, config, isprint))
         pipe.close_write
-        post_pandoc(pipe.read, config)
+        post_pandoc(pipe.read, config, isprint)
       end
       puts "done"
 
       print "\tCreating riaklil-#{lang}.tex... "
       dir = "#$here/rendered"
       File.open("#{dir}/riaklil-#{lang}.tex", 'w') do |file|
-        isprint = false
         file.write(template.result(binding))
       end
       puts "done"
@@ -235,29 +224,29 @@ def gen_pdf(languages)
       end
 
       ### Output a PDF suitable for a 6x9 print book 
+      isprint = true
       print "\tParsing markdown for print... "
       latex = IO.popen('pandoc -p --no-wrap -f markdown -t latex', 'w+') do |pipe|
-        pipe.write(pre_pandoc(markdown, config))
+        pipe.write(pre_pandoc(markdown, config, isprint))
         pipe.close_write
-        post_pandoc(pipe.read, config)
+        post_pandoc(pipe.read, config, isprint)
       end
       puts "done"
 
       print "\tCreating riaklil-print-#{lang}.tex... "
       dir = "#$here/rendered"
       File.open("#{dir}/riaklil-print-#{lang}.tex", 'w') do |file|
-        isprint = true
         file.write(template.result(binding))
       end
       puts "done"
 
       3.times do |i|
         print "\t\tPass #{i + 1}... "
-        IO.popen("xelatex -papersize=letter -output-directory=\"#{dir}\" \"#{dir}/riaklil-print-#{lang}.tex\" 2>&1") do |pipe|
+        IO.popen("xelatex --debug -papersize=letter -output-directory=\"#{dir}\" \"#{dir}/riaklil-print-#{lang}.tex\" 2>&1") do |pipe|
           unless $DEBUG
             if $_[0..1]=='! '
               puts "failed with:\n\t\t\t#{$_.strip}"
-              puts "\tConsider running this again with --debug."
+              # puts "\tConsider running this again with --debug."
               abort = true
             end while not abort and pipe.gets
           else

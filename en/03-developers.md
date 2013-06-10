@@ -4,7 +4,7 @@
 
 It's worth mentioning that I use the word "node" a lot. Realistically, this means a physical/virtual server, but really, the workhorses of Riak are vnodes.
 
-When you write to multiple vnodes, Riak will attempt to spread values to as many physical servers as possible. However, this isn't guaranteed (for example, if you have only 4 physical servers with the default `n_val` of 3, there will be a few cases where data is copied to the same server twice). You're safe conceptualizing nodes as Riak instances, and it's simpler than qualifying "vnode" all the time. If something applies specifically to a vnode, I'll mention it.
+When you write to multiple vnodes, Riak will attempt to spread values to as many physical servers as possible. However, this isn't guaranteed (for example, if you have only 2 physical servers with the default `n_val` of 3, some data will be copied to the same server twice). You're safe conceptualizing nodes as Riak instances, and it's simpler than qualifying "vnode" all the time. If something applies specifically to a vnode, I'll mention it.
 </aside>
 
 _We're going to hold off on the details of installing Riak at the moment. If you'd like to follow along, it's easy enough to get started by following the [install documentation](http://docs.basho.com/riak/latest/) on the website (http://docs.basho.com). If not, this is a perfect section to read while you sit on a train without an Internet connection._
@@ -20,7 +20,7 @@ Erlang, Java, PHP, Python, Ruby
 
 Including community-supplied drivers, supported languages are even more numerous: C/C++, Clojure, Common Lisp, Dart, Go, Groovy, Haskell, JavaScript (jQuery and NodeJS), Lisp Flavored Erlang, .NET, Perl, PHP, Play, Racket, Scala, Smalltalk.
 
-There are also dozens of other [project-specific addons](http://docs.basho.com/riak/latest/references/Community-Developed-Libraries-and-Projects/).
+Dozens of other project-specific addons can be found in the [docs](http://docs.basho.com/riak/latest/).
 </aside>
 
 Since Riak is a KV database, the most basic commands are setting and getting values. We'll use the HTTP interface, via curl, but we could just as easily use Erlang, Ruby, Java, or any other supported language.
@@ -859,7 +859,7 @@ search engine in its own right, it made more sense to integrate the two.
 
 *Note: This is covering a project still under development. Changes are to be
 expected, so please refer to the
-[project page](https://github.com/rzezeski/yokozuna) for the most recent
+[yokozuna project page](https://github.com/basho/yokozuna) for the most recent
 information.*
 
 Yokozuna is an extension to Riak that lets you perform searches to find
@@ -879,7 +879,8 @@ curl -XPUT http://localhost:8098/riak/people/ryan \
   -d "Ryan Zezeski"
 ```
 
-To execute a search, request `/search/[bucket]` along with any distributed [Solr parameters](http://wiki.apache.org/solr/CommonQueryParameters). Here we
+To execute a search, request `/search/[bucket]` along with any distributed
+[Solr parameters](http://wiki.apache.org/solr/CommonQueryParameters). Here we
 query for documents that contain a word starting with `zez`, request the
 results to be in json format (`wt=json`), only return the Riak key
 (`fl=_yz_rk`).

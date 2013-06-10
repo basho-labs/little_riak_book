@@ -15,10 +15,14 @@
 \usepackage{indentfirst}
 \usepackage{framed,color}
 \usepackage{fancyvrb}
-\usepackage{mdframed}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage[framemethod=tikz]{mdframed}
+% \usepackage{mdframed}
 \usepackage{caption}
 \usepackage{pdfpages}
 \usepackage{wrapfig}
+\usepackage{perpage}
 
 \definecolor{shadecolor}{gray}{1.00}
 
@@ -95,11 +99,11 @@
 
 \newcounter{img}[chapter]
 \renewcommand{\theimg}{\thechapter.\arabic{img}}
-\newcommand{\img}[1]{\begin{figure}[ht!]
+\newcommand{\img}[2]{\begin{figure}[ht!]
 	\refstepcounter{img}
 	\label{img:\theimg}
-	\centering\includegraphics[width=\maxwidth]{figures/\theimg.png}
-	\textbf{\caption{#1}}
+  \centering\includegraphics[width=\maxwidth]{figures/#1.png}
+  \textbf{\caption{#2}}
 \end{figure}}
 
 \newcounter{tab}[chapter]
@@ -173,12 +177,36 @@
 
 % \EndDefineVerbatimEnvironment{Highlighting}
 
-\newenvironment{aside}
-  {\begin{mdframed}[style=0,%
-      leftline=false,rightline=false,leftmargin=2em,rightmargin=2em,%
-          innerleftmargin=0pt,innerrightmargin=0pt,linewidth=0.75pt,%
-      skipabove=7pt,skipbelow=7pt]\small}
+\mdfdefinestyle{AsideFrame}{%
+    outerlinewidth=0pt,
+    leftline=false,
+    rightline=false,
+    topline=false,
+    bottomline=false,
+    roundcorner=6pt,
+    innerbottommargin=0.6\baselineskip,
+    innertopmargin=0.6\baselineskip,
+    skipabove=7pt,
+    skipbelow=7pt,
+    % font=\Huge,
+    backgroundcolor=gray!20
+    % splittopskip=0.5\baselineskip,
+    % frametitleaboveskip=\baselineskip% \baselineskip distance from top rule
+    }
+
+% \newenvironment{aside}[1][]
+%   {\begin{mdframed}[style=0,%
+%       leftline=false,rightline=false,leftmargin=2em,rightmargin=2em,%
+%       innerleftmargin=18pt,innerrightmargin=18pt,linewidth=0pt,%
+%       innerbottommargin=0.6\baselineskip,innertopmargin=0.6\baselineskip,%
+%       roundcorner=10pt,backgroundcolor=gray!20,%
+%       skipabove=7pt,skipbelow=7pt,font=\small,#1]\small}
+%   {\end{mdframed}}
+
+\newenvironment{aside}[1][]
+  {\begin{mdframed}[style=AsideFrame,font=\small,#1]\small}
   {\end{mdframed}}
+
 
 \linespread{1.3}
 
@@ -194,6 +222,8 @@
 \end{center}
 \setcounter{tocdepth}{4}
 \tableofcontents\newpage\thispagestyle{empty}
+
+\renewcommand{\thefootnote}{\arabic{footnote}}
 
 \mainmatter
 \fancyhf{}
