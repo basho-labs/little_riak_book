@@ -306,12 +306,12 @@ Erlang ou precisar de ajuda de membros do Riak ou da Basho.
 
 ![Top](../assets/top.png)
 
-<h3>Making a Cluster</h3>
+<h3>Criar um Cluster</h3>
 
-With several solitary nodes running---assuming they are networked and are able to communicate to
-each other---launching a cluster is the simplest part.
+Com vários nós solitários a correr---assumindo que eles estão ligados e
+conseguem comunicar---criar um cluster é a parte mais fácil.
 
-Executing the `cluster` command will output a descriptive set of commands.
+Executar o comando `cluster` vai devolver uma lista descritiva de comandos:
 
 ```bash
 $ riak-admin cluster
@@ -340,16 +340,16 @@ Staging commands:
    clear                          Clear the staged changes
 ```
 
-To create a new cluster, you must `join` another node (any will do). Taking a
-node out of the cluster uses `leave` or `force-remove`, while swapping out
-an old node for a new one uses `replace` or `force-replace`.
+Para criar um cluster, tem que se executar o comando `join` para juntar o nó
+atual a outro nó (qualquer um serve). Para retirar um nó, executa-se `leave` ou
+`force-remove`, enquanto que trocar um nó antigo por um novo executa-se `replace`
+ou `force-replace`.
 
-I should mention here that using `leave` is the nice way of taking a node
-out of commission. However, you don't always get that choice. If a server
-happens to explode (or simply smoke ominously), you don't need its approval
-to remove it from the cluster, but can instead mark it as `down`.
+O comando `leave` é uma boa maneira de retirar um nó. No entanto, não temos
+sempre essa escolha;  Se um nó explodir, não é preciso a sua autorização parar o
+retirar do cluster, basta marcá-lo como `down` (em baixo).
 
-But before we worry about removing nodes, let's add some first.
+Mas antes de nos preocupar-mos com a remoção de nós, vamos primeiro adicioná-los.
 
 ```bash
 $ riak-admin cluster join A@10.0.1.1
@@ -358,14 +358,14 @@ $ riak-admin cluster join A@10.0.1.1
 Success: staged join request for 'C@10.0.1.3' to 'A@10.0.1.1'
 ```
 
-Once all changes are staged, you must review the cluster `plan`. It will give you
-all of the details of the nodes that are joining the cluster, and what it
-will look like after each step or *transition*, including the `member-status`,
-and how the `transfers` plan to handoff partitions.
+Quando todas as mudanças estiverem preparadas, deve então rever o plano
+(`plan`). Irá ver todos os detalhes dos nós que se irão juntar ao cluster, e
+como irá ficar o cluster no fim de cada transição, incluindo o `member-status`,
+e como se precederá a transferência entre nós.
 
-Below is a simple plan, but there are cases when Riak requires multiple
-transitions to enact all of your requested actions, such as adding and removing
-nodes in one stage.
+Abaixo encontra-se um simples plano, mas há casos onde o Riak requer multiplas
+transições para satisfazer todos os pedidos, como adicionar e remover nós numa
+transição.
 
 ```bash
 $ riak-admin cluster plan
@@ -399,28 +399,30 @@ Transfers resulting from cluster changes: 42
   21 transfers from 'A@10.0.1.1' to 'B@10.0.1.2'
 ```
 
-Making changes to cluster membership can be fairly resource intensive,
-so Riak defaults to only performing 2 transfers at a time. You can
-choose to alter this `transfer-limit` using `riak-admin`, but bear in
-mind the higher the number, the greater normal operations will be
-impinged.
+Fazer alterações nos membros do cluster pode ser bastante intensivos nos
+recursos do sistema, portanto o Riak por defeito apenas faz 2 transferências de
+cada vez. Pode-se alterar este valor na propriedade `transfer-limit` usando o
+comando `riak-admin`, mas tenha a atenção que quanto maior este valor, maior é o
+seu impacto nas operações desse nó.
 
-At this point, if you find a mistake in the plan, you have the chance to `clear` it and try
-again. When you are ready, `commit` the cluster to enact the plan.
+Neste ponto, se encontrar algum erro no plano, tem a hipótese de usar o comando
+`clear` para limpar tudo e tentar novamente. Quando estiver pronto, use o
+`commit` para o cluster executar o plano.
 
 ```bash
 $ dev1/bin/riak-admin cluster commit
 Cluster changes committed
 ```
 
-Without any data, adding a node to a cluster is a quick operation. However, with large amounts of
-data to be transferred to a new node, it can take quite a while before the new node is ready to use.
+Sem dados, adicionar um nó ao cluster é extremamente rápido. No entanto, se
+tiver muitos dados para transferir para o novo nó, pode levar algum tempo até
+esse novo nó estar disponível.
 
-<h3>Status Options</h3>
+<h3>Opções de estado</h3>
 
-To check on a launching node's progress, you can run the `wait-for-service` command. It will
-output the status of the service and stop when it's finally up. In this example, we check
-the `riak_kv` service.
+Para ver o estado de um nó que está a ser adicionado, pode-se usar o comando
+`wait-for-service`. Vai imprimir o estado do serviço e pára quando o nó estiver
+online. Neste exemplo, vamos ver o estado do serviço `riak_kv`:
 
 ```bash
 $ riak-admin wait-for-service riak_kv C@10.0.1.3
@@ -429,10 +431,11 @@ riak_kv is not up: []
 riak_kv is up
 ```
 
-You can get a list of available services with the `services` command.
+Pode obter a lista de serviços disponíveis com o comando `services`.
 
-You can also see if the whole ring is ready to go with `ringready`. If the nodes do not agree
-on the state of the ring, it will output `FALSE`, otherwise `TRUE`.
+Pode também ver se todo o anel está pronto com `ringready`. Se os nós não
+concordarem com o estado do anel, vai imprimir `FALSE`, ou caso contrário
+`TRUE`.
 
 ```bash
 $ riak-admin ringready
@@ -440,7 +443,7 @@ TRUE All nodes agree on the ring ['A@10.0.1.1','B@10.0.1.2',
                                   'C@10.0.1.3']
 ```
 
-For a more complete view of the status of the nodes in the ring, you can check out `member-status`.
+Para uma vista completa do estado dos nós no anel, pode usar o `member-status`.
 
 ```bash
 $ riak-admin member-status
@@ -454,9 +457,9 @@ valid      32.8%      --      'C@10.0.1.3'
 Valid:3 / Leaving:0 / Exiting:0 / Joining:0 / Down:0
 ```
 
-And for more details of any current handoffs or unreachable nodes, try `ring-status`. It
-also lists some information from `ringready` and `transfers`. Below I turned off the C
-node to show what it might look like.
+E para mais detalhes de nós inacessíveis, tente `ring-status`. Também devolve
+informação sobre o `ringready` e o `transfers`. Abaixo desliguei o nó C para
+mostrar como se parece.
 
 ```bash
 $ riak-admin ring-status
@@ -485,11 +488,12 @@ forcibly remove the nodes from the cluster (riak-admin
 force-remove NODE) to allow the remaining nodes to settle.
 ```
 
-If all of the above information options about your nodes weren't enough, you can
-list the status of each vnode per node, via `vnode-status`. It'll show each
-vnode by its partition number, give any status information, and a count of each
-vnode's keys. Finally, you'll get to see each vnode's backend type---something I'll
-cover in the next section.
+Se a informação acima sobre os vnodes não chega, pode listar o estado de cada
+vnode por nó com `vnode-status`. Vai mostrar cada vnode pelo seu número de
+partição, dar qualquer detalhe do seu estado, e número de chaves de cada vnode.
+Finalmente, verá qual o tipo de servidor de cada vnode---algo que veremos na
+próxima secção.
+
 
 ```bash
 $ riak-admin vnode-status
@@ -523,17 +527,18 @@ Status:
 ...
 ```
 
-Some commands we did not cover are either deprecated in favor of their `cluster`
-equivalents (`join`, `leave`, `force-remove`, `replace`, `force-replace`), or
-flagged for future removal `reip` (use `cluster replace`).
+Alguns comandos não foram abordados estão desatualizados em favor do seu
+equivalente com `cluster` (`join`, `leave`, etc), ou estão marcados para futura
+remoção.
 
-The last command is `diag`, which leverages [Riaknostic](http://riaknostic.basho.com/)
-installation to give you more diagnostic tools.
+O último comando é o comando `diag`, que tira partido da instalação do
+[Riaknostic](http://riaknostic.basho.com/) para lhe dar mais ferramentas de
+diagnóstico.
 
-I know this was a lot to digest, and probably pretty dry. Walking through command
-line tools usually is. There are plenty of details behind many of the `riak-admin`
-commands, too numerous to cover in such a short book. I encourage you to toy around
-with them on your own installation.
+Eu sei que isto foi muita informação para digerir de uma vez. Mas explicar
+comando normalmente é assim mesmo. Há imensos detalhes por de trás do comando
+`riak-admin`, demais para os cobrir a todos neste livro. Mas aconselho a brincar
+com os comandos na instalação.
 
 
 ## How Riak is Built
