@@ -541,30 +541,30 @@ comando normalmente é assim mesmo. Há imensos detalhes por de trás do comando
 com os comandos na instalação.
 
 
-## How Riak is Built
+## Como é construido o Riak?
 
-It's difficult to label Riak as a single project. It's probably more correct to think of
-Riak as the center of gravity for a whole system of projects. As we've covered
-before, Riak is built on Erlang, but that's not the whole story. It's more correct
-to say Riak is fundamentally Erlang, with some pluggable native C code components
-(like leveldb), Java (Yokozuna), and even JavaScript (for MapReduce or commit hooks).
+É difícil categorizar o Riak como um único projeto. É mais correto pensar nele
+como o centro de gravidade de um conjunto de projetos. Como já dissemos antes, o
+Riak é escrito em Erlang, mas essa não é a história toda. O mais correto é dizer
+que o Riak é principalmente escrito em Erlang, com alguns componentes em C (como
+o leveldb), Java (Yokozuna) e até Javascript (para o MapReduce e commit hooks).
 
-![Tech Stack](../assets/riak-stack.svg)
+![Stack Tecnológico](../assets/riak-stack.svg)
 
-The way Riak stacks technologies is a good thing to keep in mind, in order to make
-sense of how to configure it properly.
+A maneira como o Riak usa estas tecnologias é uma coisa útil para manter na sua
+mente, de forma a fazer sentido algumas configurações do Riak.
 
 <h3>Erlang</h3>
 
-![Tech Stack Erlang](../assets/riak-stack-erlang.svg)
+![Stack Tecnológico do Erlang](../assets/riak-stack-erlang.svg)
 
-When you fire up a Riak node, it also starts up an Erlang VM (virtual machine) to run
-and manage Riak's processes. These include vnodes, process messages, gossips, resource
-management and more. The Erlang operating system process is found as a `beam.smp`
-command with many, many arguments.
+Quando se liga um nó do Riak, liga-se também uma VM do Erlang para correr e
+gerir os processos do Riak. Estes incluem os vnodes, mensagens de processos,
+gossip, etc. O processo do Erlang no sistema operativo está no processo
+`beam.smp` com vários argumentos.
 
-These arguments are configured through the `etc/vm.args` file. There are a few
-settings you should pay special attention to.
+Estes argumentos são configurados através do ficheiro `etc/vm.args`. Há algumas
+propriedades que deve prestar atenção.
 
 ```bash
 $ ps -o command | grep beam
@@ -584,17 +584,17 @@ $ ps -o command | grep beam
 console
 ```
 
-The `name` setting is the name of the current Riak node. Every node in your cluster
-needs a different name. It should have the IP address or dns name of the server
-this node runs on, and optionally a different prefix---though some people just like
-to name it *riak* for simplicity (eg: `riak@node15.myhost`).
+A propriedade `name` é o nome do atual nó Riak. Todos os nós no seu cluster
+precisam de nomes diferentes. Deve ter o endereço IP ou o nome de DNS do
+servidor que está a correr, e opcionalmente um prefixo diferente--- embora
+algumas gostem de usar *riak* para simplificar (ex. `riak@node15.myhost`).
 
-The `setcookie` parameter is a setting for Erlang to perform inter-process
-communication (IPC) across nodes. Every node in the cluster must have the same
-cookie name. I recommend you change the name from `riak` to something a little
-less likely to accidentally conflict, like `hihohihoitsofftoworkwego`.
+O parâmetro `setcookie` é usado pelo Erlang para efetuar comunicações inter-
+processos (IPC) entre nós. Todos os nós no cluster devem ter o mesmo nome do
+cookie. Eu recomendo que mude o nome de `riak` para algo menos provável de
+colidir acidentalmente, como `skdjhfasdfhsadfhsidfhsgij`.
 
-My `vm.args` starts with this:
+O meu `vm.args` começa com isto:
 
 ```bash
 ## Name of the riak node
@@ -606,31 +606,30 @@ My `vm.args` starts with this:
 -setcookie testing123
 ```
 
-Continuing down the `vm.args` file are more Erlang settings, some environment
-variables that are set up for the process (prefixed by `-env`), followed by
-some optional SSL encryption settings.
+Continuando pelo ficheiro abaixo, temos mais propriedades Erlang, algumas
+variáveis de sistema (com o prefixo `-env`), seguidos de algumas propriedades
+opcionais de SSL.
 
 <h3>riak_core</h3>
 
-![Tech Stack Core](../assets/riak-stack-core.svg)
+![Stack Tecnológico do Core](../assets/riak-stack-core.svg)
 
-If any single component deserves the title of "Riak proper", it would
-be *Riak Core*. Core shares responsibility with projects built atop it
-for managing the partitioned keyspace, launching and supervising
-vnodes, preference list building, hinted handoff, and things that
-aren't related specifically to client interfaces, handling requests,
-or storage.
+Se qualquer componente merece o título de "Propriedade Riak", ele seria o *Riak
+Core*. Este core partilha a responsabilidade com projetos que constroem em cima
+desta fundação para gerir vnodes, construir listas de preferências, hinted
+handoff, e coisas que não estão diretamente relacionadas com a interface para o
+cliente, como gerir pedidos ou armazenamento.
 
-Riak Core, like any project, has some hard-coded values (for example, how
-protocol buffer messages are encoded in binary). However, many values
-can be modified to fit your use case. The majority of this configuration
-occurs under `app.config`. This file is Erlang code, so commented lines
-begin with a `%` character.
+O Riak Core, como qualquer outro projeto, tem alguns valores codificados
+explicitamente, como o codificação em binário do protocol buffers. No entanto,
+muitos valores podem ser modificados para servir algum caso em específico. A
+maioria destas configurações ocorre dentro do `app.config`. Este ficheiro é
+código Erlang, com algumas linhas comentadas que começam com o caracter `%`.
 
-The `riak_core` configuration section allows you to change the options in
-this project. This handles basic settings, like files/directories where
-values are stored or to be written to, the number of partitions/vnodes
-in the cluster (`ring_creation_size`), and several port options.
+A seção de configuração do `riak_core` permite alterar as opções neste projeto.
+Isto trata de coisas simples como onde são guardados os ficheiros, o número de
+partições/vnodes no cluster (`ring_creation_size`) e várias opções de portas.
+
 
 ```bash
 %% Riak Core config
@@ -678,21 +677,21 @@ in the cluster (`ring_creation_size`), and several port options.
 
 <h3>riak_kv</h3>
 
-![Tech Stack KV](../assets/riak-stack-kv.svg)
+![Stack Tecnológico do KV](../assets/riak-stack-kv.svg)
 
-Riak KV is a key/value implementation of Riak Core. This is where the
-magic happens, such as handling requests and coordinating them for
-redundancy and read repair. It's what makes Riak a KV store rather
-than something else like a Cassandra-style columnar data store.
+O Riak KV é implementação do Riak Core no formato de chave/valor. É aqui que a
+magia acontece, como gerir pedidos e coordená-los para redundância e leitura-
+reparação. É o que faz do Riak uma BD chave/valor em vez de outra coisa qualquer
+como uma BD por colunas como o Cassandra.
 
 <!-- When configuring KV, you may scratch your head about about when a setting belongs
 under `riak_kv` versus `riak_core`. For example, if `http` is under core, why
 is raw_name under riak. -->
 
-HTTP access to KV defaults to the `/riak` path as we've seen in examples
-throughout the book. This prefix is editable via `raw_name`. Many of the
-other KV settings are concerned with backward compatibility  modes,
-backend settings, MapReduce, and JavaScript integration.
+O acesso à KV via HTTP é por defeito feito em `/riak` como já vimos nos exemplos
+até agora. Este prefixo é modificável via `raw_name`. Muitas outras
+configurações estão relacionadas com a compatibilidade de modos antigos,
+MapReduce e integração com o JavaScript.
 
 ```bash
 %% Riak KV config
@@ -727,12 +726,13 @@ backend settings, MapReduce, and JavaScript integration.
 
 <h3>riak_pipe</h3>
 
-![Tech Stack Pipe](../assets/riak-stack-pipe.svg)
+![Stack Tecnológico do Pipe](../assets/riak-stack-pipe.svg)
 
-Riak Pipe is an input/output messaging system that forms the basis of Riak's
-MapReduce. This was not always the case, and MR used to be a dedicated
-implementation, hence some legacy options. Like the ability to alter the KV
-path, you can also change HTTP from `/mapred` to a custom path.
+O Riak Pipe é o sistema de mensagens de input e output que são a fundação para o
+MapReduce do Riak. Este nem sempre foi o caso e o MP costumava ser uma
+implementação dedicada, daí algumas configurações antigas. Tal como a
+possibilidade de alterar o caminho HTTP para o KV, também podemos alterar o
+caminho HTTP para o MP de `/mapred` para outro qualquer.
 
 ```bash
 %% Riak KV config
@@ -776,9 +776,8 @@ path, you can also change HTTP from `/mapred` to a custom path.
 
 <h4>JavaScript</h4>
 
-Riak KV's MapReduce implementation (under riak_kv, though implemented in Pipe) is the
-primary user of the Spidermonkey JavaScript engine---the second user is
-precommit hooks.
+A implementação MapReduce do Riak KV é o principal utilizador do motor de
+JavaScript SpiderMonkey---o segundo utilizador são as funções de precommit.
 
 ```bash
 %% Riak KV config
@@ -813,13 +812,13 @@ precommit hooks.
 
 <h3>yokozuna</h3>
 
-![Tech Stack Yokozuna](../assets/riak-stack-yokozuna.svg)
+![Stack Tecnológico do Yokozuna](../assets/riak-stack-yokozuna.svg)
 
-Yokozuna is the newest addition to the Riak ecosystem. It's an integration of
-the distributed Solr search engine into Riak, and provides some extensions
-for extracting, indexing, and tagging documents. The Solr server runs its
-own HTTP interface, and though your Riak users should never have to access
-it, you can choose which `solr_port` will be used.
+Yokozuna é a nova adição ao ecosistema do Riak. É a integração do motor de
+pesquisa distribuído Solr no Riak, e fornece algumas extensões para extrair,
+indexar, e identificar documentos. O servidor Solr corre a sua própria interface
+HTTP, e embora os seus clientes não devam ter acesso a isso, pode alterar a
+porta a ser usada em `solr_port`.
 
 ```bash
 %% Yokozuna Search
@@ -831,23 +830,24 @@ it, you can choose which `solr_port` will be used.
 
 <h3>bitcask, eleveldb, memory, multi</h3>
 
-![Tech Stack Backend](../assets/riak-stack-backend.svg)
+![Stack Tecnológico do Backend](../assets/riak-stack-backend.svg)
 
-Several modern databases have swappable backends, and Riak is no different in that
-respect. Riak currently supports three different storage engines: *Bitcask*,
-*eLevelDB*, and *Memory* --- and one hybrid called *Multi*.
+Várias base de dados modernas têm servidores de dados configuráveis e o Riak não
+é diferente. Atualmente, o Riak suporta três motores de dados: *Bitcask*,
+*eLevelDB* e *Memory* (memória) --- e um híbrido chamado de *Multi*.
 
-Using a backend is simply a matter of setting the `storage_backend` with one of the following values.
+Usar um servidor de dados é simplesmente usar a propriedade `storage_backend`
+com um dos seguintes valores:
 
-- `riak_kv_bitcask_backend` - The catchall Riak backend. If you don't have
-  a compelling reason to *not* use it, this is my suggestion.
-- `riak_kv_eleveldb_backend` - A Riak-friendly backend which uses Google's
-  leveldb. This is necessary if you have too many keys to fit into memory, or
-  wish to use 2i.
-- `riak_kv_memory_backend` - A main-memory backend, with time-to-live (TTL). Meant
-  for transient data.
-- `riak_kv_multi_backend` - Any of the above backends, chosen on a per-bucket
-  basis.
+- `riak_kv_bitcask_backend` - O servidor por defeito do Riak. Se não tiver uma 
+  forte uma forte razão para *não* usar esta opção, esta é a minha escolha.
+- `riak_kv_eleveldb_backend` - Um servidor de dados amigável que usa o leveldb 
+  do Google. Esta opção é necessário se tiver muitas chaves que não cabem em 
+  memória ou se quiser usar o 2i.
+- `riak_kv_memory_backend` - Um servidor apenas em memória com a opção de tempo 
+  para viver (TTL). É usado para dados transientes.
+- `riak_kv_multi_backend` - Qualquer uma das opções anteriores, sendo escolhida 
+  o servidor por bucket.
 
 
 ```bash
@@ -859,8 +859,8 @@ Using a backend is simply a matter of setting the `storage_backend` with one of 
 ]},
 ```
 
-Then, with the exception of Multi, each memory configuration is under one of
-the following options.
+Então, com a exceção do Multi, cada configuração de servidor está nas seguintes
+opções:
 
 ```bash
 %% Memory Config
