@@ -58,7 +58,7 @@ um nó vizinho ao acaso.
 A propagação de mudanças no anel é uma operação assíncrona e portanto pode levar
 alguns minutos, dependendo do tamanho do anel.
 
-<!-- Transfers will not start while a gossip is in progress. -->
+<!-- Transferências não começam enquanto a fase de gossip não acabar. -->
 
 Atualmente, não é possível mudar o número de vnodes num cluster. Isto significa
 que se deve ter um vaga ideia de quanto o cluster pode crescer em tamanho.
@@ -78,14 +78,14 @@ funcionalidade por defeito.
 
 <h3>Como a Replicação usa o Anel</h3>
 
-Mesmo que não seja um programador, é de notar que
+Mesmo que não seja um programador, é recomendado prestar atenção a este exemplo
+de um Anel. Também é importante lembrar que as partições são geridas por vnodes,
+e por vezes trocamos os nomes, mas vamos tentar ser mais precisos daqui para a
+frente.
 
-Even if you are not a programmer, it's worth taking a look at this Ring example. It's also worth
-remembering that partitions are managed by vnodes, and in conversation are sometimes interchanged,
-though I'll try to be more precise here.
-
-Let's start with Riak configured to have 8 partitions, which are set via `ring_creation_size`
-in the `etc/app.config` file (we'll dig deeper into this file later).
+Vamos começar com o Riak configurado para 8 partições, configurado a partir da
+propriedade `ring_creation_size` no ficheiro `etc/app.config` (veremos isto
+melhor mais tarde).
 
 ```bash
  %% Riak Core config
@@ -94,15 +94,16 @@ in the `etc/app.config` file (we'll dig deeper into this file later).
                {ring_creation_size, 8},
 ```
 
-In this example, I have a total of 4 Riak nodes running on `A@10.0.1.1`,
-`B@10.0.1.2`, `C@10.0.1.3`, and `D@10.0.1.4`, each with two partitions (and thus vnodes)
+Neste exemplo, temos um total de 4 nós do Riak a correr em `A@10.0.1.1`,
+`B@10.0.1.2`, `C@10.0.1.3`, e `D@10.0.1.4`, cada uma com 2 partições (e portanto
+vnodes).
 
-Riak has the amazing, and dangerous, `attach` command that attaches an Erlang console to a live Riak
-node, with access to all of the Riak modules.
+O Riak tem o incrível e perigoso comando `attach`, que abre uma consola Erlang
+com ligação direta a um nó do Riak, com acesso a todos os seus módulos.
 
-The `riak_core_ring:chash(Ring)` function extracts the total count of partitions (8), with an array
-of numbers representing the start of the partition, some fraction of the 2^160 number, and the node
-name that represents a particular Riak server in the cluster.
+A função `riak_core_ring:chash(Ring) extraí o número total de partições (8), com
+um número representando o começo da partição (uma fração do número `2^160`) e o
+nome que representa essa partição.
 
 ```bash
 $ bin/riak attach
@@ -119,25 +120,26 @@ $ bin/riak attach
   {1278813932664540053428224228626747642198940975104, 'D@10.0.1.4'}]}
 ```
 
-To discover which partition the bucket/key `food/favorite` object would be stored in, for example,
-we execute `riak_core_util:chash_key({<<"food">>, <<"favorite">>})` and get a wacky 160 bit Erlang
-number we named `DocIdx` (document index).
+Para descobrir qual a partição o objeto bucket/chave `comida/favorita` está
+guardado, por exemplo, executamos `riak_core_util:chash_key({<<"comida">>,
+<<"favorita">>})` e obtemos um array de números estranhos de 160 bits do Erlang,
+a que nós chamamos de `DocIdx` (índice do documento).
 
-Just to illustrate that Erlang binary value is a real number, the next line makes it a more
-readable format, similar to the ring partition numbers.
+Só para ilustrar que o valor binário do Erlang é um número real, a próxima linha
+transforma-o num formato mais legível, semelhante aos números das partições do
+Anel.
 
 ```bash
-(A@10.0.1.1)3> DocIdx = 
-(A@10.0.1.1)3> riak_core_util:chash_key({<<"food">>,<<"favorite">>}).
+(A@10.0.1.1)3> DocIdx = riak_core_util:chash_key({<<"comida">>,<<"favorita">>}).
 <<80,250,1,193,88,87,95,235,103,144,152,2,21,102,201,9,156,102,128,3>>
 
-(A@10.0.1.1)4> <<I:160/integer>> = DocIdx. I.
+(A@10.0.1.1)4> <<I:160/integer>> = DocIdx.
 462294600869748304160752958594990128818752487427
 ```
 
-With this `DocIdx` number, we can order the partitions, starting with first number greater than
-`DocIdx`. The remaining partitions are in numerical order, until we reach zero, then
-we loop around and continue to exhaust the list.
+Com este número `DocIdx`, podemos ordenar as partições, começando com o primeiro
+número maior que o `DocIdx`. As restantes partições estão ordenadas por ordem
+numérica, até chegar a zero; aí damos a volta e continuamos a lista até acabar.
 
 ```bash
 (A@10.0.1.1)5> Preflist = riak_core_ring:preflist(DocIdx, Ring).
@@ -151,77 +153,88 @@ we loop around and continue to exhaust the list.
  {365375409332725729550921208179070754913983135744, 'C@10.0.1.3'}]
 ```
 
-So what does all this have to do with replication? With the above list, we simply replicate a write
-down the list N times. If we set N=3, then the `food/favorite` object will be written to
-the `D@10.0.1.4` node's partition `5480631...` (I truncated the number here),
-`A@10.0.1.1` partition `7307508...`, and `B@10.0.1.2` partition `9134385...`.
+Mas o que tem isto a ver com replicação? Com a lista acima, nós simplesmente
+replicámos uma escrita pela lista N vezes. Se tivermos o N=3, então o objeto
+`comida/favorita` vai ser escrito para a partição `5480631...` (o número está
+reduzido) do nó `D@10.0.1.1`, para a partição `7307508...` do nó `A@10.0.1.1` e
+para a partição `9134385...` do nó `B@10.0.1.2`.
 
-If something has happened to one of those nodes, like a network split
-(confusingly also called a partition---the "P" in "CAP"), the remaining
-active nodes in the list become candidates to hold the data.
+Se alguma coisa acontecer a algum nó, como uma separação da rede (a chamada
+partição "P" no teorema de CAP), os restantes nós ativos na lista tornam-se
+candidatos a guardar esses dados.
 
-So if the node coordinating the write could not reach node
-`A@10.0.1.1` to write to partition `7307508...`, it would then attempt
-to write that partition `7307508...` to `C@10.0.1.3` as a fallback
-(it's the next node in the list preflist after the 3 primaries).
+Então, se o nó coordenador da escrita não conseguir contactar o nó `A@10.0.1.1`
+para escrever na partição `7307508...`, vai tentar escrever na partição
+`7307508...` do nó `C@10.0.1.3` como recurso (é o próximo nó na lista *preflist*
+a seguir às 3 partições primárias).
 
-The way that the Ring is structured allows Riak to ensure data is always
-written to the appropriate number of physical nodes, even in cases where one
-or more physical nodes are unavailable. It does this by simply trying the next
-available node in the preflist.
+A maneira como o Anel está estruturado permite ao Riak garantir que os dados
+serão sempre escritos para o número apropriado de nós, mesmo em casos onde um ou
+mais nós físicos estão indisponíveis. Ele faz isto simplesmente tentando o
+próximo nó disponível na lista.
 
 <h3>Hinted Handoff</h3>
 
-When a node goes down, data is replicated to a backup node. This is
-not permanent; Riak will periodically examine whether each vnode
-resides on the correct physical node and hands them off to the proper
-node when possible.
+Quando um nó vai abaixo, os dados são replicados para um nó de backup. Isto não
+é permanente; o Riak vai periodicamente examinar se cada vnode reside no nó
+físico correto e devolve esse vnode para a partição correta quando possível.
 
-As long as the temporary node cannot connect to the primary, it will continue
-to accept write and read requests on behalf of its incapacitated brethren.
+Enquanto o nó temporário não se conseguir ligar ao nó primário, ele vai aceitar
+pedidos de leituras e escritas em lugar dos outros nós indisponíveis.
 
-Hinted handoff not only helps Riak achieve high availability, it also facilitates
-data migration when physical nodes are added or removed from the Ring.
+O *Hinted handoff* não só ajuda o Riak a ter alta disponibilidade, mas também
+facilita a migração de nós físicos que são adicionados e removidos do Anel.
 
-## Managing a Cluster
+## Gerindo um Cluster
 
-Now that we have a grasp of the general concepts of Riak, how users query it,
-and how Riak manages replication, it's time to build a cluster. It's so easy to
-do, in fact, I didn't bother discussing it for most of this book.
+Agora que temos uma ideia geral do que é o Riak, os seus conceitos, como os
+utilizadores podem fazer pedidos e como funciona a replicação, está na hora de
+montar um cluster. É tão fácil que nem me dei ao trabalho de o explicar até
+agora.
 
-<h3>Install</h3>
+<h3>Instalação</h3>
 
-The Riak docs have all of the information you need to [Install](http://docs.basho.com/riak/latest/tutorials/installation/) it per operating system. The general sequence is:
+A documentação do Riak tem toda a informação necessária para a
+[instalação](http://docs.basho.com/riak/latest/tutorials/installation/) por
+sistema operativo.
 
-1. Install Erlang
-2. Get Riak from a package manager (<em>a la</em> `apt-get` or Homebrew), or build from source (the results end up under `rel/riak`, with the binaries under `bin`).
-3. Run `riak start`
+1. Instalar o Erlang;
+2. Arranjar o Riak atráves de um gestor de pacotes (`apt-get, homebrew, etc.), ou compile o código fonte;
+3. Executar `riak start`
 
-Install Riak on four or five nodes---five being the recommended safe minimum for production. Fewer nodes are OK during software development and testing.
+Instale o Riak em quatro ou cinco nós---sendo cinco o mínimo recomendado em
+produção. Menos que cinco nós serve para testes ou se estiver a desenvolver
+código.
 
-<h3>Command Line</h3>
+<h3>Linha de comandos</h3>
 
-Most Riak operations can be performed though the command line. We'll concern ourselves with two commands: `riak` and `riak-admin`.
+A maioria das operações do Riak podem ser feitas através da linha de comandos.
+Vamos-nos focar em dois comandos: `riak` e `riak-admin`.
 
 <h4>riak</h4>
 
-Simply typing the `riak` command will give a usage list, although not a
-terribly descriptive one.
+Ao escrever simplesmente o comando `riak`, dará uma lista de uso, embora não
+muito descritiva.
 
 ```bash
 Usage: riak {start|stop|restart|reboot|ping|console|\
              attach|chkconfig|escript|version|getpid}
 ```
 
-Most of these commands are self explanatory, once you know what they mean. `start` and `stop` are simple enough. `restart` means to stop the running node and restart it inside of the same Erlang VM (virtual machine), while `reboot` will take down the Erlang VM and restart everything.
+A maioria destes comandos são auto descritivos, a partir do momento que se sabe
+o seu significado. `start` e `stop` são simples. `restart` significa parar o nó
+que está a correr e reiniciá-lo dentro da mesma VM (máquina virtual) do Erlang,
+enquanto que `reboot` vai deitar a VM do Erlang toda a baixo e reiniciar tudo.
 
-You can print the current running `version`. `ping` will return `pong` if the server is in good shape, otherwise you'll get the *just-similar-enough-to-be-annoying* response `pang` (with an *a*), or a simple `Node *X* not responding to pings` if it's not running at all.
+Pode imprimir a versão atual usando `version`. `ping` vai devolver `pong` se o
+servidor estiver em bom estado, senão receber `pang` ou um simples `Node *X* not
+responding to pings` se o nó nem estiver a correr.
 
-`chkconfig` is useful if you want to ensure your `etc/app.config` is not broken
-(that is to say, it's parsable). I mentioned `attach` briefly above, when
-we looked into the details of the Ring---it attaches a console to the local
-running Riak server so you can execute Riak's Erlang code. `escript` is similar
-to `attach`, except you pass in script file of commands you wish to run automatically.
+`chkconfig` é útil se quiser ter a certeza que o seu `etc/app.config` não está
+estragado. Eu mencionei o `attach` brevemente acima, quando olhamos com detalhe
+para o Anel; ele liga uma consola a um nó Riak onde consegue executar código
+Erlang do Riak. `escript` é parecido com o `attach`, exceto que se passa um
+ficheiro de script com comandos que deseja correr automaticamente.
 
 <!--
 If you want to build this on a single dev machine, here is a truncated guide.
@@ -238,7 +251,8 @@ You should now have a 5 node cluster running locally.
 
 <h4>riak-admin</h4>
 
-The `riak-admin` command is the meat operations, the tool you'll use most often. This is where you'll join nodes to the Ring, diagnose issues, check status, and trigger backups.
+O comando `riak-admin` é o comando que irá usar mais vezes. É aqui que irá
+juntar nós ao Anel, diagnosticar problemas, verificar estados e fazer backups.
 
 ```bash
 Usage: riak-admin { cluster | join | leave | backup | restore | test |
@@ -250,10 +264,12 @@ Usage: riak-admin { cluster | join | leave | backup | restore | test |
                     [-lines N] }
 ```
 
-Many of these commands are deprecated, and many don't make sense without a
-cluster, but a few we can look at now.
+Muitos destes comandos estão desatualizados, e muitos não fazem sentido sem um
+cluster; mas podemos olhar agora para alguns.
 
-`status` outputs a list of information about this cluster. It's mostly the same information you can get from getting `/stats` via HTTP, although the coverage of information is not exact (for example, riak-admin status returns `disk`, and `/stats` returns some computed values like `gossip_received`).
+`status` devolve uma lista de informações sobre o cluster. É em grande parte a
+mesma informação que se obtém através de `/stats` via HTTP, embora não sejam
+exatamente iguais.
 
 ```bash
 $ riak-admin status
@@ -273,19 +289,20 @@ vnode_index_deletes : 0
 ...
 ```
 
-Adding JavaScript or Erlang files to Riak (as we did in the
-[developers chapter](#developers) ) are not usable by the nodes until they are informed
-about them by the `js-reload` or `erl-reload` command.
+Ficheiros de Javascript ou Erlang adicionados ao Riak (como fizemos no capítulo
+anterior) não são imediatamente usáveis pelos nós até que estes recebam o
+comando `js-reload` ou `erl-reload`.
 
-`riak-admin` also provides a little `test` command, so you can perform a read/write cycle
-to a node, which I find useful for testing a client's ability to connect, and the node's
-ability to write.
 
-Finally, `top` is an analysis command checking the Erlang details of a particular node in
-real time. Different processes have different process ids (Pids), use varying amounts of memory,
-queue up so many messages at a time (MsgQ), and so on. This is useful for advanced diagnostics,
-and is especially useful if you know Erlang or need help from other users, the Riak team, or
-Basho.
+O `riak-admin` também providencia o comando `test` para executar ciclos de
+escritas e leituras para o nó, que é útil para testar a capacidade de uma
+biblioteca cliente de ligar e do nó escrever.
+
+Finalmente, o `top` verifica em tempo real os detalhes de um nó Erlang.
+Diferentes processos têm ids de processo diferentes (Pids), usam memória de
+forma variável, guardam mensagens até certo ponto (MsgQ), e por aí em diante.
+Isto é útil para diferentes diagnósticos, e especialmente útil se conhecer
+Erlang ou precisar de ajuda de membros do Riak ou da Basho.
 
 ![Top](../assets/top.png)
 
