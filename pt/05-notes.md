@@ -11,7 +11,7 @@ esteja com vontade de escrever um sobre isto.
 
 ## Uma pequena nota sobre o MDC
 
-O *MDC* ou Multi Data Center (Múltiplos Centros de Dados), é uma extensão
+O *MDC* ou Multi Data Center (Múltiplos Data Centers), é uma extensão
 comercial do Riak oferecida pela Basho. Embora a documentação esteja disponível
 livremente, o código fonte não está. Se atingir um volume de dados em que
 precise de ter múltiplos clusters do Riak em sincronia numa escala local ou
