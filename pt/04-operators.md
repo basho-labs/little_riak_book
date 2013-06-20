@@ -27,8 +27,9 @@ O *Anel* no Riak representa duas coisas na verdade.
 Primeiro, o Anel representa as partições de hash consistente (cada partição é um
 vnode). A série de partições é tratada como um círculo, de 0 a 2^160-1 até 0
 novamente. (Se está com dúvidas, sim, isto significa que estamos limitados a
-2^160-1 vnodes, que é um limite de `1.46 x 10^48` nós. Para referência, existem
-`1.92 x 10^49` [átomos de silício na Terra](http://education.jlab.org/qa/mathatom_05.html).)
+2^160 vnodes, que é um limite de `1.46 x 10^48` nós. Para referência, existem
+`1.92 x 10^49` [átomos de silício na
+Terra](http://education.jlab.org/qa/mathatom_05.html).)
 
 Quando falamos de replicação, o valor de N define para quantos nós um objeto é
 replicado. O Riak espalha o objeto por nós adjacentes no anel, começando com o
@@ -101,7 +102,7 @@ vnodes).
 O Riak tem o incrível e perigoso comando `attach`, que abre uma consola Erlang
 com ligação direta a um nó do Riak, com acesso a todos os seus módulos.
 
-A função `riak_core_ring:chash(Ring) extraí o número total de partições (8), com
+A função `riak_core_ring:chash(Ring)` extraí o número total de partições (8), com
 um número representando o começo da partição (uma fração do número `2^160`) e o
 nome que representa essa partição.
 
@@ -160,7 +161,7 @@ reduzido) do nó `D@10.0.1.1`, para a partição `7307508...` do nó `A@10.0.1.1
 para a partição `9134385...` do nó `B@10.0.1.2`.
 
 Se alguma coisa acontecer a algum nó, como uma separação da rede (a chamada
-partição "P" no teorema de CAP), os restantes nós ativos na lista tornam-se
+partição---o "P" no teorema de CAP), os restantes nós ativos na lista tornam-se
 candidatos a guardar esses dados.
 
 Então, se o nó coordenador da escrita não conseguir contactar o nó `A@10.0.1.1`
@@ -196,10 +197,12 @@ agora.
 
 A documentação do Riak tem toda a informação necessária para a
 [instalação](http://docs.basho.com/riak/latest/tutorials/installation/) por
-sistema operativo.
+sistema operativo. A sequência normal é:
 
 1. Instalar o Erlang;
-2. Arranjar o Riak atráves de um gestor de pacotes (`apt-get, homebrew, etc.), ou compile o código fonte;
+2. Arranjar o Riak atráves de um gestor de pacotes (`apt-get`, homebrew, etc.),
+ou compile o código fonte  (o resultado vai para `rel/riak`, com os binários em
+`bin`);
 3. Executar `riak start`
 
 Instale o Riak em quatro ou cinco nós---sendo cinco o mínimo recomendado em
@@ -269,7 +272,8 @@ cluster; mas podemos olhar agora para alguns.
 
 `status` devolve uma lista de informações sobre o cluster. É em grande parte a
 mesma informação que se obtém através de `/stats` via HTTP, embora não sejam
-exatamente iguais.
+exatamente iguais (por exemplo, o riak-admin devolve `disk`, enquanto que o
+`/stats` devolve valores calculados para o `gossip_received`).
 
 ```bash
 $ riak-admin status
@@ -528,8 +532,9 @@ Status:
 ```
 
 Alguns comandos não foram abordados estão desatualizados em favor do seu
-equivalente com `cluster` (`join`, `leave`, etc), ou estão marcados para futura
-remoção.
+equivalente com `cluster` (`join`, `leave`, `force-remove`, `replace`, `force-
+replace`), ou estão marcados para futura remoção (como o `reip` que será
+substituído por `cluster replace`).
 
 O último comando é o comando `diag`, que tira partido da instalação do
 [Riaknostic](http://riaknostic.basho.com/) para lhe dar mais ferramentas de
@@ -556,7 +561,7 @@ mente, de forma a fazer sentido algumas configurações do Riak.
 
 <h3>Erlang</h3>
 
-![Stack Tecnológico do Erlang](../assets/riak-stack-erlang.svg)
+![Stack Tecnológico do Erlang](../assets/decor/riak-stack-erlang.png)
 
 Quando se liga um nó do Riak, liga-se também uma VM do Erlang para correr e
 gerir os processos do Riak. Estes incluem os vnodes, mensagens de processos,
@@ -612,7 +617,7 @@ opcionais de SSL.
 
 <h3>riak_core</h3>
 
-![Stack Tecnológico do Core](../assets/riak-stack-core.svg)
+![Stack Tecnológico do Core](../assets/decor/riak-stack-core.png)
 
 Se qualquer componente merece o título de "Propriedade Riak", ele seria o *Riak
 Core*. Este core partilha a responsabilidade com projetos que constroem em cima
@@ -677,7 +682,7 @@ partições/vnodes no cluster (`ring_creation_size`) e várias opções de porta
 
 <h3>riak_kv</h3>
 
-![Stack Tecnológico do KV](../assets/riak-stack-kv.svg)
+![Stack Tecnológico do KV](../assets/decor/riak-stack-kv.png)
 
 O Riak KV é implementação do Riak Core no formato de chave/valor. É aqui que a
 magia acontece, como gerir pedidos e coordená-los para redundância e leitura-
@@ -726,7 +731,7 @@ MapReduce e integração com o JavaScript.
 
 <h3>riak_pipe</h3>
 
-![Stack Tecnológico do Pipe](../assets/riak-stack-pipe.svg)
+![Stack Tecnológico do Pipe](../assets/decor/riak-stack-pipe.png)
 
 O Riak Pipe é o sistema de mensagens de input e output que são a fundação para o
 MapReduce do Riak. Este nem sempre foi o caso e o MP costumava ser uma
@@ -812,7 +817,7 @@ JavaScript SpiderMonkey---o segundo utilizador são as funções de precommit.
 
 <h3>yokozuna</h3>
 
-![Stack Tecnológico do Yokozuna](../assets/riak-stack-yokozuna.svg)
+![Stack Tecnológico do Yokozuna](../assets/decor/riak-stack-yokozuna.png)
 
 Yokozuna é a nova adição ao ecosistema do Riak. É a integração do motor de
 pesquisa distribuído Solr no Riak, e fornece algumas extensões para extrair,
@@ -830,11 +835,9 @@ porta a ser usada em `solr_port`.
 
 <h3>bitcask, eleveldb, memory, multi</h3>
 
-![Stack Tecnológico do Backend](../assets/riak-stack-backend.svg)
-
-Várias base de dados modernas têm servidores de dados configuráveis e o Riak não
-é diferente. Atualmente, o Riak suporta três motores de dados: *Bitcask*,
-*eLevelDB* e *Memory* (memória) --- e um híbrido chamado de *Multi*.
+Várias base de dados modernas têm servidores de dados (backends) configuráveis e
+o Riak não é diferente. Atualmente, o Riak suporta três motores de dados:
+*Bitcask*, *eLevelDB* e *Memory* (memória) --- e um híbrido chamado de *Multi*.
 
 Usar um servidor de dados é simplesmente usar a propriedade `storage_backend`
 com um dos seguintes valores:
@@ -888,11 +891,12 @@ opções:
 ]},
 ```
 
-With the Multi backend, you can even choose different backends
-for different buckets. This can make sense, as one bucket may hold
-user information that you wish to index (use eleveldb), while another
-bucket holds volatile session information that you may prefer to simply
-remain resident (use memory).
+![Stack Tecnológica dos Servidores de Dados](../assets/decor/riak-stack-backend.png)
+
+Se escolher a opção Multi, poderá escolher diferentes servidores para diferentes
+buckets. Isto pode fazer sentido se, por exemplo, tiver um bucket que indexa
+dados (use o eleveldb), enquanto que outro bucket contém informação de sessão
+volátil que prefere que seja guardada em memória.
 
 ```bash
 %% Riak KV config
@@ -920,8 +924,8 @@ remain resident (use memory).
 ]},
 ```
 
-You can put the `memory_multi` configured above to the `session_data` bucket
-by just setting its `backend` property.
+Pode configurar agora o bucket de sessões `session_data` para usar a
+configuração acima `memory_multi`, usando a propriedade `backend`.
 
 ```bash
 $ curl -XPUT http://riaknode:8098/riak/session_data \
@@ -931,19 +935,20 @@ $ curl -XPUT http://riaknode:8098/riak/session_data \
 
 <h3>riak_api</h3>
 
-![Tech Stack API](../assets/riak-stack-api.svg)
+![Stack Tecnológico da API](../assets/decor/riak-stack-api.png)
 
-So far, all of the components we've seen have been inside the Riak
-house. The API is the front door. *In a perfect world*, the API would
-manage two implementations: HTTP and Protocol buffers (PB), an
-efficient binary protocol framework designed by Google.
+Até agora, todos os componentes que vimos são do próprio Riak. A API é a porta
+de entrada.  Num mundo perfeito, a API devia gerir duas implementações: o HTTP e
+os Protocol buffers (PB), uma framework de um protocolo binário desenvolvido
+pela Google.
 
-But because they are not yet separated, only PB is configured under `riak_api`,
-while HTTP still remains under KV.
+Mas como ainda não estão separados, só o suporte para os PB está incluído no
+`riak_api`, enquanto que o HTTP continua dentro do KV.
 
-In any case, Riak API represents the client facing aspect of Riak. Implementations
-handle how data is encoded and transferred, and this project handles the services
-for presenting those interfaces, managing connections, providing entry points.
+Em qualquer caso, a API do Riak representa o cliente à frente do Riak. As
+implementações gerem como os dados são codificados e transferidos, e este
+projeto lida com os serviços que fornecem essas interfaces, gestão de conexões e
+pontos de acesso.
 
 
 ```bash
@@ -967,12 +972,11 @@ for presenting those interfaces, managing connections, providing entry points.
 ]},
 ```
 
-<h3>Other projects</h3>
+<h3>Outros projetos</h3>
 
-Other projects add depth to Riak but aren't strictly necessary. Two of
-these projects are lager, for logging, and riak_sysmon, for
-monitoring. Both have reasonable defaults and well-documented
-settings.
+Outros projetos fornecem funcionalidade extra mas não são estritamente
+necessários. Dois desses projetos são o lager para registar eventos e o
+riak_sysmon para monitorização.
 
 * [https://github.com/basho/lager](https://github.com/basho/lager)
 * [https://github.com/basho/riak_sysmon](https://github.com/basho/riak_sysmon)
@@ -1022,34 +1026,34 @@ settings.
 ]},
 ```
 
-<h3>Backward Incompatibility</h3>
+<h3>Incompatibilidade com versões mais antigas</h3>
 
-Riak is a project in evolution. And as such, it has a lot of projects that have
-been created, but over time are being replaced with newer versions. Obviously
-this baggage can be confounding if you are just learning Riak---especially as
-you run across deprecated configuration, or documentation.
+O Riak é uma projeto em evolução. E como tal, tem muitos projetos que foram
+criados, mas com o tempo estão a ser substituídos por novas versões. Obviamente,
+isto pode ser prejudicial se estiver agora a aprender o Riak---especialmente se
+encontrar informações ou configurações desatualizadas.
 
-- InnoDB - The MySQL engine once supported by Riak, but now deprecated.
-- Luke - The legacy MapReduce implementation replaced by Riak Pipe.
-- Search - The search implementation replaced by Yokozuna.
-- Merge Index - The backend created for the legacy Riak Search.
-- SASL - A logging engine improved by Lager.
+- InnoDB - O motor do MySQL que já foi suportado, mas não é mais suportado.
+- Luke - O antigo motor de MapReduce substituído pelo Riak Pipe.
+- Search - A implementação de pesquisa agora substituída pelo Yokozuna.
+- Merge Index - O servidor de dados criado para o descontinuado Riak Search.
+- SASL - Um motor de registos que foi melhorado pelo Lager.
 
 
-## Tools
+## Ferramentas
 
 <h3>Riaknostic</h3>
 
-You may recall that we skipped the `diag` command while looking through
-`riak-admin`, but it's time to circle back around.
+Pode-se lembrar que saltamos à frente do comando `diag` quando estávamos a ver o
+`riak_admin`, mas está na hora de voltar a ver isto.
 
-[Riaknostic](http://http://riaknostic.basho.com/) is a diagnostic tool
-for Riak, meant to run a suite of checks against an installation to
-discover potential problems. If it finds any, it also recommends
-potential resolutions.
+O [Riaknostic](http://http://riaknostic.basho.com/) é uma ferramenta de
+diagnóstico para o Riak, concebida para correr um conjunto de testes contra uma
+determinada instalação para descobrir potenciais problemas. Se encontrar algum,
+ele recomenda possíveis soluções.
 
-Riaknostic exists separately from the core project but as of Riak 1.3
-is included and installed with the standard database packages.
+O Riaknostic existe separadamente do conjunto principal do Riak, mas desde o
+Riak 1.3 está a ser incluído na instalação base do sistema.
 
 ```bash
 $ riak-admin diag --list
@@ -1065,7 +1069,8 @@ Available diagnostic checks:
   search               Check whether search is enabled on all nodes
 ```
 
-I'm a bit concerned that my disk might be slow, so I ran the `disk` diagnostic.
+Eu um pouco preocupado que o meu disco esteja lento, por isso corri o comando de
+diagnóstico `disk`.
 
 ```bash
 $ riak-admin diag disk
@@ -1074,33 +1079,32 @@ not mounted with 'noatime'. Please remount its disk with the\
 'noatime' flag to improve performance.
 ```
 
-Riaknostic returns an analysis and suggestion for improvement. Had my disk
-configuration been ok, the command would have returned nothing.
+O Riaknostic devolve uma análise e sugestões de melhorias. Se o meu disco
+estivesse bem configurado, o comando não devolvia nada.
 
 
 <h3>Riak Control</h3>
 
-The last tool we'll look at is the aptly named
-[Riak Control](http://docs.basho.com/riak/latest/references/appendices/Riak-Control/).
-It's a web application for managing Riak clusters, watching, and drilling down
-into the details of your nodes to get a comprehensive view of the system. That's the
-idea, anyway. It's forever a work in progress, and it does not yet have parity with
-all of the command-line tools we've looked at. However, it's great for quick
-checkups and routing configuration changes.
+A última ferramenta que vamos ver é o  [Riak
+Control](http://docs.basho.com/riak/latest/references/appendices/Riak-Control/).
+É uma aplicação web para gerir clusters do Riak, ver detalhes dos seus nós para
+compreender a fundo o que se passa no seu cluster. Pelo menos essa é a ideia. É
+um projeto em desenvolvimento e que ainda não tem está em paridade com os todos
+comandos que vimos atrás. No entanto, é fantástico para uma rápida consulta do
+cluster e para mudar algumas configurações.
 
-Riak Control is shipped with Riak as of version 1.1, but turned off by
-default. You can enable it on one of your servers by editing
-`app.config` and restarting the node.
+O Riak Control vem pré-instalado com o Riak a partir da versão 1.1, mas
+desligado por defeito. Pode ser ligado ao editar o ficheiro `app.config` e
+reiniciando o servidor.
 
-If you're going to turn it on in production, do so carefully: you're
-opening up your cluster to remote administration using a password that
-sadly must be stored in plain text in the configuration file.
+Se quiser ligá-lo em produção, tenha cuidado: está a abrir o seu cluster a
+administração remota através de uma password que deve ser guardada em texto
+normal no ficheiro de configuração.
 
-The first step is to enable SSL and HTTPS in the `riak_core` section
-of `app.config`.  You can just uncomment these lines, set the `https`
-port to a reasonable value like `8069`, and point the `certfile` and
-`keyfile` to your SSL certificate. If you have an intermediate
-authority, add the `cacertfile` too.
+O primeiro passo é ligar o SSL e o HTTS na secção `riak_core` do `app.config`.
+Tire os comentários desta secção e escreva uma porta razoável para o `https`
+como `8069`, e aponte o `certfile` e o `keyfile` para o seu certificado SSL. Se
+tem uma autoridade intermediária, adicione o `cacertfile` também.
 
 ```bash
 %% Riak Core config
@@ -1118,10 +1122,11 @@ authority, add the `cacertfile` too.
           ]},
 ```
 
-Then, you'll have to `enable` Riak Control in your `app.config`, and add a user.
-Note that the user password is plain text. Yeah it sucks, so be careful to not
-open your Control web access to the rest of the world, or you risk giving away
-the keys to the kingdom.
+Depois, tem que configurar o `enable` para `true` na secção do Riak Control no
+`app.config` e adicionar um utilizador. Note que a password está escrita em
+texto aberto (sem codificação). Não é o ideal, por isso tenha cuidado em não
+abrir o acesso web para o resto do mundo, ou arrisca-se a partilhar as suas
+chaves com toda a gente.
 
 ```bash
 %% riak_control config
@@ -1146,35 +1151,46 @@ the keys to the kingdom.
 ]}
 ```
 
-With Control in place, restart your node and connect via a browser (note you're using
-`https`) `https://localhost:8069/admin`. After you log in using the user you set, you
-should see a snapshot page, which communicates the health of your cluster.
+Com o Control configurado, reinicie o seu servidor e ligue-se através de um
+browser (note que está a usar `https`) `https:localhost:8069/admin`. Depois de
+fazer login usando o utilizador que definiu, deve ver uma página com informação
+geral sobre a saúde do cluster.
 
-![Snapshot View](../assets/control-snapshot.png)
+![Vista Geral](../assets/control-snapshot.png)
 
-If something is wrong, you'll see a huge red "X" instead of the green check mark, along
-with a list of what the trouble is.
+Se alguma coisa estiver mal, vai ver um grande "X" vermelho em vez da marca
+verde, ao lado da descrição do possível problema.
 
-From here you can drill down into a view the cluster's nodes, with details on memory usage,
-partition distribution, and other status. You can also add and configure and these nodes.
+A partir daqui pode ir ver com mais detalhe cada nó do cluster, como a memória
+usada, distribuições das partições, entre outros. Também pode adicionar e
+remover estes nós do cluster.
 
-![Cluster View](../assets/control-cluster.png)
+![Vista do Cluster](../assets/control-cluster.png)
 
-There is more in line for Riak Control, like performing MapReduce queries, stats views,
-graphs, and more coming down the pipe. It's not a universal toolkit quite yet,
-but it has a phenomenal start.
+Há mais funcionalidades programadas para o Riak Control, como executar operações
+de MapReduce, estatísticas, gráficos, entre outros. Não é uma ferramenta
+universal ainda, mas tem um começo promissor.
+
+Tendo o cluster à sua preferência, pode gerir nós individuais, podendo desligá-
+los ou removê-los permanentemente.  Pode também ver mais detalhadamente cada nó
+individual, como a percentagem do cluster que está a gerir ou quanta RAM está a
+usar.
+
+![Vista da Gestão do Nó](../assets/control-node-mgmt.png)
 
 <!-- ## Scaling Riak
 Vertically (by adding bigger hardware), and Horizontally (by adding more nodes).
  -->
 
-## Wrapup
+## Conclusão
 
-Once you comprehend the basics of Riak, it's a simple thing to manage. If this seems like
-a lot to swallow, take it from a long-time relational database guy (me), Riak is a
-comparatively simple construct, especially when you factor in the complexity of
-distributed systems in general. Riak manages much of the daily tasks an operator might
-do themselves manually, such as sharding by keys, adding/removing nodes, rebalancing data,
-supporting multiple backends, and allowing growth with unbalanced nodes.
-And due to Riak's architecture, the best part of all is when a server goes down at night,
-you can sleep (do you remember what that was?), and fix it in the morning.
+Uma vez compreendido o básico do Riak, é simples de administrar. Se lhe parece
+muita informação para digerir, acredite num utilizador de base de dados de longa
+data como eu, o Riak é comparativamente simples, especialmente se tiver em conta
+a complexidade dos sistemas distribuídos em geral. O Riak gere muita das tarefas
+diárias que um administrador teria que fazer manualmente, como dividir as chaves
+pelas diferentes partições, adicionar e remover nós, rebalancear os dados,
+suportar múltiplos servidores de dados e permitir o crescimento do cluster com
+nós heterogéneos. E devido à arquitetura do Riak, a melhor parte é que quando um
+nó for abaixo durante a noite, você pode dormir descansado e resolver o problema
+de manhã.
