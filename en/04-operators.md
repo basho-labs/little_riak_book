@@ -517,13 +517,13 @@ with them on your own installation.
 
 ## How Riak is Built
 
+![Tech Stack](../assets/riak-stack.svg)
+
 It's difficult to label Riak as a single project. It's probably more correct to think of
 Riak as the center of gravity for a whole system of projects. As we've covered
 before, Riak is built on Erlang, but that's not the whole story. It's more correct
 to say Riak is fundamentally Erlang, with some pluggable native C code components
 (like leveldb), Java (Yokozuna), and even JavaScript (for MapReduce or commit hooks).
-
-![Tech Stack](../assets/riak-stack.svg)
 
 The way Riak stacks technologies is a good thing to keep in mind, in order to make
 sense of how to configure it properly.
@@ -1120,11 +1120,11 @@ the keys to the kingdom.
 ]}
 ```
 
+![Snapshot View](../assets/control-snapshot.png)
+
 With Control in place, restart your node and connect via a browser (note you're using
 `https`) `https://localhost:8069/admin`. After you log in using the user you set, you
 should see a snapshot page, which communicates the health of your cluster.
-
-![Snapshot View](../assets/control-snapshot.png)
 
 If something is wrong, you'll see a huge red "X" instead of the green check mark, along
 with a list of what the trouble is.

@@ -16,7 +16,7 @@ Developing with a Riak database is quite easy to do, once you understand some of
 <aside class="sidebar"><h3>Supported Languages</h3>
 
 Riak has official drivers for the following languages:
-Erlang, Java, PHP, Python, Ruby
+Erlang, Java, PHP, Python, Ruby.
 
 Including community-supplied drivers, supported languages are even more numerous: C/C++, Clojure, Common Lisp, Dart, Go, Groovy, Haskell, JavaScript (jQuery and NodeJS), Lisp Flavored Erlang, .NET, Perl, PHP, Play, Racket, Scala, Smalltalk.
 
