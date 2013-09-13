@@ -502,7 +502,7 @@ value:  pizza
 <p><aside class="sidebar"><h3>Supported Languages</h3></p>
 
 <p>Riak has official drivers for the following languages:
-Erlang, Java, PHP, Python, Ruby</p>
+Erlang, Java, PHP, Python, Ruby.</p>
 
 <p>Including community-supplied drivers, supported languages are even more numerous: C/C++, Clojure, Common Lisp, Dart, Go, Groovy, Haskell, JavaScript (jQuery and NodeJS), Lisp Flavored Erlang, .NET, Perl, PHP, Play, Racket, Scala, Smalltalk.</p>
 
@@ -1931,13 +1931,13 @@ with them on your own installation.</p>
 
 <h2 id="toc_19">How Riak is Built</h2>
 
+<p><img src="../assets/riak-stack.svg" alt="Tech Stack"></p>
+
 <p>It&#39;s difficult to label Riak as a single project. It&#39;s probably more correct to think of
 Riak as the center of gravity for a whole system of projects. As we&#39;ve covered
 before, Riak is built on Erlang, but that&#39;s not the whole story. It&#39;s more correct
 to say Riak is fundamentally Erlang, with some pluggable native C code components
 (like leveldb), Java (Yokozuna), and even JavaScript (for MapReduce or commit hooks).</p>
-
-<p><img src="../assets/riak-stack.svg" alt="Tech Stack"></p>
 
 <p>The way Riak stacks technologies is a good thing to keep in mind, in order to make
 sense of how to configure it properly.</p>
@@ -2518,11 +2518,11 @@ the keys to the kingdom.</p>
 ]}
 </code></pre>
 
+<p><img src="../assets/control-snapshot.png" alt="Snapshot View"></p>
+
 <p>With Control in place, restart your node and connect via a browser (note you&#39;re using
 <code>https</code>) <code>https://localhost:8069/admin</code>. After you log in using the user you set, you
 should see a snapshot page, which communicates the health of your cluster.</p>
-
-<p><img src="../assets/control-snapshot.png" alt="Snapshot View"></p>
 
 <p>If something is wrong, you&#39;ll see a huge red &quot;X&quot; instead of the green check mark, along
 with a list of what the trouble is.</p>
