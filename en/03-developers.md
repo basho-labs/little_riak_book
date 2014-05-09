@@ -311,7 +311,7 @@ If any of the nodes currently responsible for the data cannot complete the reque
 
 Another utility of buckets are their ability to enforce behaviors on writes by way of hooks. You can attach functions to run either before, or after, a value is committed to a bucket.
 
-Functions that run before a write is called precommit, and has the ability to cancel a write altogether if the incoming data is considered bad in some way. A simple precommit hook is to check if a value exists at all.
+Precommit hooks are functions that run before a write is called. A precommit hook has the ability to cancel a write altogether if the incoming data is considered bad in some way. A simple precommit hook is to check if a value exists at all.
 
 I put my custom Erlang code files under the riak installation `./custom/my_validators.erl`.
 
