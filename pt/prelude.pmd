@@ -1,0 +1,14 @@
+<h1 class="title">Um Pequeno Livro sobre o Riak</h1>
+<h3 class="author">Autor: Eric Redmond</h3>
+<h3 class="author">Tradução: Ricardo Gonçalves</h3>
+
+<div class="intro">
+Aqui está um pequeno livro sobre o <a
+href="http://docs.basho.com/riak/latest/">Riak</a>, uma base de dados NoSQL
+escalável e com alta disponibilidade.
+
+Outros formatos:
+<a href="https://github.com/coderoshi/little_riak_book/blob/master/rendered/riaklil-pt.epub?raw=true" class="epub">ePub</a>
+<a href="https://github.com/coderoshi/little_riak_book/blob/master/rendered/riaklil-pt.mobi?raw=true" class="mobi">mobi</a>
+<a href="https://github.com/coderoshi/little_riak_book/blob/master/rendered/riaklil-pt.pdf?raw=true" class="pdf">PDF</a>
+</div>

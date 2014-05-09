@@ -7,8 +7,9 @@ You must have `ruby` installed, tested mostly on 1.9.2+
 ### Building eBooks/PDFs
 
 ```
-gem install bundler
+[sudo] gem install bundler
 bundle install
+[sudo] gem install redcarpet
 ```
 
 All text is in markdown. To build the book, you must install [calibre](http://manual.calibre-ebook.com/cli/cli-index.html).
