@@ -549,7 +549,7 @@ $ ps -o command | grep beam
 -root /riak \
 -progname riak -- \
 -home /Users/ericredmond -- \
--boot /riak/releases/1.2.1/riak \
+-boot /riak/releases/2.0.0/riak \
 -embedded \
 -config /riak/etc/app.config \
 -pa ./lib/basho-patches \

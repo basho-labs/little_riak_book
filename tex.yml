@@ -1,5 +1,5 @@
 default:
-  version: 1.4.0
+  version: 2.0.0
   font: Crimson
   bold: "{* Bold}"
   mono: Andale Mono
@@ -13,7 +13,7 @@ default:
   fig: "Figure "
   tab: "Table "
   indent: "\\qquad"
-  thanks: "Special thanks to editor John Daily, to everyone who helped, and Basho Press"
+  thanks: "Special thanks to everyone who helped and all of the folks at Basho"
   license: "This book is licensed under the Creative Commons Attribution-Non Commercial-Share Alike 3.0 license."
   typeface: "Body typeface is Crimson."
 zh:

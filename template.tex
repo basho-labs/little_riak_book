@@ -23,6 +23,7 @@
 \usepackage{pdfpages}
 \usepackage{wrapfig}
 \usepackage{perpage}
+\usepackage{enumerate}
 
 \definecolor{shadecolor}{gray}{1.00}
 
@@ -35,7 +36,7 @@
 \settowidth{\parindent}{<%= config['indent'] %>}
 
 \title{A Little Riak Book}
-\author{Eric Redmond}
+\author{Eric Redmond \& John Daily}
 
 \makeatletter
 \let\savedauthor=\@author
@@ -99,11 +100,11 @@
 
 \newcounter{img}[chapter]
 \renewcommand{\theimg}{\thechapter.\arabic{img}}
-\newcommand{\img}[2]{\begin{figure}[ht!]
+\newcommand{\img}[3]{\begin{figure}[ht!]
 	\refstepcounter{img}
 	\label{img:\theimg}
-  \centering\includegraphics[width=\maxwidth]{figures/#1.png}
-  \textbf{\caption{#2}}
+  \centering\includegraphics[width=\maxwidth]{figures/#1.#2}
+  \textbf{\caption{#3}}
 \end{figure}}
 
 \newcounter{tab}[chapter]

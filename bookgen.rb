@@ -20,8 +20,11 @@ def gen_pdf(languages)
     begin
       Dir::mkdir("#$root/figures") rescue nil
       Dir::mkdir("#$root/figures/decor") rescue nil
-      Dir["#$root/assets/*.pdf","#$root/assets/*.png","#$root/assets/decor/*.png"].each do |file|
+      Dir["#$root/assets/*.png","#$root/assets/decor/*.png"].each do |file|
         cp file, file.sub(/assets\/(.*?)\.\w{3}/, "figures/\\1.png")
+      end
+      Dir["#$root/assets/*.pdf"].each do |file|
+        cp file, file.sub(/assets\/(.*?)\.\w{3}/, "figures/\\1.pdf")
       end
       block.call
     ensure
@@ -77,7 +80,9 @@ def gen_pdf(languages)
       # Process figures
       s /^\!\[(.*?)\]\(\.\.\/(.*?\/decor\/drinks.*?)\)/, 'DEC2: \2'
       s /^\!\[(.*?)\]\(\.\.\/(.*?\/decor\/.*?)\)/, 'DEC: \2'
-      s /^\!\[(.*?)\]\(\.\.\/assets\/(.*?)\.\w{3}\)/, 'FIG: \2 --- \1'
+      # Yet another ugly hack because xelatex doesn't recognize svg
+      s /^\!\[(.*?)\]\(\.\.\/assets\/(.*?)\.(svg)\)/, 'FIG: \2 --- pdf --- \1'
+      s /^\!\[(.*?)\]\(\.\.\/assets\/(.*?)\.(\w{3,4})\)/, 'FIG: \2 --- \3 --- \1'
 
       # TODO: perhaps this should be post pandoc?
       if isprint
@@ -115,7 +120,7 @@ def gen_pdf(languages)
       # s /DEC: (.*)/, "\\begin{wrapfigure}{r}{.3\\textwidth}\n  \\includegraphics[scale=1.0]{\\1}\n\\end{wrapfigure}"
       s /DEC: (.*)/, "\\begin{wrapfigure}{r}{.4\\textwidth}\n  \\includegraphics[scale=1.0]{\\1}\n\\end{wrapfigure}"
       s /DEC2: (.*)/, "\\begin{wrapfigure}{r}{.65\\textwidth}\n  \\includegraphics[scale=1.0]{\\1}\n\\end{wrapfigure}"
-      s /FIG: (.*?) \-\-\- (.*)/, '\img{\1}{\2}'
+      s /FIG: (.*?) \-\-\- (\w{3,4}) \-\-\- (.*)/, '\img{\1}{\2}{\3}'
       s '\begin{enumerate}[1.]', '\begin{enumerate}'
       s /(\w)--(\w)/, '\1-\2'
       s /``(.*?)''/, "#{config['dql']}\\1#{config['dqr']}"
