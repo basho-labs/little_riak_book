@@ -257,58 +257,6 @@ Other formats:
 </ul>
 </li>
 <li>
-<a href="#locks,-a-cautionary-tale">Locks, a cautionary tale</a>
-<ul>
-<li>
-<a href="#lock,-a-first-draft">Lock, a first draft</a>
-<ul>
-<li>
-<a href="#sequence">Sequence</a>
-</li>
-<li>
-<a href="#failure-scenario">Failure scenario</a>
-</li>
-</ul>
-</li>
-<li>
-<a href="#lock,-a-second-draft">Lock, a second draft</a>
-<ul>
-<li>
-<a href="#sequence">Sequence</a>
-</li>
-<li>
-<a href="#failure-scenario">Failure scenario</a>
-</li>
-</ul>
-</li>
-<li>
-<a href="#lock,-a-third-draft">Lock, a third draft</a>
-<ul>
-<li>
-<a href="#sequence">Sequence</a>
-</li>
-<li>
-<a href="#failure-scenario">Failure scenario</a>
-</li>
-</ul>
-</li>
-<li>
-<a href="#lock,-a-fourth-draft">Lock, a fourth draft</a>
-<ul>
-<li>
-<a href="#sequence">Sequence</a>
-</li>
-<li>
-<a href="#failure-scenario">Failure scenario</a>
-</li>
-</ul>
-</li>
-<li>
-<a href="#conclusion">Conclusion</a>
-</li>
-</ul>
-</li>
-<li>
 <a href="#backends">Backends</a>
 <ul>
 <li>
@@ -393,6 +341,58 @@ Other formats:
 </li>
 <li>
 <a href="#a-short-note-on-mdc">A Short Note on MDC</a>
+</li>
+<li>
+<a href="#locks,-a-cautionary-tale">Locks, a cautionary tale</a>
+<ul>
+<li>
+<a href="#lock,-a-first-draft">Lock, a first draft</a>
+<ul>
+<li>
+<a href="#sequence">Sequence</a>
+</li>
+<li>
+<a href="#failure-scenario">Failure scenario</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#lock,-a-second-draft">Lock, a second draft</a>
+<ul>
+<li>
+<a href="#sequence">Sequence</a>
+</li>
+<li>
+<a href="#failure-scenario">Failure scenario</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#lock,-a-third-draft">Lock, a third draft</a>
+<ul>
+<li>
+<a href="#sequence">Sequence</a>
+</li>
+<li>
+<a href="#failure-scenario">Failure scenario</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#lock,-a-fourth-draft">Lock, a fourth draft</a>
+<ul>
+<li>
+<a href="#sequence">Sequence</a>
+</li>
+<li>
+<a href="#failure-scenario">Failure scenario</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#conclusion">Conclusion</a>
+</li>
+</ul>
 </li>
 </ul>
 </li>
@@ -3666,9 +3666,178 @@ respond since it won&#39;t yet have a copy of that key.</p>
 <li><a href="http://basho.com/understanding-riaks-configurable-behaviors-part-1/">Understanding Riak&#39;s Configurable Behaviors</a> (Basho blog series)</li>
 </ul>
 
+<h2 id="backends">Backends</h2>
+
+<p>As a developer of a Riak application, you may or may not have control
+over the backend that stores the data for your application. You
+should, however, be aware of the tradeoffs.</p>
+
+<h3 id="bitcask">Bitcask</h3>
+
+<p>Bitcask has two particularly compelling qualities: very low (and
+predictable) latency, and configurable expiry of keys (TTL). The
+latter is particularly handy because deleting data from Riak is a
+delicate and often slow operation.</p>
+
+<p>Bitcask is very fast because each object retrieval is at most two lookups:
+find the key in memory, and seek directly to the point on disk where
+the latest copy of its object lives.</p>
+
+<h4 id="downsides">Downsides</h4>
+
+<ul>
+<li>Bitcask currently lacks a key feature that most developers think they
+want: secondary indexing (2i). Consider using term-based indexes
+instead.</li>
+<li>All keys stored on the server must be able to fit into RAM.</li>
+<li>TTL values are set per-backend instead of per-bucket, so if you need
+different expiration values, you will be forced to use the multi
+backend (below) to configure multiple Bitcask backends.</li>
+<li>Bitcask compaction operations can be expensive; Basho recommends
+tuning the compaction criteria and interval to prevent unacceptable
+latency spikes.</li>
+</ul>
+
+<h3 id="leveldb">LevelDB</h3>
+
+<p>Unlike Bitcask, which is home-grown by Basho, LevelDB originates with
+Google, although it has been (and continues to be) <em>heavily</em>
+customized to work well with Riak.</p>
+
+<p>LevelDB offers 2i and does not require that all keys fit into memory.</p>
+
+<h4 id="downsides">Downsides</h4>
+
+<ul>
+<li>LevelDB&#39;s latency profile is less predictable than Bitcasks&#39;s
+because it can take several disk seeks to retrieve an object.</li>
+<li>It does not (today) offer TTL.</li>
+</ul>
+
+<h3 id="memory">Memory</h3>
+
+<p>Riak can store all keys and values in RAM using the Memory backend,
+which offers 2i and TTL.</p>
+
+<h4 id="downsides">Downsides</h4>
+
+<ul>
+<li>Data is not persisted to disk.</li>
+</ul>
+
+<p>Because your data lives on multiple servers, it still offers
+  reasonably robust storage, but a power failure or rolling system
+  reboots can wipe out all of your data.</p>
+
+<h3 id="multi">Multi</h3>
+
+<p>It is possible for Riak to use a combination of the backends using a
+multi-backend configuration.</p>
+
+<h4 id="downsides">Downsides</h4>
+
+<ul>
+<li>Complex configuration[^cuttlefish].</li>
+<li>More contention for memory and other resources.</li>
+<li>Buckets must be created against the proper backend before data
+arrives unless the default backend is appropriate.</li>
+</ul>
+
+<p>[^cuttlefish]: Riak 2.0 includes a new configuration mechanism
+intended to reduce complexity and eliminate some common operational
+errors, but backend configuration is still handled at each server in a
+cluster and must be managed carefully.</p>
+
+<h3 id="important-backend-operational-notes">Important backend operational notes</h3>
+
+<p>Technically these are out of scope for an application development
+guide, but given the potential for bad things to happen™, it seems
+useful to point these out here.</p>
+
+<ul>
+<li>As hinted under [Multi], if a bucket contains data, changing
+backends for that bucket does not migrate the data. Instead the old
+data becomes invisible to Riak.</li>
+<li>If the backend for a bucket is configured inconsistently across the
+cluster (e.g., Bitcask on some servers but LevelDB on others) then
+features such as 2i or TTL will only work on portions of your data set.</li>
+</ul>
+
+<h2 id="dynamic-querying">Dynamic querying</h2>
+
+<p><strong>Need lots of content here.</strong></p>
+
+<h3 id="secondary-indexes-(2i)">Secondary indexes (2i)</h3>
+
+<h3 id="key-&amp;-bucket-lists">Key &amp; bucket lists</h3>
+
+<h4 id="key-ranges">Key ranges</h4>
+
+<p><a href="http://docs.basho.com/riak/latest/dev/using/keyfilters/">http://docs.basho.com/riak/latest/dev/using/keyfilters/</a></p>
+
+<h3 id="mapreduce">MapReduce</h3>
+
+<ul>
+<li>Perils of JS (prefer Erlang)</li>
+<li>Difficult to find debug information</li>
+</ul>
+
+<h3 id="full-text-search">Full-text search</h3>
+
+<!-- Yes, the Riak Search link below is intended to link to a specific
+version of the docs rather than "latest" since the content will
+presumably change significantly once 2.0 is released. -->
+
+<p>Riak&#39;s full-text search engine exists in two very different forms with
+similar interfaces: the original
+<a href="http://docs.basho.com/riak/2.0.0/dev/advanced/search/">Riak Search</a>,
+written in-house by Basho and designed to look like
+<a href="http://lucene.apache.org/solr/">Solr</a>, and the
+<a href="https://github.com/basho/yokozuna">Yokozuna</a> project for Riak 2.0,
+which <strong>is</strong> Solr, with Riak handling the responsibility of feeding
+Solr new content for indexing as values are written, updated, and
+deleted.</p>
+
+<h4 id="architectural-differences">Architectural differences</h4>
+
+<p>Basho&#39;s original Riak Search is term-based: searching for a specific
+keyword would involve querying only those servers responsible for that
+word. Searching for that same keyword using Yokozuna will involve a
+&quot;coverage query&quot; of a representative subset of the cluster (like 2i),
+which should be somewhat slower for a single term search, but for more
+complex searches or large result sets that advantage will likely be
+lost.</p>
+
+<h3 id="commit-hooks">Commit hooks</h3>
+
+<ul>
+<li>Difficult to find debug information</li>
+</ul>
+
+<h3 id="custom-hash-functions">Custom hash functions</h3>
+
+<p><em>more</em></p>
+<h1 id="notes">Notes</h1>
+
+<h2 id="a-short-note-on-riakcs">A Short Note on RiakCS</h2>
+
+<p><em>Riak CS</em> is Basho&#39;s open source extension to Riak to allow your cluster to act as
+a remote storage mechanism, comparable to (and compatible with) Amazon&#39;s
+S3. There are several reasons you may wish to host your own cloud storage mechanism
+(security, legal reasons, you already own lots of hardware, cheaper at scale).
+This is not covered in this short book, though I may certainly be bribed to
+write one.</p>
+
+<h2 id="a-short-note-on-mdc">A Short Note on MDC</h2>
+
+<p><em>MDC</em>, or Multi Data Center, is a commercial extension to Riak provided by Basho.
+While the documentation is freely available, the source code is not. If you reach
+a scale where keeping multiple Riak clusters in sync on a local or global scale is
+necessary, I would recommend considering this option.</p>
+
 <h2 id="locks,-a-cautionary-tale">Locks, a cautionary tale</h2>
 
-<p>While assembling this guide, I tried to develop a data model that
+<p>While assembling the <em>Writing Applications</em> guide, I tried to develop a data model that
 would allow for reliable locking without strong consistency. That
 attempt failed, but rather than throw the idea away entirely, I
 decided to include it here to illustrate the complexities of coping
@@ -3850,173 +4019,4 @@ read the key is challenging.</p>
 particularly fraught with peril. It&#39;s not difficult to construct
 scenarios where deleted values reappear if servers are temporarily
 unavailable during the deletion request.</p>
-
-<h2 id="backends">Backends</h2>
-
-<p>As a developer of a Riak application, you may or may not have control
-over the backend that stores the data for your application. You
-should, however, be aware of the tradeoffs.</p>
-
-<h3 id="bitcask">Bitcask</h3>
-
-<p>Bitcask has two particularly compelling qualities: very low (and
-predictable) latency, and configurable expiry of keys (TTL). The
-latter is particularly handy because deleting data from Riak is a
-delicate and often slow operation.</p>
-
-<p>Bitcask is very fast because each object retrieval is at most two lookups:
-find the key in memory, and seek directly to the point on disk where
-the latest copy of its object lives.</p>
-
-<h4 id="downsides">Downsides</h4>
-
-<ul>
-<li>Bitcask currently lacks a key feature that most developers think they
-want: secondary indexing (2i). Consider using term-based indexes
-instead.</li>
-<li>All keys stored on the server must be able to fit into RAM.</li>
-<li>TTL values are set per-backend instead of per-bucket, so if you need
-different expiration values, you will be forced to use the multi
-backend (below) to configure multiple Bitcask backends.</li>
-<li>Bitcask compaction operations can be expensive; Basho recommends
-tuning the compaction criteria and interval to prevent unacceptable
-latency spikes.</li>
-</ul>
-
-<h3 id="leveldb">LevelDB</h3>
-
-<p>Unlike Bitcask, which is home-grown by Basho, LevelDB originates with
-Google, although it has been (and continues to be) <em>heavily</em>
-customized to work well with Riak.</p>
-
-<p>LevelDB offers 2i and does not require that all keys fit into memory.</p>
-
-<h4 id="downsides">Downsides</h4>
-
-<ul>
-<li>LevelDB&#39;s latency profile is less predictable than Bitcasks&#39;s
-because it can take several disk seeks to retrieve an object.</li>
-<li>It does not (today) offer TTL.</li>
-</ul>
-
-<h3 id="memory">Memory</h3>
-
-<p>Riak can store all keys and values in RAM using the Memory backend,
-which offers 2i and TTL.</p>
-
-<h4 id="downsides">Downsides</h4>
-
-<ul>
-<li>Data is not persisted to disk.</li>
-</ul>
-
-<p>Because your data lives on multiple servers, it still offers
-  reasonably robust storage, but a power failure or rolling system
-  reboots can wipe out all of your data.</p>
-
-<h3 id="multi">Multi</h3>
-
-<p>It is possible for Riak to use a combination of the backends using a
-multi-backend configuration.</p>
-
-<h4 id="downsides">Downsides</h4>
-
-<ul>
-<li>Complex configuration[^cuttlefish].</li>
-<li>More contention for memory and other resources.</li>
-<li>Buckets must be created against the proper backend before data
-arrives unless the default backend is appropriate.</li>
-</ul>
-
-<p>[^cuttlefish]: Riak 2.0 includes a new configuration mechanism
-intended to reduce complexity and eliminate some common operational
-errors, but backend configuration is still handled at each server in a
-cluster and must be managed carefully.</p>
-
-<h3 id="important-backend-operational-notes">Important backend operational notes</h3>
-
-<p>Technically these are out of scope for an application development
-guide, but given the potential for bad things to happen™, it seems
-useful to point these out here.</p>
-
-<ul>
-<li>As hinted under [Multi], if a bucket contains data, changing
-backends for that bucket does not migrate the data. Instead the old
-data becomes invisible to Riak.</li>
-<li>If the backend for a bucket is configured inconsistently across the
-cluster (e.g., Bitcask on some servers but LevelDB on others) then
-features such as 2i or TTL will only work on portions of your data set.</li>
-</ul>
-
-<h2 id="dynamic-querying">Dynamic querying</h2>
-
-<p><strong>Need lots of content here.</strong></p>
-
-<h3 id="secondary-indexes-(2i)">Secondary indexes (2i)</h3>
-
-<h3 id="key-&amp;-bucket-lists">Key &amp; bucket lists</h3>
-
-<h4 id="key-ranges">Key ranges</h4>
-
-<p><a href="http://docs.basho.com/riak/latest/dev/using/keyfilters/">http://docs.basho.com/riak/latest/dev/using/keyfilters/</a></p>
-
-<h3 id="mapreduce">MapReduce</h3>
-
-<ul>
-<li>Perils of JS (prefer Erlang)</li>
-<li>Difficult to find debug information</li>
-</ul>
-
-<h3 id="full-text-search">Full-text search</h3>
-
-<!-- Yes, the Riak Search link below is intended to link to a specific
-version of the docs rather than "latest" since the content will
-presumably change significantly once 2.0 is released. -->
-
-<p>Riak&#39;s full-text search engine exists in two very different forms with
-similar interfaces: the original
-<a href="http://docs.basho.com/riak/2.0.0/dev/advanced/search/">Riak Search</a>,
-written in-house by Basho and designed to look like
-<a href="http://lucene.apache.org/solr/">Solr</a>, and the
-<a href="https://github.com/basho/yokozuna">Yokozuna</a> project for Riak 2.0,
-which <strong>is</strong> Solr, with Riak handling the responsibility of feeding
-Solr new content for indexing as values are written, updated, and
-deleted.</p>
-
-<h4 id="architectural-differences">Architectural differences</h4>
-
-<p>Basho&#39;s original Riak Search is term-based: searching for a specific
-keyword would involve querying only those servers responsible for that
-word. Searching for that same keyword using Yokozuna will involve a
-&quot;coverage query&quot; of a representative subset of the cluster (like 2i),
-which should be somewhat slower for a single term search, but for more
-complex searches or large result sets that advantage will likely be
-lost.</p>
-
-<h3 id="commit-hooks">Commit hooks</h3>
-
-<ul>
-<li>Difficult to find debug information</li>
-</ul>
-
-<h3 id="custom-hash-functions">Custom hash functions</h3>
-
-<p><em>more</em></p>
-<h1 id="notes">Notes</h1>
-
-<h2 id="a-short-note-on-riakcs">A Short Note on RiakCS</h2>
-
-<p><em>Riak CS</em> is Basho&#39;s open source extension to Riak to allow your cluster to act as
-a remote storage mechanism, comparable to (and compatible with) Amazon&#39;s
-S3. There are several reasons you may wish to host your own cloud storage mechanism
-(security, legal reasons, you already own lots of hardware, cheaper at scale).
-This is not covered in this short book, though I may certainly be bribed to
-write one.</p>
-
-<h2 id="a-short-note-on-mdc">A Short Note on MDC</h2>
-
-<p><em>MDC</em>, or Multi Data Center, is a commercial extension to Riak provided by Basho.
-While the documentation is freely available, the source code is not. If you reach
-a scale where keeping multiple Riak clusters in sync on a local or global scale is
-necessary, I would recommend considering this option.</p>
 </body></html>
