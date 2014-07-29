@@ -644,7 +644,7 @@ to define applications which enforce ACID semantics.
 
 ### Further reading
 
-* [HAT, not CAP: Introducing Highly Available Transactions](http://www.bailis.org/blog/hat-not-cap-introducing-highly-available-transactions/) (Peter Bailis's blog)
+* [Scalable Atomic Visibility with RAMP Transactions](http://www.bailis.org/blog/scalable-atomic-visibility-with-ramp-transactions/) (Peter Bailis's blog)
 
 
 
