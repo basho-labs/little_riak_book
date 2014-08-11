@@ -205,6 +205,54 @@ curl -v "http://localhost:8098/riak/food?list=stream"
 
 You should note that list actions should *not* be used in production (they're really expensive operations). But they are useful for development, investigations, or for running occasional analytics at off-peak hours.
 
+## Conditional requests
+
+It is possible to use conditional requests with Riak, but these are
+fragile due to the nature of its availability/eventual consistency
+model.
+
+### GET
+
+When retrieving values from Riak via HTTP, a last-modified timestamp
+and an [ETag](https://en.wikipedia.org/wiki/HTTP_ETag) are
+included. These may be used for future `GET` requests; if the value
+has not changed, a `304 Not Modified` status will be returned.
+
+For example, let's assume you receive the following headers.
+
+    Last-Modified: Thu, 17 Jul 2014 21:01:16 GMT
+    ETag: "3VhRP0vnXbk5NjZllr0dDE"
+
+Note that the quotes are part of the ETag.
+
+If the ETag is used via the `If-None-Match` header in the next request:
+
+    $ curl -i --header 'If-None-Match: "3VhRP0vnXbk5NjZllr0dDE"' http://localhost:8098/buckets/training/keys/baz
+    HTTP/1.1 304 Not Modified
+    Vary: Accept-Encoding
+    Server: MochiWeb/1.1 WebMachine/1.10.5 (jokes are better explained)
+    ETag: "3VhRP0vnXbk5NjZllr0dDE"
+    Date: Mon, 28 Jul 2014 19:48:13 GMT
+
+Similarly, the last-modified timestamp may be used with `If-Modified-Since`:
+
+    $ curl -i --header 'If-Modified-Since: Thu, 17 Jul 2014 21:01:16 GMT' http://localhost:8098/buckets/training/keys/baz
+    HTTP/1.1 304 Not Modified
+    Vary: Accept-Encoding
+    Server: MochiWeb/1.1 WebMachine/1.10.5 (jokes are better explained)
+    ETag: "3VhRP0vnXbk5NjZllr0dDE"
+    Date: Mon, 28 Jul 2014 19:51:39 GMT
+
+### PUT & DELETE
+
+When adding, updating, or removing content, the HTTP headers
+`If-None-Match`, `If-Match`, `If-Modified-Since`, and
+`If-Unmodified-Since` can be used to specify ETags and timestamps.
+
+If the specified condition cannot be met, a `412 Precondition Failed`
+status will be the result.
+
+
 ## Buckets
 
 Although we've been using buckets as namespaces up to now, they are capable of more.

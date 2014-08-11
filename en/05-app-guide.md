@@ -1,80 +1,8 @@
-# Writing Applications
+# Writing Riak Applications
 
-In the summer of 2012, I discovered
-[Sijin Joseph's *Programmer Competency Matrix*](http://sijinjoseph.com/programmer-competency-matrix/)
-and it spurred me to finally learn a functional programming language.
-
-I grabbed a copy of
-[Bruce Tate's *Seven Languages in Seven Weeks*](http://pragprog.com/book/btlang/seven-languages-in-seven-weeks). With my background in server and network administration, and a bit of server-side software
-development experience, Erlang grabbed me and has yet to let go.
-
-Learning Erlang led me to discover Basho and NoSQL technologies, and
-ultimately to a job as technical evangelist for Basho, where I helped
-edit
-[Eric Redmond's *A Little Riak Book*](http://littleriakbook.com/). Helping
-write Riak's documentation and interacting with developers has led me
-to two conclusions:
-
-* It's really *not* necessary to be a distributed systems expert to
-  write applications for Riak.
-* It nonetheless *is* necessary to think differently when designing
-  Riak applications, and we at Basho haven't (yet) done a great job of
-  making that fact obvious or surmountable.
-
-Hence this guide.
-
-Thanks to Mark Phillips for hiring me at Basho, Eric Redmond for
-inspiring me to write this guide, and the entire Basho crew for
-demanding and demonstrating excellence.
-
-## Introduction
-
-Riak is not a relational database. It is not a document store. It has
-characteristics in common with other databases, but it is very much
-its own beast, and writing
-performant^[Yes, I'll argue *performant* is a proper word, thankyewverymuch],
-scalable applications requires more than just a list of API functions:
-it requires a different way of thinking about assembling and managing
-data.
-
-If you need to be convinced that Riak is the solution for you, this is
-not the guide you're looking for. The Little Riak Book, Basho engineers, and satisfied
-customers are better resources; my goal here is to help people avoid common
-pitfalls that await the novice Riak developer. Designing applications
-to work well with a distributed key/value store is not (yet) a common skill.
-
-Because Riak is evolving rapidly to encompass new features and use cases, this
-guide will steer clear of low-level details that can be found on
-Basho's documentation website.
-
-Furthermore, this neither an operations guide nor an architecture
-guide. Understanding how Riak works under the covers is useful, but it
-should not be necessary for software development.
-
-### What do I need to read?
-
-While I'd hope that everyone will read this whole document, I have
-enough partially-read books on my shelves (analog and digital) to know
-better.
-
-Above all, read [How not to write a Riak application]. If the
-anti-patterns make sense, feel free to skip [Denormalization] and jump
-directly to [Data modeling].
-
-If [Data modeling] and the preceding content makes sense, then the
-guide has achieved its primary purpose of encouraging a different
-mindset when thinking about how Riak applications should be designed.
-
-Be sure to read [Write failures] (under [Request tuning]), because
-Riak errors and write failures are two very different things.
-
-The other particularly critical content is under
-[Conflict resolution], because while it is possible to develop
-applications that ignore the problem, such applications are probably
-working correctly only when everything else in the environment is
-working correctly.
-
-
+Chapters 2 and 3 covered key concepts that every developer should
+know. In this chapter we look more closely at ways to build (and more
+importantly not to build) Riak applications.
 
 ## How not to write a Riak application
 
@@ -89,22 +17,22 @@ themselves to great Riak applications.
 
 ### Dynamic querying
 
-Riak offers query features such as secondary indexes (**2i**),
-MapReduce, and full-text search, but throwing a large quantity of data
-into Riak and expecting those tools to find whatever you need is
-setting yourself (and Riak) up to fail. Performance will be poor,
-especially as you scale.
-
-**Reads and writes in Riak should be as fast with ten billion values
-in storage as with ten thousand.**
+Riak's tools for finding data (2i, MapReduce, and full-text search)
+are useful but should be used judiciously. None of these scale nearly
+as well as key/value operations; queries that may work well on a few
+nodes in development may run more slowly on a busy development
+environment, particularly as the cluster grows in size.
 
 Key/value operations seem primitive (and they are) but you'll find
 they are flexible, scalable, and very very fast (and predictably so).
 
-Treat 2i and friends as tools to be applied judiciously, design the
-main functionality of your application as if they don't exist, and
-your software will continue to work at blazing speeds when you have
-petabytes of data stored across dozens of servers.
+*Reads and writes in Riak should be as fast with ten billion values
+in storage as with ten thousand.*
+
+Design the main functionality of your application around the straight
+key/value operations that Riak provides and your software will
+continue to work at blazing speeds when you have petabytes of data
+stored across dozens of servers.
 
 ### Normalization
 
@@ -117,10 +45,11 @@ from multiple objects would involve multiple read requests; certainly
 possible and fast enough on a small scale, but not ideal for larger
 requests.
 
-Instead, imagine the performance of your application if most of your
-requests were a single, trivial read. Preparing and storing the
-answers to queries you're going to ask later is a best practice for
-Riak.
+Imagine the performance of your application if most of your requests
+involved a single read operation. Preparing and storing the answers to
+queries you're going to ask later is a best practice for Riak.
+
+See [Denormalization] for more discussion.
 
 ### Ducking conflict resolution
 
@@ -146,10 +75,9 @@ business needs well-served by blindly applying the most recent update?
 Some databases have no alternative but to handle it that way, but we think
 you deserve better.
 
-Riak 2.0, when installed on new clusters, will default to retaining
-conflicts and requiring the application to resolve them, but we're
-also providing replicated data types to automate conflict resolution
-on the servers.
+Typed buckets in Riak 2.0 default to retaining conflicts and requiring
+the application to resolve them, but we're also providing replicated
+data types to automate conflict resolution on the servers.
 
 If you want to minimize the need for conflict resolution, modeling
 with as much immutable data as possible is a big win.
@@ -324,8 +252,6 @@ in your database?
 Any information which must be updated frequently should be confined to
 small objects that are limited in scope.
 
-<!-- Would be nice to have an example here -->
-
 We'll talk much more about data modeling to account for mutable and
 immutable data.
 
@@ -345,35 +271,15 @@ willing to sacrifice the scalability, performance, and availability of
 Riak...but why would you?
 
 If you thoroughly absorbed the earlier content, some of this may feel
-redundant, but not all of us are able to grasp the implications of the
-key/value model, and I suspect you'll find a few interesting ideas
-here.
-
-### Terminology
-
-Bucket
-:   Virtual namespaces for keys
-Bucket types
-:   Collections of buckets for customization or security
-Denormalize
-:   Introduce redundancy into a data set
-Immutable data
-:   Data which, once written, is never updated
-Key
-:   A string which uniquely (per bucket) identifies values in Riak
-Object
-:   Another term for **value**
-Value
-:   The data associated with a key
-
+redundant, but implications of the key/value model are not always
+obvious.
 
 ### Rules to live by
 
 As with most such lists, these are guidelines rather than hard rules,
-but take them seriously. We'll talk later about alternative
-approaches.
+but take them seriously.
 
-(@keys) Know thy keys.
+(@keys) Know your keys.
 
     The cardinal rule of any key/value data store: the fastest way to get
     data is to know the key you want.
@@ -397,27 +303,31 @@ approaches.
     Because keys are only unique within a bucket, the same unique
     identifier can be used in different buckets to represent different
     information about the same entity (e.g., a customer address might
-    be in an `address` bucket with the customer id as its key).
+    be in an `address` bucket with the customer id as its key, whereas
+    the customer id as a key in a `contacts` bucket would presumably
+    contain contact information).
 
-(@namespace) Know thy namespaces.
+(@namespace) Know your namespaces.
 
-    **Bucket types** (introduced in Riak 2.0) offer a way to secure
-    and configure buckets. Buckets offer namespaces and configurable
-    request parameters for keys. Both are good ways to segregate keys
-    for data modeling.
+    Riak has several levels of namespaces when storing data.
 
-    However, keys themselves define their own namespaces. If you want
-    a hierarchy for your keys that looks like `sales/customer/month`,
+    Historically, buckets have been what most thought of as Riak's
+    virtual namespaces.
+
+    The newest level: **bucket types**, introduced in Riak 2.0, which
+    group buckets for configuration and security purposes.
+
+    Less obviously, keys are their own namespaces. If you want a
+    hierarchy for your keys that looks like `sales/customer/month`,
     you don't need nested buckets: you just need to name your keys
     appropriately, as discussed in (@keys). `sales` can be your
     bucket, while each key is prepended with customer name and month.
 
-(@views) Write your own views.
+(@views) Know your queries.
 
-    The other name for this rule? **Know your queries.**
+    Writing data is cheap. Disk space is cheap.
 
-    Dynamic queries in Riak are expensive. Writing is cheap. Disk space is
-    cheap.
+    Dynamic queries in Riak are very, very expensive.
 
     As your data flows into the system, generate the views you're going to
     want later. That magazine sales example from (@keys)? The December
@@ -427,25 +337,26 @@ approaches.
     application can assemble the full month's statistics for later
     retrieval.
 
-    Yes, getting accurate business requirements is non-trivial, but many
-    Riak applications are version 2 or 3 of a system, written once the
-    business discovered that the scalability story for MySQL, or Postgres,
-    or MongoDB, simply wasn't up to the job of handling their growth.
+    Yes, getting accurate business requirements is non-trivial, but
+    many Riak applications are version 2 or 3 of a system, written
+    once the business discovered that the scalability of MySQL,
+    Postgres, or MongoDB simply wasn't up to the job of handling their
+    growth.
 
 (@small) Take small bites.
 
     Remember your parents' advice over dinner? They were right.
 
-    When creating objects *that will be updated later*, constrain
-    their scope and keep the number of contained elements low to
-    reduce the odds of multiple clients attempting to update the data
-    concurrently.
+    When creating objects that will be updated, constrain their scope
+    and keep the number of contained elements low to reduce the odds
+    of multiple clients attempting to update the data concurrently.
 
 (@indexes) Create your own indexes.
 
-    Riak offers metadata-driven indexes for values, but these face
-    scaling challenges: in order to identify all objects for a given
-    index value, roughly a third of the cluster must be involved.
+    Riak offers metadata-driven indexes (2i) and full-text indexes
+    (Riak Search) for values, but these face scaling challenges: in
+    order to identify all objects for a given index value, roughly a
+    third of the cluster must be involved.
 
     For many use cases, creating your own indexes is straightforward
     and much faster/more scalable, since you'll be managing and
@@ -477,13 +388,14 @@ approaches.
     approach to mix and match databases for different needs. Riak is
     very fast and scalable for retrieving keys, but it's decidedly
     suboptimal at ad hoc queries. If you can't model your way out of
-    that problem, don't be afraid to store your keys with searchable
+    that problem, don't be afraid to store keys alongside searchable
     metadata in a relational or other database that makes querying
-    simpler.
+    simpler, and once you have the keys you need, grab the values
+    from Riak
 
     Just make sure that you consider failure scenarios when doing so;
-    it would be unfortunate to make Riak's effective availability a
-    slave to another database's weakness.
+    it would be unfortunate to compromise Riak's availability by
+    rendering it useless when your other database is offline.
 
 ### Further reading
 
@@ -495,29 +407,6 @@ approaches.
 
 Conflict resolution is an inherent part of nearly any Riak
 application, whether or not the developer knows it.
-
-### Causality
-
-Causality in a distributed data store is wonderfully useful when it
-can be determined. If I retrieve a value, update it, and send it back
-with metadata indicating when I got the value, Riak can determine
-whether the new write is directly descended from what it already has
-on disk.
-
-With strong consistency, this context is mandatory: if the update to
-an existing object is not explicitly derived from the latest version
-of that object, it will be rejected.
-
-With eventual consistency, Riak will take a new write regardless of
-its context (aka **vector clock**).
-
-### Siblings
-
-With eventual consistency, if the vector clock cannot determine a
-causal relationship between two copies of an object, Riak will create
-**siblings**. Effectively, such an object is no longer a simple opaque
-data blob, but rather two (or more) distinct blobs (siblings) waiting
-to be resolved.
 
 ### Conflict resolution strategies
 
@@ -544,7 +433,7 @@ And, as of Riak 2.0, strong consistency can be used to avoid conflicts
 so).
 
 
-#### Last write wins
+### Last write wins
 
 Prior to Riak 2.0, the default behavior was for Riak to resolve
 siblings by default (see [Tuning parameters] for the parameter
@@ -556,15 +445,15 @@ For some use cases, letting Riak pick a winner is perfectly fine, but
 make sure you're monitoring your system clocks and are comfortable
 losing occasional (or not so occasional) updates.
 
-#### Data types
+### Data types
 
 It has always been possible to define data types on the client side to
 merge conflicts automatically.
 
-With Riak 1.4, Basho started introducing distributed data types to
-allow the cluster to resolve conflicting writes automatically. The
-first such types was a simple counter, but Riak 2.0 includes sets and
-maps.
+With Riak 1.4, Basho started introducing distributed data types
+(formally known as **CRDTs**, or conflict-free replicated data types)
+to allow the cluster to resolve conflicting writes automatically. The
+first such type was a simple counter; Riak 2.0 adds sets and maps.
 
 These types are still bound by the same basic constraints as the rest
 of Riak. For example, if the same set is updated on either side of a
@@ -572,7 +461,7 @@ network split, requests for the set will respond differently until the
 split heals; also, these objects should not be allowed to grow to
 multiple megabytes in size.
 
-#### Strong consistency
+### Strong consistency
 
 As of Riak 2.0, it is possible to indicate that values should be
 managed using a consensus protocol, so a quorum of the servers
@@ -585,9 +474,8 @@ continue to serve requests in the prence of network partitions and
 server failures will be compromised.
 
 For example, if a majority of the primary servers for the data are
-unavailable, Riak will refuse to answer read requests, because the
-surviving servers have no way of knowing whether the data they contain
-is accurate.
+unavailable, Riak will refuse to answer read requests if the surviving
+servers are not certain the data they contain is accurate.
 
 Thus, use this only when necessary, such as when the consequences of
 conflicting writes are painful to cope with. An example of the need
@@ -595,33 +483,6 @@ for this comes from Riak CS: because users are allowed to create new
 accounts, and because there's no convenient way to resolve username
 conflicts if two accounts are created at the same time with the same
 name, it is important to coordinate such requests.
-
-### Conditional requests
-
-It is possible to use conditional requests with Riak, but these are
-fragile due to the nature of its availability/eventual consistency
-model.
-
-**Need content here.**
-
-### Locks and constraints
-
-As we'll see in [Modeling transactions], even without strong consistency it is
-possible to define ACID-like transactions in Riak at the application
-level.
-
-Two mechanisms which are **not** guaranteed to work without strong
-consistency are locks and constraints on values.
-
-For financial operations, it may be necessary (or at least desirable)
-to prevent a balance from dropping below a certain value (e.g.,
-zero). This cannot be done with eventual consistency, because even
-with transactions it is always possible for a balance to be decreased
-on both sides of a network partition.
-
-Even with `PW=2` and conditional requests weird things can
-happen. Remember that `PW` requests can error out even when data is
-written durably.
 
 ### Conflicting resolution
 
@@ -641,20 +502,7 @@ Consider this yet another plug to consider immutability.
 * [Clocks Are Bad, Or, Welcome to the Wonderful World of Distributed Systems](http://basho.com/clocks-are-bad-or-welcome-to-distributed-systems/) (Basho blog)
 * [Index for Fun and for Profit](http://basho.com/index-for-fun-and-for-profit/) (Basho blog)
 * [Indexing the Zombie Apocalypse With Riak](http://basho.com/indexing-the-zombie-apocalypse-with-riak/) (Basho blog)
-
-
-## Modeling transactions
-
-Riak is definitely not an ACID database. Nonetheless, it is possible
-to define applications which enforce ACID semantics.
-
-**Need content here.**
-
-### Further reading
-
-* [HAT, not CAP: Introducing Highly Available Transactions](http://www.bailis.org/blog/hat-not-cap-introducing-highly-available-transactions/) (Peter Bailis's blog)
-
-
+* [Readings in conflict-free replicated data types](http://christophermeiklejohn.com/crdt/2014/07/22/readings-in-crdts.html) (Chris Meiklejohn's blog)
 
 ## Request tuning
 
@@ -701,7 +549,7 @@ behavior.
 #### Configure at the bucket
 
 `allow_mult`
-:    Specify whether this bucket retains conflicts for the application to resolve (`true`) or pick a winner using vector clocks and server timestamp even if the causality history does not indicate that it is safe to do so (`false`). See [Conflict resolution] for more. Default: **`false`** prior to Riak 2.0, **`true`** after
+:    Specify whether this bucket retains conflicts for the application to resolve (`true`) or pick a winner using vector clocks and server timestamp even if the causality history does not indicate that it is safe to do so (`false`). See [Conflict resolution] for more. Default: **`false`** for untyped buckets (including all buckets prior to Riak 2.0), **`true`** otherwise
 
     You **should** give this value careful thought. You **must** know what it will be in your environment to do proper key/value data modeling.
 
@@ -778,9 +626,10 @@ No matter what response you receive, if you read the key and get the
 new value back[^client-libs], you can be confident that all future
 successful reads (until the next write) will return that same value.
 
-[^client-libs]: To be *absolutely certain* your value is in Riak, make
-certain to issue a new read request; your client library could always
-be caching the value you just wrote.
+[^client-libs]: To be *absolutely certain* your value is in Riak after
+a write error and a successful read, you can issue a new read request
+not tied to any existing object; your client library could be caching
+the value you just wrote.
 
 ### Tuning for immutable data
 
@@ -805,143 +654,3 @@ respond since it won't yet have a copy of that key.
 * [Eventual Consistency](http://docs.basho.com/riak/latest/theory/concepts/Eventual-Consistency/) (docs.basho.com)
 * [Replication](http://docs.basho.com/riak/latest/theory/concepts/Replication/) (docs.basho.com)
 * [Understanding Riak's Configurable Behaviors](http://basho.com/understanding-riaks-configurable-behaviors-part-1/) (Basho blog series)
-
-
-## Backends
-
-As a developer of a Riak application, you may or may not have control
-over the backend that stores the data for your application. You
-should, however, be aware of the tradeoffs.
-
-### Bitcask
-
-Bitcask has two particularly compelling qualities: very low (and
-predictable) latency, and configurable expiry of keys (TTL). The
-latter is particularly handy because deleting data from Riak is a
-delicate and often slow operation.
-
-Bitcask is very fast because each object retrieval is at most two lookups:
-find the key in memory, and seek directly to the point on disk where
-the latest copy of its object lives.
-
-#### Downsides
-
-* Bitcask currently lacks a key feature that most developers think they
-  want: secondary indexing (2i). Consider using term-based indexes
-  instead.
-* All keys stored on the server must be able to fit into RAM.
-* TTL values are set per-backend instead of per-bucket, so if you need
-  different expiration values, you will be forced to use the multi
-  backend (below) to configure multiple Bitcask backends.
-* Bitcask compaction operations can be expensive; Basho recommends
-  tuning the compaction criteria and interval to prevent unacceptable
-  latency spikes.
-
-### LevelDB
-
-Unlike Bitcask, which is home-grown by Basho, LevelDB originates with
-Google, although it has been (and continues to be) *heavily*
-customized to work well with Riak.
-
-LevelDB offers 2i and does not require that all keys fit into memory.
-
-#### Downsides
-
-* LevelDB's latency profile is less predictable than Bitcasks's
-  because it can take several disk seeks to retrieve an object.
-* It does not (today) offer TTL.
-
-### Memory
-
-Riak can store all keys and values in RAM using the Memory backend,
-which offers 2i and TTL.
-
-#### Downsides
-* Data is not persisted to disk.
-
-  Because your data lives on multiple servers, it still offers
-  reasonably robust storage, but a power failure or rolling system
-  reboots can wipe out all of your data.
-
-### Multi
-
-It is possible for Riak to use a combination of the backends using a
-multi-backend configuration.
-
-#### Downsides
-
-* Complex configuration[^cuttlefish].
-* More contention for memory and other resources.
-* Buckets must be created against the proper backend before data
-  arrives unless the default backend is appropriate.
-
-[^cuttlefish]: Riak 2.0 includes a new configuration mechanism
-intended to reduce complexity and eliminate some common operational
-errors, but backend configuration is still handled at each server in a
-cluster and must be managed carefully.
-
-### Important backend operational notes
-
-Technically these are out of scope for an application development
-guide, but given the potential for bad things to happen™, it seems
-useful to point these out here.
-
-* As hinted under [Multi], if a bucket contains data, changing
-  backends for that bucket does not migrate the data. Instead the old
-  data becomes invisible to Riak.
-* If the backend for a bucket is configured inconsistently across the
-  cluster (e.g., Bitcask on some servers but LevelDB on others) then
-  features such as 2i or TTL will only work on portions of your data set.
-
-
-## Dynamic querying
-
-**Need lots of content here.**
-
-### Secondary indexes (2i)
-
-### Key & bucket lists
-
-#### Key ranges
-
-http://docs.basho.com/riak/latest/dev/using/keyfilters/
-
-### MapReduce
-
-* Perils of JS (prefer Erlang)
-* Difficult to find debug information
-
-### Full-text search
-
-<!-- Yes, the Riak Search link below is intended to link to a specific
-version of the docs rather than "latest" since the content will
-presumably change significantly once 2.0 is released. -->
-
-Riak's full-text search engine exists in two very different forms with
-similar interfaces: the original
-[Riak Search](http://docs.basho.com/riak/2.0.0/dev/advanced/search/),
-written in-house by Basho and designed to look like
-[Solr](http://lucene.apache.org/solr/), and the
-[Yokozuna](https://github.com/basho/yokozuna) project for Riak 2.0,
-which **is** Solr, with Riak handling the responsibility of feeding
-Solr new content for indexing as values are written, updated, and
-deleted.
-
-#### Architectural differences
-
-Basho's original Riak Search is term-based: searching for a specific
-keyword would involve querying only those servers responsible for that
-word. Searching for that same keyword using Yokozuna will involve a
-"coverage query" of a representative subset of the cluster (like 2i),
-which should be somewhat slower for a single term search, but for more
-complex searches or large result sets that advantage will likely be
-lost.
-
-
-### Commit hooks
-
-* Difficult to find debug information
-
-### Custom hash functions
-
-*more*
