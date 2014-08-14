@@ -501,7 +501,6 @@ Consider this yet another plug to consider immutability.
 
 * [Clocks Are Bad, Or, Welcome to the Wonderful World of Distributed Systems](http://basho.com/clocks-are-bad-or-welcome-to-distributed-systems/) (Basho blog)
 * [Index for Fun and for Profit](http://basho.com/index-for-fun-and-for-profit/) (Basho blog)
-* [Indexing the Zombie Apocalypse With Riak](http://basho.com/indexing-the-zombie-apocalypse-with-riak/) (Basho blog)
 * [Readings in conflict-free replicated data types](http://christophermeiklejohn.com/crdt/2014/07/22/readings-in-crdts.html) (Chris Meiklejohn's blog)
 
 ## Request tuning
@@ -557,6 +556,7 @@ behavior.
 :    Setting this to `true` is a slightly stronger version of `allow_mult=false`: when possible, Riak will write new values to storage without bothering to compare against existing values. Default: **`false`**
 
 #### Configure at the bucket or per-request
+
 `r`
 :   The number of servers that must *successfully* respond to a read request before the client will be sent a response. Default: **`quorum`**
 

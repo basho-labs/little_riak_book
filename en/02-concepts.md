@@ -107,11 +107,37 @@ main["5122"] = "Alice"
 bagshot["5122"] = "Gas"
 ```
 
-Certainly you could have just named your keys `main_5122` and `bagshot_5122`, but buckets allow for cleaner key naming, and have other benefits that I'll outline later.
+Certainly you could have just named your keys `main_5122` and `bagshot_5122`, but buckets allow for cleaner key naming, and have other benefits, such as custom properties. For example, to add new Riak Search 2.0 indexes to a bucket, you might tell Riak to index all values under a bucket like this:
+
+```javascript
+main.props = {"search_index":"homes"}
+```
 
 Buckets are so useful in Riak that all keys must belong to a bucket. There is no global namespace. The true definition of a unique key in Riak is actually `bucket/key`.
 
-For convenience, we call a *bucket/key + value* pair an *object*, sparing ourselves the verbosity of "X key in the Y bucket and its value".
+<h3>Bucket Types</h3>
+
+Starting in Riak 2.0, there now exists a level above buckets, called bucket types. Bucket types are groups of buckets with a similar set of properties. So for the example above, it would be like a bucket of keys:
+
+```javascript
+places["main"]["5122"] = "Alice"
+places["bagshot"]["5122"] = "Gas"
+```
+
+The benefit here is that a group of distinct buckets can share properties.
+
+```javascript
+places.props = {"search_index":"anyplace"}
+```
+
+This has practical implications. Previously, you were limited to how many custom bucket properties Riak could support, because any slight change from the default would have to be propogated to every other node in the cluster (via the gossip protocol). If you had ten thousand custom buckets, that's ten thousand values that were routinely sent amongst every member. Quickly, your system could be overloaded with that chatter, called a *gossip storm*.
+
+With the addition of bucket types, and the improved communication mechanism that accompanies it, there's no limit to your bucket count. It also makes managing multiple buckets easier, since every bucket of a type inherits the common properties, you can make across-the-board changes trivially.
+
+Due to its versatility (and downright necessity in some cases) and improved performance, Basho recommends using bucket types whenever possible from this point into the future.
+
+For convenience, we call a *type/bucket/key + value* pair an *object*, sparing ourselves the verbosity of "X key in the Y bucket with the Z type, and its value".
+
 
 ## Replication and Partitions
 
@@ -212,22 +238,27 @@ But when values are distributed, *consistency* might not be guaranteed. In the m
 
 If consistency should not be compromised in a distributed database, we can choose to sacrifice *availability* instead. We may, for instance, decide to lock the entire database during a write, and simply refuse to serve requests until that value has been replicated to all relevant nodes. Clients have to wait while their results can be brought into a consistent state (ensuring all replicas will return the same value) or fail if the nodes have trouble communicating. For many high-traffic read/write use-cases, like an online shopping cart where even minor delays will cause people to just shop elsewhere, this is not an acceptable sacrifice.
 
-This tradeoff is known as Brewer's CAP theorem. CAP loosely states that you can have a C (consistent), A (available), or P (partition-tolerant) system, but you can only choose 2. Assuming your system is distributed, you're going to be partition-tolerant, meaning, that your network can tolerate packet loss. If a network partition occurs between nodes, your servers still run.
+This tradeoff is known as Brewer's CAP theorem. CAP loosely states that you can have a C (consistent), A (available), or P (partition-tolerant) system, but you can only choose 2. Assuming your system is distributed, you're going to be partition-tolerant, meaning, that your network can tolerate packet loss. If a network partition occurs between nodes, your servers still run. So your only real choices are CP or AP. Riak 2.0 supports both modes.
 
 <!-- A fourth concept not covered by the CAP theorem, latency, is especially important here. -->
 
+<h3>Strong Consistency</h3>
+
+Since version 2.0, Riak now supports strong Consistency (SC), as well as High Availability (HA). "Waitaminute!" I hear you say, "doesn't that break the CAP theorem?" Not the way Riak does it. Riak supports setting a bucket type property as strongly consistent. Any bucket of that type is now SC. Meaning, that a request is either successfully replicated to a majority of partitions, or it fails (if you want to sound fancy at parties, just say "Riak SC uses a variant of the vertical Paxos leader election algorithm").
+
+This, naturally, comes at a cost. As we know from the CAP theorem, if too many nodes are down, the write will fail. You'll have to repair your node or network, and try the write again. In short, you've lost high availability. If you don't absolutely need strong consistency, consider staying with the high availability default, and tuning it to your needs as we'll see in the next section.
+
+
+<h3>Tunable Availability with N/R/W</h3>
+
+A question the CAP theorem demands you answer with a distributed system is: do I give up strong consistency, or give up ensured availability? If a request comes in, do I lock out requests until I can enforce consistency across the nodes? Or do I serve requests at all costs, with the caveat that the database may become inconsistent?
+
+Riak's solution is based on Amazon Dynamo's novel approach of a *tunable* AP system. It takes advantage of the fact that, though the CAP theorem is true, you can choose what kind of tradeoffs you're willing to make. Riak is highly available to serve requests, with the ability to tune its level of availability---nearing, but never quite reaching, strong consistency. If you want strong consistency, you'll need to create a special SC bucket type, which we'll see in a later chapter.
+
 <aside class="sidebar"><h3>Not Quite C</h3>
 
-Strictly speaking, Riak has a tunable availability/latency tradeoff, rather than availability/consistency. Making Riak run faster by keeping R and W values low will increase the likelihood of temporarily inconsistent results (higher availability). Setting those values higher will improving the <em>odds</e> of consistent responses (never quite reaching strict consistency), but will slow down those responses and increase the likelihood that Riak will fail to respond (in the event of a partition).
-
-Currently, no setting can make Riak truly CP in the general case, but features for a few strict cases are being researched.
+Strictly speaking, altering R and W values actually creates a tunable availability/latency tradeoff, rather than availability/consistency. Making Riak run faster by keeping R and W values low will increase the likelihood of temporarily inconsistent results (higher availability). Setting those values higher will improving the <em>odds</em> of consistent responses (never quite reaching strong consistency), but will slow down those responses and increase the likelihood that Riak will fail to respond (in the event of a partition).
 </aside>
-
-<h3>N/R/W</h3>
-
-A question the CAP theorem demands you answer with a distributed system is: do I give up strict consistency, or give up ensured availability? If a request comes in, do I lock out requests until I can enforce consistency across the nodes? Or do I serve requests at all costs, with the caveat that the database may become inconsistent?
-
-Riak's solution is based on Amazon Dynamo's novel approach of a *tunable* AP system. It takes advantage of the fact that, though the CAP theorem is true, you can choose what kind of tradeoffs you're willing to make. Riak is highly available to serve requests, with the ability to tune its level of availability (nearing, but never quite reaching, full consistency).
 
 Riak allows you to choose how many nodes you want to replicate an object to, and how many nodes must be written to or read from per request. These values are settings labeled `n_val` (the number of nodes to replicate to), `r` (the number of nodes read from before returning), and `w` (the number of nodes written to before considered successful).
 
@@ -253,19 +284,27 @@ Reading involves similar tradeoffs. To ensure you have the most recent value, yo
 
 In general terms, the N/R/W values are Riak's way of allowing you to trade lower consistency for more availability.
 
-<h3>Vector Clock</h3>
+<h3>Logical Clock</h3>
 
-If you've followed thus far, I only have one more conceptual wrench to throw at you. I wrote earlier that with `r=all`, we can "compare all nodes against each other and choose the latest one." But how do we know which is the latest value? This is where *vector clocks* (aka *vclocks*) come into play.
+If you've followed thus far, I only have one more conceptual wrench to throw at you. I wrote earlier that with `r=all`, we can "compare all nodes against each other and choose the latest one." But how do we know which is the latest value? This is where logical clocks like *vector clocks* (aka *vclocks*) come into play.
 
-Vector clocks measure a sequence of events, just like a normal clock. But since we can't reasonably keep the clocks on dozens, or hundreds, or thousands of servers in sync (without really exotic hardware, like geosynchronized atomic clocks, or quantum entanglement), we instead keep a running history of updates.
+<aside class="sidebar"><h3>DVV</h3>
 
-Let's use our `favorite` example again, but this time we have 3 people trying to come to a consensus on their favorite food: Aaron, Britney, and Carrie. We'll track the value each has chosen along with the relevant vector clock.
+Since Riak 2.0, some internal values have been migrated over to an alternative logical timestamp called Dot Version Vectors. How they operate isn't really germain to this short lesson. What's important is not so much how they're implemented, but the basic idea of a logical clock that we're talking about in the section. You can read more about DVVs (or any Riak concept) on the [Basho docs website](http://docs.basho.com).
+</aside>
 
-(To illustrate vector clocks in action, we'll cheat a bit. By default, Riak no longer tracks vector clocks using client information, but rather via the server that coordinates a write request; nonetheless, the concept is the same. We'll cheat further by disregarding the timestamp that is stored with vector clocks.)
+Vector clocks measure a sequence of events, just like a normal clock. But since we can't reasonably keep the clocks on dozens, or hundreds, or thousands of servers in sync (without really exotic hardware, like geosynchronized atomic clocks, or quantum entanglement), we instead keep a running history of updates, and look for logical, rather than temporal, causality.
+
+Let's use our `favorite` example again, but this time we have 3 people trying to come to a consensus on their favorite food: Aaron, Britney, and Carrie. These people are called *actors*, ie. the things responsible for the updates. We'll track the value each actor has chosen along with the relevant vector clock.
+
+(To illustrate vector clocks in action, we're cheating a bit. Riak doesn't track vector clocks via the client that initiated the request, but rather, via the server that coordinates the write request; nonetheless, the concept is the same. We'll cheat further by disregarding the timestamp that is stored with vector clocks.)
 
 When Aaron sets the `favorite` object to `pizza`, a vector clock could contain his name and the number of updates he's performed.
 
 ```yaml
+bucket: food
+key:    favorite
+
 vclock: {Aaron: 1}
 value:  pizza
 ```
@@ -273,6 +312,9 @@ value:  pizza
 Britney now comes along, and reads `favorite`, but decides to update `pizza` to `cold pizza`. When using vclocks, she must provide the vclock returned from the request she wants to update. This is how Riak can help ensure you're updating a previous value, and not merely overwriting with your own.
 
 ```yaml
+bucket: food
+key:    favorite
+
 vclock: {Aaron: 1, Britney: 1}
 value:  cold pizza
 ```
@@ -280,15 +322,21 @@ value:  cold pizza
 At the same time as Britney, Carrie decides that pizza was a terrible choice, and tried to change the value to `lasagna`.
 
 ```yaml
+bucket: food
+key:    favorite
+
 vclock: {Aaron: 1, Carrie: 1}
 value:  lasagna
 ```
 
-This presents a problem, because there are now two vector clocks in play that diverge from `[Aaron: 1]`. If previously configured to do so, Riak will store both values.
+This presents a problem, because there are now two vector clocks in play that diverge from `{Aaron: 1}`. By default, Riak will store both values.
 
 Later in the day Britney checks again, but this time she gets the two conflicting values (aka *siblings*, which we'll discuss in more detail in the next chapter), with two vclocks.
 
 ```yaml
+bucket: food
+key:    favorite
+
 vclock: {Aaron: 1, Britney: 1}
 value:  cold pizza
 ---
@@ -299,6 +347,9 @@ value:  lasagna
 It's clear that a decision must be made. Perhaps Britney knows that Aaron's original request was for `pizza`, and thus two people generally agreed on `pizza`, so she resolves the conflict choosing that and providing a new vclock.
 
 ```yaml
+bucket: food
+key:    favorite
+
 vclock: {Aaron: 1, Carrie: 1, Britney: 2}
 value:  pizza
 ```
@@ -306,6 +357,67 @@ value:  pizza
 Now we are back to the simple case, where requesting the value of `favorite` will just return the agreed upon `pizza`.
 
 If you're a programmer, you may notice that this is not unlike a version control system, like **git**, where conflicting branches may require manual merging into one.
+
+<h3>Datatypes</h3>
+
+New in Riak 2.0 is the concept of datatypes. In the preceding logical clock example, we were responsible for resolving the conflicting values. This is because in the normal case, Riak has no idea what object's you're giving it. That is to say, Riak values are *opaque*. This is actually a powerful construct, since it allows you to store any type of value you want, from plain text, to semi-structured data like XML or JSON, to binary objects like images.
+
+When you decide to use datatypes, you've given Riak some information about the type of object you want to store. With this information, Riak can figure out how to resolve conflicts automatically for you, based on some pre-defined behavior.
+
+Let's try another example. Let's imagine a shopping cart in an online retailer. You can imagine a shopping cart like a set of items. So each key in our cart contains a *set* of values.
+
+Let's say you log into the retailer's website on your laptop with your username *ponies4evr*, and choose the Season 2 DVD of *My Little Pony: Friendship is Magic*. This time, the logical clock will act more like Riak's, where the node that coordinates the request will be the actor.
+
+```yaml
+type:   set
+bucket: cart
+key:    ponies4evr
+
+vclock: {Node_A: 1}
+value:  ["MYPFIM-S2-DVD"]
+```
+
+Once the DVD was added to the cart bucket, your laptop runs out of batteries. So you take out your trusty smartphone, and log into the retailer's mobile app. You decide to also add the *Bloodsport III* DVD. Little did you know, a temporary network partition caused your write to redirect to another node. This partition had no knowledge of of your other purchase.
+
+```yaml
+type:   set
+bucket: cart
+key:    ponies4evr
+
+vclock: {Node_B: 1}
+value:  ["BS-III-DVD"]
+```
+
+Happily, the network hiccup was temporary, and thus the cluster heals itself. Undr normal circumstances, since the logical clocks did not decend from one another, you'd end up with siblings like this:
+
+```yaml
+type:   set
+bucket: cart
+key:    ponies4evr
+
+vclock: {Node_A: 1}
+value:  ["MYPFIM-S2-DVD"]
+---
+vclock: {Node_B: 1}
+value:  ["BS-III-DVD"]
+```
+
+But since the bucket was designed to hold a *set*, Riak knows how to automatically resolve this conflict. In the case of conflicting sets, it performs a set union. So when you go to checkout of the cart, the system returns this instead:
+
+```yaml
+type:   set
+bucket: cart
+key:    ponies4evr
+
+vclock: [{Node_A: 1}, {Node_B: 1}]
+value:  ["MYPFIM-S2-DVD", "BS-III-DVD"]
+```
+
+Datatypes will never return conflicts. This is an important claim to make, because as a developer, you get all of the benefits of dealing with a simple value, with all of the benefits of a distributed, available system. You don't have to think about handling conflicts. It would be like a version control system where (*git*, *svn*, etc) where you never had to merge code---the VCS simply *knew* what you wanted.
+
+How this all works is beyond the scope of this document. Under the covers it's implemented by something called [CRDTs](http://docs.basho.com/riak/2.0.0/theory/concepts/crdts/) \(Conflict-free Replicated Data Types). What's important to note is that Riak supports four datatypes: *map*, *set*, *counter*, *flag* (a binary value). Best of all, maps can nest arbitrarily, so you can create a map whose values are sets, counters, or even other maps. It also supports plain string values called *register*s.
+
+We'll see how to use datatypes in the next chapter.
 
 <h3>Riak and ACID</h3>
 
@@ -320,7 +432,7 @@ Or, the entire transaction can fail, making the whole cluster unavailable. Even 
 
 Unlike single node databases like Neo4j or PostgreSQL, Riak does not support *ACID* transactions. Locking across multiple servers would can write availability, and equally concerning, increase latency. While ACID transactions promise *Atomicity*, *Consistency*, *Isolation*, and *Durability*---Riak and other NoSQL databases follow *BASE*, or *Basically Available*, *Soft state*, *Eventually consistent*.
 
-The BASE acronym was meant as shorthand for the goals of non-ACID-transactional databases like Riak. It is an acceptance that distribution is never perfect (basically available), all data is in flux (soft state), and that true consistency is generally untenable (eventually consistent).
+The BASE acronym was meant as shorthand for the goals of non-ACID-transactional databases like Riak. It is an acceptance that distribution is never perfect (basically available), all data is in flux (soft state), and that strong consistency is untenable (eventually consistent) if you want high availability.
 
 Look closely at promises of distributed transactions---it's often couched in some diminishing adjective or caveat like *row transactions*, or *per node transactions*, which basically mean *not transactional* in terms you would normally use to define it. I'm not claiming it's impossible, but certainly worth due consideration.
 
@@ -328,7 +440,7 @@ As your server count grows---especially as you introduce multiple datacenters---
 
 ## Wrapup
 
-Riak is designed to bestow a range of real-world benefits, but equally, to handle the fallout of wielding such power. Consistent hashing and vnodes are an elegant solution to horizontally scaling across servers. N/R/W allows you to dance with the CAP theorem by fine-tuning against its constraints. And vector clocks allow another step closer to true consistency by allowing you to manage conflicts that will occur at high load.
+Riak is designed to bestow a range of real-world benefits, but equally, to handle the fallout of wielding such power. Consistent hashing and vnodes are an elegant solution to horizontally scaling across servers. N/R/W allows you to dance with the CAP theorem by fine-tuning against its constraints. And vector clocks allow another step closer to consistency by allowing you to manage conflicts that will occur at high load.
 
 We'll cover other technical concepts as needed, including the gossip protocol, hinted handoff, and read-repair.
 

@@ -38,7 +38,7 @@ So, common features to all of these models:
 
 ### Lock, a first draft
 
-#### Sequence
+__Sequence__
 
 Bucket: `allow_mult=false`
 
@@ -48,7 +48,7 @@ Bucket: `allow_mult=false`
 4. Process data set to completion
 5. Remove the lock
 
-#### Failure scenario
+__Failure scenario__
 
 1. Worker #1 reads the non-existent lock
 2. Worker #2 reads the non-existent lock
@@ -61,7 +61,7 @@ Bucket: `allow_mult=false`
 
 Bucket: `allow_mult=false`
 
-#### Sequence
+__Sequence__
 
 1. Worker reads with `pr=quorum` to determine whether a lock exists
 2. If it does, move on to another data set
@@ -72,7 +72,7 @@ Bucket: `allow_mult=false`
 6. Process data set to completion
 7. Remove the lock
 
-#### Failure scenario
+__Failure scenario__
 
 1. Worker #1 reads the non-existent lock
 2. Worker #2 reads the non-existent lock
@@ -90,7 +90,7 @@ this as a common problem with non-atomic lock operations.
 
 Bucket: `allow_mult=true`
 
-#### Sequence
+__Sequence__
 
 1. Worker reads with `pr=quorum` to determine whether a lock exists
 2. If it does, move on to another data set
@@ -101,7 +101,7 @@ contains siblings, move on to another data set
 6. Process data set to completion
 7. Remove the lock
 
-#### Failure scenario
+__Failure scenario__
 
 1. Worker #1 reads the non-existent lock
 2. Worker #2 reads the non-existent lock
@@ -115,7 +115,7 @@ contains siblings, move on to another data set
 
 Bucket: `allow_mult=true`
 
-#### Sequence
+__Sequence__
 
 1. Worker reads with `pr=quorum` to determine whether a lock exists
 2. If it does, move on to another data set
@@ -127,8 +127,7 @@ to another data set
 6. Process data set to completion
 7. Remove the lock
 
-
-#### Failure scenario
+__Failure scenario__
 
 1. Worker #1 reads the non-existent lock
 2. Worker #2 reads the non-existent lock
