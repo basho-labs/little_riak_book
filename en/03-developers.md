@@ -15,12 +15,12 @@ Developing with a Riak database is quite easy to do, once you understand some of
 
 <aside class="sidebar"><h3>Supported Languages</h3>
 
-Riak has official drivers for the following languages:
-Erlang, Java, PHP, Python, Ruby.
+Riak 2.0 has official drivers for the following languages:
+Erlang, Java, Python, Ruby.
 
-Including community-supplied drivers, supported languages are even more numerous: C/C++, Clojure, Common Lisp, Dart, Go, Groovy, Haskell, JavaScript (jQuery and NodeJS), Lisp Flavored Erlang, .NET, Perl, PHP, Play, Racket, Scala, Smalltalk.
+Including community-supplied drivers, supported languages are even more numerous: C/C++, PHP, Clojure, Common Lisp, Dart, Go, Groovy, Haskell, JavaScript (jQuery and NodeJS), Lisp Flavored Erlang, .NET, Perl, PHP, Play, Racket, Scala, Smalltalk.
 
-Dozens of other project-specific addons can be found in the [docs](http://docs.basho.com/riak/latest/).
+Dozens of other project-specific addons can be found in the [Basho docs](http://docs.basho.com/riak/latest/).
 </aside>
 
 Since Riak is a KV database, the most basic commands are setting and getting values. We'll use the HTTP interface, via curl, but we could just as easily use Erlang, Ruby, Java, or any other supported language.
@@ -30,17 +30,23 @@ and maybe eventually deleting it. The actions are related to HTTP methods
 (PUT, GET, POST, DELETE).
 
 ```bash
-PUT    /riak/bucket/key
-GET    /riak/bucket/key
-DELETE /riak/bucket/key
+PUT    /types/<type>/buckets/<bucket>/keys/<key>
+GET    /types/<type>/buckets/<bucket>/keys/<key>
+DELETE /types/<type>/buckets/<bucket>/keys/<key>
+```
+
+For the examples in this chapter, let's call an environment variable `$RIAK` that points to our access node's URL.
+
+```bash
+export RIAK=http://localhost:8098
 ```
 
 <h4>PUT</h4>
 
-The simplest write command in Riak is putting a value. It requires a key, value, and a bucket. In curl, all HTTP methods are prefixed with `-X`. Putting the value `pizza` into the key `favorite` under the `food` bucket is done like this:
+The simplest write command in Riak is putting a value. It requires a key, value, and a bucket. In curl, all HTTP methods are prefixed with `-X`. Putting the value `pizza` into the key `favorite` under the `food` bucket and `items` bucket type is done like this:
 
 ```bash
-curl -XPUT "http://localhost:8098/riak/food/favorite" \
+curl -XPUT "$RIAK/types/items/buckets/food/keys/favorite" \
   -H "Content-Type:text/plain" \
   -d "pizza"
 ```
@@ -49,24 +55,23 @@ I threw a few curveballs in there. The `-d` flag denotes the next string will be
 
 <h4>GET</h4>
 
-The next command reads the value `pizza` under the bucket/key `food`/`favorite`.
+The next command reads the value `pizza` under the type/bucket/key `items`/`food`/`favorite`.
 
 ```bash
-curl -XGET "http://localhost:8098/riak/food/favorite"
+curl -XGET "$RIAK/types/items/buckets/food/keys/favorite"
 pizza
 ```
 
 This is the simplest form of read, responding with only the value. Riak contains much more information, which you can access if you read the entire response, including the HTTP header.
 
-In `curl` you can access a full response by way of the `-i` flag. Let's perform the above query again, adding that flag.
+In `curl` you can access a full response by way of the `-i` flag. Let's perform the above query again, adding that flag (`-XGET` is the default curl method, so we can leave it off).
 
 ```bash
-curl -i -XGET "http://localhost:8098/riak/food/favorite"
+curl -i "$RIAK/types/items/buckets/food/keys/favorite"
 HTTP/1.1 200 OK
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmdwZTImMfKcN3h1Um+LAA=
 Vary: Accept-Encoding
 Server: MochiWeb/1.1 WebMachine/1.9.0 (someone had painted...
-Link: </riak/food>; rel="up"
 Last-Modified: Wed, 10 Oct 2012 18:56:23 GMT
 ETag: "1yHn7L0XMEoMVXRGp4gOom"
 Date: Thu, 11 Oct 2012 23:57:29 GMT
@@ -105,12 +110,12 @@ Some other headers like `Link` will be covered later in this chapter.
 
 <h4>POST</h4>
 
-Similar to PUT, POST will save a value. But with POST a key is optional. All it requires is a bucket name, and it will generate a key for you.
+Similar to PUT, POST will save a value. But with POST a key is optional. All it requires is a bucket name (and should include a type), and it will generate a key for you.
 
-Let's add a JSON value to represent a person under the `people` bucket. The response header is where a POST will return the key it generated for you.
+Let's add a JSON value to represent a person under the `json`/`people` type/bucket. The response header is where a POST will return the key it generated for you.
 
 ```bash
-curl -i -XPOST "http://localhost:8098/riak/people" \
+curl -i -XPOST "$RIAK/types/json/buckets/people/keys" \
   -H "Content-Type:application/json" \
   -d '{"name":"aaron"}'
 HTTP/1.1 201 Created
@@ -129,7 +134,7 @@ You can extract this key from the `Location` value. Other than not being pretty,
 You may note that no body was returned with the response. For any kind of write, you can add the `returnbody=true` parameter to force a value to return, along with value-related headers like `X-Riak-Vclock` and `ETag`.
 
 ```bash
-curl -i -XPOST "http://localhost:8098/riak/people?returnbody=true" \
+curl -i -XPOST "$RIAK/types/json/buckets/people/keys?returnbody=true" \
   -H "Content-Type:application/json" \
   -d '{"name":"billy"}'
 HTTP/1.1 201 Created
@@ -137,7 +142,6 @@ X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmdwZTImMfKkD3z10m+LAA=
 Vary: Accept-Encoding
 Server: MochiWeb/1.1 WebMachine/1.9.0 (someone had painted...
 Location: /riak/people/DnetI8GHiBK2yBFOEcj1EhHprss
-Link: </riak/people>; rel="up"
 Last-Modified: Tue, 23 Oct 2012 04:30:35 GMT
 ETag: "7DsE7SEqAtY12d8T1HMkWZ"
 Date: Tue, 23 Oct 2012 04:30:35 GMT
@@ -151,10 +155,10 @@ This is true for PUTs and POSTs.
 
 <h4>DELETE</h4>
 
-The final basic operation is deleting keys, which is similar to getting a value, but sending the DELETE method to the `url`/`bucket`/`key`.
+The final basic operation is deleting keys, which is similar to getting a value, but sending the DELETE method to the `type`/`bucket`/`key`.
 
 ```bash
-curl -XDELETE "http://localhost:8098/riak/people/DNQGJY0KtcHMirkidasA066yj5V"
+curl -XDELETE "$RIAK/types/json/buckets/people/keys/DNQGJY0KtcHMirkidasA066yj5V"
 ```
 
 A deleted object in Riak is internally marked as deleted, by writing a marker known as a *tombstone*. Unless configured otherwise, another process called a *reaper* will later finish deleting the marked objects.
@@ -171,7 +175,7 @@ Riak provides two kinds of lists. The first lists all *buckets* in your cluster,
 The following will give us all of our buckets as a JSON object.
 
 ```bash
-curl "http://localhost:8098/riak?buckets=true"
+curl "$RIAK/types/default/buckets?buckets=true"
 
 {"buckets":["food"]}
 ```
@@ -179,7 +183,7 @@ curl "http://localhost:8098/riak?buckets=true"
 And this will give us all of our keys under the `food` bucket.
 
 ```bash
-curl "http://localhost:8098/riak/food?keys=true"
+curl "$RIAK/types/default/buckets/food/keys?keys=true"
 {
   ...
   "keys": [
@@ -191,7 +195,7 @@ curl "http://localhost:8098/riak/food?keys=true"
 If we had very many keys, clearly this might take a while. So Riak also provides the ability to stream your list of keys. `keys=stream` will keep the connection open, returning results in chunks of arrays. When it has exhausted its list, it will close the connection. You can see the details through curl in verbose (`-v`) mode (much of that response has been stripped out below).
 
 ```bash
-curl -v "http://localhost:8098/riak/food?list=stream"
+curl -v "$RIAK/types/default/buckets/food/keys?keys=stream"
 ...
 
 * Connection #0 to host localhost left intact
@@ -220,28 +224,36 @@ has not changed, a `304 Not Modified` status will be returned.
 
 For example, let's assume you receive the following headers.
 
-    Last-Modified: Thu, 17 Jul 2014 21:01:16 GMT
-    ETag: "3VhRP0vnXbk5NjZllr0dDE"
+```bash
+Last-Modified: Thu, 17 Jul 2014 21:01:16 GMT
+ETag: "3VhRP0vnXbk5NjZllr0dDE"
+```
 
 Note that the quotes are part of the ETag.
 
 If the ETag is used via the `If-None-Match` header in the next request:
 
-    $ curl -i --header 'If-None-Match: "3VhRP0vnXbk5NjZllr0dDE"' http://localhost:8098/buckets/training/keys/baz
-    HTTP/1.1 304 Not Modified
-    Vary: Accept-Encoding
-    Server: MochiWeb/1.1 WebMachine/1.10.5 (jokes are better explained)
-    ETag: "3VhRP0vnXbk5NjZllr0dDE"
-    Date: Mon, 28 Jul 2014 19:48:13 GMT
+```bash
+curl -i "$RIAK/types/default/buckets/food/keys/dinner" \
+  -H 'If-None-Match: "3VhRP0vnXbk5NjZllr0dDE"'
+HTTP/1.1 304 Not Modified
+Vary: Accept-Encoding
+Server: MochiWeb/1.1 WebMachine/1.10.5 (jokes are better explained)
+ETag: "3VhRP0vnXbk5NjZllr0dDE"
+Date: Mon, 28 Jul 2014 19:48:13 GMT
+```
 
 Similarly, the last-modified timestamp may be used with `If-Modified-Since`:
 
-    $ curl -i --header 'If-Modified-Since: Thu, 17 Jul 2014 21:01:16 GMT' http://localhost:8098/buckets/training/keys/baz
-    HTTP/1.1 304 Not Modified
-    Vary: Accept-Encoding
-    Server: MochiWeb/1.1 WebMachine/1.10.5 (jokes are better explained)
-    ETag: "3VhRP0vnXbk5NjZllr0dDE"
-    Date: Mon, 28 Jul 2014 19:51:39 GMT
+```bash
+curl -i "$RIAK/types/default/buckets/food/keys/dinner" \
+  -H 'If-Modified-Since: Thu, 17 Jul 2014 21:01:16 GMT'
+HTTP/1.1 304 Not Modified
+Vary: Accept-Encoding
+Server: MochiWeb/1.1 WebMachine/1.10.5 (jokes are better explained)
+ETag: "3VhRP0vnXbk5NjZllr0dDE"
+Date: Mon, 28 Jul 2014 19:51:39 GMT
+```
 
 ### PUT & DELETE
 
@@ -253,9 +265,9 @@ If the specified condition cannot be met, a `412 Precondition Failed`
 status will be the result.
 
 
-## Buckets
+## Bucket Types/Buckets
 
-Although we've been using buckets as namespaces up to now, they are capable of more.
+Although we've been using bucket types and buckets as namespaces up to now, they are capable of more.
 
 Different use-cases will dictate whether a bucket is heavily written to, or largely read from. You may use one bucket to store logs, one bucket could store session data, while another may store shopping cart data. Sometimes low latency is important, while other times it's high durability. And sometimes we just want buckets to react differently when a write occurs.
 
@@ -270,7 +282,7 @@ N is the number of total nodes that a value should be replicated to, defaulting 
 Any bucket property, including `n_val`, can be set by sending a `props` value as a JSON object to the bucket URL. Let's set the `n_val` to 5 nodes, meaning that objects written to `cart` will be replicated to 5 nodes.
 
 ```bash
-curl -i -XPUT "http://localhost:8098/riak/cart" \
+curl -i -XPUT "$RIAK/types/default/buckets/cart/props" \
   -H "Content-Type: application/json" \
   -d '{"props":{"n_val":5}}'
 ```
@@ -280,7 +292,7 @@ You can take a peek at the bucket's properties by issuing a GET to the bucket.
 *Note: Riak returns unformatted JSON. If you have a command-line tool like jsonpp (or json_pp) installed, you can pipe the output there for easier reading. The results below are a subset of all the `props` values.*
 
 ```bash
-curl "http://localhost:8098/riak/cart" | jsonpp
+curl "$RIAK/types/default/buckets/cart/props" | jsonpp
 {
   "props": {
     ...
@@ -312,7 +324,7 @@ What's important is that your reads and writes *overlap*. As long as `r+w > n`, 
 A `quorum` is an excellent default, since you're reading and writing from a balance of nodes. But if you have specific requirements, like a log that is often written to, but rarely read, you might find it make more sense to wait for a successful write from a single node, but read from all of them. This affords you an overlap
 
 ```bash
-curl -i -XPUT http://localhost:8098/riak/logs \
+curl -i -XPUT "$RIAK/types/default/buckets/logs/props" \
   -H "Content-Type: application/json" \
   -d '{"props":{"w":"one","r":"all"}}'
 ```
@@ -348,7 +360,7 @@ It's worth noting that these values (except for `n_val`) can be overridden *per 
 Consider a scenario in which you have data that you find very important (say, credit card checkout), and want to help ensure it will be written to every relevant node's disk before success. You could add `?dw=all` to the end of your write.
 
 ```bash
-curl -i -XPUT http://localhost:8098/riak/cart/cart1?dw=all \
+curl -i -XPUT "$RIAK/types/default/buckets/cart/keys/cart1?dw=all" \
   -H "Content-Type: application/json" \
   -d '{"paid":true}'
 ```
@@ -394,7 +406,7 @@ Install the file by informing the Riak installation of your new code via `app.co
 Then you need to do set the Erlang module (`my_validators`) and function (`value_exists`) as a JSON value to the bucket's precommit array `{"mod":"my_validators","fun":"value_exists"}`.
 
 ```bash
-curl -i -XPUT http://localhost:8098/riak/cart \
+curl -i -XPUT "$RIAK/types/default/buckets/cart/props" \
   -H "Content-Type:application/json" \
   -d '{"props":{"precommit":[{"mod":"my_validators","fun":"value_exists"}]}}'
 ```
@@ -402,7 +414,7 @@ curl -i -XPUT http://localhost:8098/riak/cart \
 If you try and post to the `cart` bucket without a value, you should expect a failure.
 
 ```bash
-curl -XPOST http://localhost:8098/riak/cart \
+curl -XPOST "$RIAK/types/default/buckets/cart/keys" \
   -H "Content-Type:application/json"
 A value sized greater than 0 is required
 ```
@@ -413,6 +425,77 @@ Post-commits are similar in form and function, albeit executed after the write h
 
 * The only language supported is Erlang.
 * The function's return value is ignored, thus it cannot cause a failure message to be sent to the client.
+
+
+## Datatypes
+
+A new feature in Riak 2.0 are datatypes. Rather than the opaque values of days past, these new additions allow a user to define the type of values that are accepted under a given bucket type. In addition to the benefits listed in the previous chapter of automatic conflict resolution, you also interact with datatypes in a different way.
+
+<aside id="crdt" class="sidebar"><h3>CRDT</h3>
+
+In the previous chapter I said that Riak datatypes are implemented as CRDTs. The definition of CRDT given was Conflict-free Replicated Data Types. This is only partially correct. In fact, there are two varients of CRDTs, namely, describing how they attempt to keep the replicated datatypes Conflict-free. They are Convergent (CvRDT) and Commutative (CmRDT).
+
+CmRDTs are datatypes that are updated with commutative operations. CvRDTs ensure that disparate states converge to a single value. This distinction is interesting in Riak, because Basho actually implements both. You interface with datatypes by commutative operations (meaning, it doesn't matter which takes place first), while any underlying divergent states will eventually converge.
+</aside>
+
+In normal Riak operations, as we've seen, you put a value with a given key into a type/bucket object. If you wanted to store a map, say, as a JSON object representing a person, you would put the entire object with every field/value as an operation.
+
+```bash
+curl -XPOST "$RIAK/types/json/buckets/people/keys/joe" \
+  -H "Content-Type:application/json"
+  -d '{"name_register":"Joe", "pets_set":["cat"]}'
+```
+
+But if you wanted to add a `fish` as a pet, you'd have to replace the entire object.
+
+```bash
+curl -XPOST "$RIAK/types/json/buckets/people/keys/joe" \
+  -H "Content-Type:application/json"
+  -d '{"name_register":"Joe", "pets_set":["cat", "fish"]}'
+```
+
+As we saw in the previous chapter, this runs the risk of conflicting, thus creating a sibling.
+
+```
+{"name_register":"Joe", "pets_set":["cat"]}
+{"name_register":"Joe", "pets_set":["cat", "fish"]}
+```
+
+But if we used a map, we'd instead issue only updates to create a map. So, assume that the bucket type `map` is of a map datatype (we'll see how operators can assign datatypes to bucket types in the next chapter). This command will insert a map object with two fields (`name_register` and `pets_set`).
+
+```bash
+curl -XPOST "$RIAK/types/map/buckets/people/keys/joe" \
+  -H "Content-Type:application/json"
+  -d '{
+    "update": {
+      "name_register": "Joe"
+      "pets_set": {
+        "add_all": "cat"
+      }
+    }
+  }'
+```
+
+Next, we want to update the `pets_set` contained within `joe`'s map. Rather than set Joe's name and his pet cat, we only need to inform the object of the change. Namely, that we want to add a `fish` to his `pets_set`.
+
+```bash
+curl -XPOST "$RIAK/types/map/buckets/people/keys/joe" \
+  -H "Content-Type:application/json"
+  -d '{
+    "update": {
+      "pets_set": {
+        "add": "fish"
+      }
+    }
+  }'
+```
+
+This has a few benefits. Firstly, we don't need to send duplicate data. Second, it doesn't matter what order the two requests happen in, the outcome will be the same. Third, because the operations are CmRDTs, there is no possibility of a datatype returning siblings, making your client code that much easier.
+
+As we've noted before, there are four Riak datatypes: *map*, *set*, *counter*, *flag*. The object type is set as a bucket type property. However, when populating a map, as we've seen, you must suffix the field name with the datatype that you wish to store: \*\_map, \*\_set, \*\_counter, \*\_flag. For plain string values, there's a special \*\_register datatype suffix.
+
+You can read more about [datatypes in the docs](http://docs.basho.com/riak/latest/dev/using/data-types).
+
 
 ## Entropy
 
@@ -434,10 +517,12 @@ As we saw under [Concepts](#practical-tradeoffs), *vector clocks* are Riak's way
 
 <h4>Siblings</h4>
 
-*Siblings* occur when you have conflicting values, with no clear way for Riak to know which value is correct. Riak will try to resolve these conflicts itself if the `allow_mult` parameter is configured to `false`, but you can instead ask Riak to retain siblings to be resolved by the client if you set `allow_mult` to `true`.
+*Siblings* occur when you have conflicting values, with no clear way for Riak to know which value is correct. As of Riak 2.0, as long as you use a custom (not `default`) bucket type that isn't a datatype, conflicting writes should create siblings. This is a good thing, since it ensures no data is ever lost.
+
+In the case where you forgo a custom bucket type, Riak will try to resolve these conflicts itself if the `allow_mult` parameter is configured to `false`. You should generally always have your buckets set to retain siblings, to be resolved by the client by ensuring `allow_mult` is `true`.
 
 ```bash
-curl -i -XPUT http://localhost:8098/riak/cart \
+curl -i -XPUT "$RIAK/types/default/buckets/cart/props" \
   -H "Content-Type:application/json" \
   -d '{"props":{"allow_mult":true}}'
 ```
@@ -451,21 +536,20 @@ We used the second scenario to manufacture a conflict in the previous chapter wh
 
 <h4>Creating an Example Conflict</h4>
 
-Imagine we create a shopping cart for a single refrigerator, but several people in a household are able to order food for it. Because losing orders would result in an unhappy household, Riak is configured with `allow_mult=true`.
+Imagine we create a shopping cart for a single refrigerator, but several people in a household are able to order food for it. Because losing orders would result in an unhappy household, Riak is using a custom bucket type `shopping` which keeps the default `allow_mult=true`.
 
 First Casey (a vegan) places 10 orders of kale in the cart.
 
 Casey writes `[{"item":"kale","count":10}]`.
 
 ```bash
-curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
+curl -i -XPUT "$RIAK/types/shopping/buckets/fridge/keys/97207?returnbody=true" \
   -H "Content-Type:application/json" \
   -d '[{"item":"kale","count":10}]'
 HTTP/1.1 200 OK
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA=
 Vary: Accept-Encoding
 Server: MochiWeb/1.1 WebMachine/1.9.0 (someone had painted...
-Link: </riak/cart>; rel="up"
 Last-Modified: Thu, 01 Nov 2012 00:13:28 GMT
 ETag: "2IGTrV8g1NXEfkPZ45WfAP"
 Date: Thu, 01 Nov 2012 00:13:28 GMT
@@ -482,7 +566,7 @@ His roommate Mark, reads the order and adds milk. In order to allow Riak to trac
 Mark writes `[{"item":"kale","count":10},{"item":"milk","count":1}]`.
 
 ```bash
-curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
+curl -i -XPUT "$RIAK/types/shopping/buckets/fridge/keys/97207?returnbody=true" \
   -H "Content-Type:application/json" \
   -H "X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA="" \
   -d '[{"item":"kale","count":10},{"item":"milk","count":1}]'
@@ -490,7 +574,6 @@ HTTP/1.1 200 OK
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmTwZTIlMfKcMaK7RRfFgA=
 Vary: Accept-Encoding
 Server: MochiWeb/1.1 WebMachine/1.9.0 (someone had painted...
-Link: </riak/cart>; rel="up"
 Last-Modified: Thu, 01 Nov 2012 00:14:04 GMT
 ETag: "62NRijQH3mRYPRybFneZaY"
 Date: Thu, 01 Nov 2012 00:14:04 GMT
@@ -502,15 +585,15 @@ Content-Length: 54
 
 If you look closely, you'll notice that the vector clock changed with the second write request
 
-* <code>a85hYGBgzGDKBVIcypz/fgaUHjmTwZTI<strong>mMfKsMK</strong>K7RRfFgA=</code> (after the write by Casey)
-* <code>a85hYGBgzGDKBVIcypz/fgaUHjmTwZTI<strong>lMfKcMa</strong>K7RRfFgA=</code> (after the write by Mark)
+* a85hYGBgzGDKBVIcypz/fgaUHjmTwZTI<strong>mMfKsMK</strong>K7RRfFgA= (after the write by Casey)
+* a85hYGBgzGDKBVIcypz/fgaUHjmTwZTI<strong>lMfKcMa</strong>K7RRfFgA= (after the write by Mark)
 
 Now let's consider a third roommate, Andy, who loves almonds. Before Mark updates the shared cart with milk, Andy retrieved Casey's kale order and appends almonds. As with Mark, Andy's update includes the vector clock as it existed after Casey's original write.
 
 Andy writes `[{"item":"kale","count":10},{"item":"almonds","count":12}]`.
 
 ```bash
-curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
+curl -i -XPUT "$RIAK/types/shopping/buckets/fridge/keys/97207?returnbody=true" \
   -H "Content-Type:application/json" \
   -H "X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTImMfKsMKK7RRfFgA="" \
   -d '[{"item":"kale","count":10},{"item":"almonds","count":12}]'
@@ -527,14 +610,12 @@ Content-Length: 491
 
 --Ql3O0enxVdaMF3YlXFOdmO5bvrs
 Content-Type: application/json
-Link: </riak/cart>; rel="up"
 Etag: 62NRijQH3mRYPRybFneZaY
 Last-Modified: Thu, 01 Nov 2012 00:14:04 GMT
 
 [{"item":"kale","count":10},{"item":"milk","count":1}]
 --Ql3O0enxVdaMF3YlXFOdmO5bvrs
 Content-Type: application/json
-Link: </riak/cart>; rel="up"
 Etag: 7kfvPXisoVBfC43IiPKYNb
 Last-Modified: Thu, 01 Nov 2012 00:24:07 GMT
 
@@ -550,10 +631,10 @@ Since there was a conflict between what Mark and Andy set the fridge value to be
 
 Since we're using the HTTP client, Riak returned a `300 Multiple Choices` code with a `multipart/mixed` MIME type. It's up to you to parse the results (or you can request a specific value by its Etag, also called a Vtag).
 
-Issuing a plain get on the `/cart/fridge-97207` key will also return the vtags of all siblings.
+Issuing a plain get on the `shopping/fridge/97207` key will also return the vtags of all siblings.
 
 ```
-curl http://localhost:8098/riak/cart/fridge-97207
+curl "$RIAK/types/shopping/buckets/fridge/keys/97207"
 Siblings:
 62NRijQH3mRYPRybFneZaY
 7kfvPXisoVBfC43IiPKYNb
@@ -562,14 +643,14 @@ Siblings:
 What can you do with this tag? Namely, you request the value of a specific sibling by its `vtag`. To get the first sibling in the list (Mark's milk):
 
 ```bash
-curl http://localhost:8098/riak/cart/fridge-97207?vtag=62NRijQH3mRYPRybFneZaY
+curl "$RIAK/types/shopping/buckets/fridge/keys/97207?vtag=62NRijQH3mRYPRybFneZaY"
 [{"item":"kale","count":10},{"item":"milk","count":1}]
 ```
 
 If you want to retrieve all sibling data, tell Riak that you'll accept the multipart message by adding `-H "Accept:multipart/mixed"`.
 
 ```bash
-curl http://localhost:8098/riak/cart/fridge-97207 \
+curl "$RIAK/types/shopping/buckets/fridge/keys/97207" \
   -H "Accept:multipart/mixed"
 ```
 
@@ -592,7 +673,7 @@ For our example, let's merge the values into a single result set, taking the lar
 Successive reads will receive a single (merged) result.
 
 ```bash
-curl -i -XPUT http://localhost:8098/riak/cart/fridge-97207?returnbody=true \
+curl -i -XPUT "$RIAK/types/shopping/buckets/fridge/keys/97207?returnbody=true" \
   -H "Content-Type:application/json" \
   -H "X-Riak-Vclock:a85hYGBgzGDKBVIcypz/fgaUHjmTwZTInMfKoG7LdoovCwA=" \
   -d '[{"item":"kale","count":10},{"item":"milk","count":1},\
@@ -643,20 +724,20 @@ provided it's prefixed by `X-Riak-Index-` and suffixed by `_int` for an
 integer, or `_bin` for a string.
 
 ```bash
-curl -i -XPUT http://localhost:8098/riak/people/casey \
+curl -i -XPUT $RIAK/types/shopping/buckets/people/keys/casey \
   -H "Content-Type:application/json" \
   -H "X-Riak-Index-age_int:31" \
-  -H "X-Riak-Index-fridge_bin:fridge-97207" \
+  -H "X-Riak-Index-fridge_bin:97207" \
   -d '{"work":"rodeo clown"}'
 ```
 
-Querying can be done in two forms: exact match and range. Add a couple more people and we'll see what we get: `mark` is `32`, and `andy` is `35`, they both share `fridge-97207`.
+Querying can be done in two forms: exact match and range. Add a couple more people and we'll see what we get: `mark` is `32`, and `andy` is `35`, they both share `97207`.
 
-What people own `fridge-97207`? It's a quick lookup to receive the
+What people own `97207`? It's a quick lookup to receive the
 keys that have matching index values.
 
 ```bash
-curl http://localhost:8098/buckets/people/index/fridge_bin/fridge-97207
+curl "$RIAK/types/shopping/buckets/people/index/fridge_bin/97207"
 {"keys":["mark","casey","andy"]}
 ```
 
@@ -666,13 +747,13 @@ The other query option is an inclusive ranged match. This finds all
 people under the ages of `32`, by searching between `0` and `32`.
 
 ```bash
-curl http://localhost:8098/buckets/people/index/age_int/0/32
+curl "$RIAK/types/shopping/buckets/people/index/age_int/0/32"
 {"keys":["mark","casey"]}
 ```
 
 That's about it. It's a basic form of 2i, with a decent array of utility.
 
-<h3>MapReduce/Link Walking</h3>
+<h3>MapReduce</h3>
 
 MapReduce is a method of aggregating large amounts of data by separating the
 processing into two phases, map and reduce, that themselves are executed
@@ -694,7 +775,7 @@ prefixed by either INFO or ERROR. We want to count the number of INFO
 logs that contain the word "cart".
 
 ```bash
-LOGS=http://localhost:8098/riak/logs
+LOGS=$RIAK/types/default/buckets/logs/keys
 curl -XPOST $LOGS -d "INFO: New user added"
 curl -XPOST $LOGS -d "INFO: Kale added to shopping cart"
 curl -XPOST $LOGS -d "INFO: Milk added to shopping cart"
@@ -706,7 +787,7 @@ easy route and write JavaScript. You execute MapReduce by posting JSON to the
 `/mapred` path.
 
 ```bash
-curl -XPOST "http://localhost:8098/mapred" \
+curl -XPOST "$RIAK/mapred" \
   -H "Content-Type: application/json" \
   -d @- \
 <<EOF
@@ -740,59 +821,6 @@ map function outputs, or of multiple reduce outputs. I probably cheated a
 bit by using JavaScript's `reduce` function to sum the values, but, well,
 welcome to the world of thinking in terms of MapReduce!
 
-<h4>Key Filters</h4>
-
-Besides executing a map function against every object in a bucket, you
-can reduce the scope by using *key filters*. Just as it sounds, they
-are a way of only including those objects that match a pattern...
-it filters out certain keys.
-
-Rather than passing in a bucket name as a value for `inputs`, instead
-we pass it a JSON object containing the `bucket` and `key_filters`.
-The `key_filters` get an array describing how to transform then test each key
-in the bucket. Any keys that match the predicate will be passed into the
-map phase, all others are just filtered out.
-
-To get all keys in the `cart` bucket that end with a number greater than 97000,
-you could tokenize the keys on `-` (remember we used `fridge-97207`) and
-keep the second half of the string, convert it to an integer, then compare
-that number to be greater than 97000.
-
-```
-"inputs":{
-  "bucket":"cart",
-  "key_filters":[["tokenize", "-", 2],["string_to_int"],["greater_than",97000]]
-}
-```
-
-It would look like this to have the mapper just return matching object keys. Pay
-special attention to the `map` function, and lack of `reduce`.
-
-```bash
-curl -XPOST http://localhost:8098/mapred \
-  -H "Content-Type: application/json" \
-  -d @- \
-<<EOF
-{
-  "inputs":{
-    "bucket":"cart",
-    "key_filters":[
-      ["tokenize", "-", 2],
-      ["string_to_int"],
-      ["greater_than",97000]
-    ]
-  },
-  "query":[{
-    "map":{
-      "language":"javascript",
-      "source":"function(riakObject, keydata, arg) {
-        return [riakObject.key];
-      }"
-    }
-  }]
-}
-EOF
-```
 
 <h4>MR + 2i</h4>
 
@@ -812,89 +840,15 @@ index you wish to use, and either a `key` for an index lookup, or `start` and
     ...
 ```
 
-<h4>Link Walking</h4>
-
-Conceptually, a link is a one-way relationship from one object to another.
-*Link walking* is a convenient query option for retrieving data when you start
-with the object linked from.
-
-Let's add a link to our people, by setting `casey` as the brother of `mark`
-using the HTTP header `Link`.
-
-```bash
-curl -XPUT http://localhost:8098/riak/people/mark \
-  -H "Content-Type:application/json" \
-  -H "Link: </riak/people/casey>; riaktag=\"brother\""
-```
-
-With a Link in place, now it's time to walk it. Walking is like a normal
-request, but with the suffix of `/[bucket],[riaktag],[keep]`. In other words,
-the *bucket* a possible link points to, the value of a *riaktag*, and whether to
-*keep* the results of this phase (only useful when chaining link walks). Any combination
-of these query values can be set to a wildcard _, meaning you want to match anything.
-
-```bash
-curl http://localhost:8098/riak/people/mark/people,brother,_
-
---8wuTE7VSpvHlAJo6XovIrGFGalP
-Content-Type: multipart/mixed; boundary=991Bi7WVpjYAGUwZlMfJ4nPJROw
-
---991Bi7WVpjYAGUwZlMfJ4nPJROw
-X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgZMzorIYEpkz2NlWCzKcYovCwA=
-Location: /riak/people/casey
-Content-Type: application/json
-Link: </riak/people>; rel="up"
-Etag: Wf02eljDiBa5q5nSbTq2s
-Last-Modified: Fri, 02 Nov 2012 10:00:03 GMT
-x-riak-index-age_int: 31
-x-riak-index-fridge_bin: fridge-97207
-
-{"work":"rodeo clown"}
---991Bi7WVpjYAGUwZlMfJ4nPJROw--
-
---8wuTE7VSpvHlAJo6XovIrGFGalP--
-```
-
-Even without returning the Content-Type, this kind of body should look familiar.
-Link walking always returns a `multipart/mixed`, since a single key can
-contain any number of links, meaning any number of objects returned.
-
-It gets crazier. You can actually chain together link walks, which will follow the
-a followed link. If `casey` has links, they can be followed by tacking another link
-triplet on the end, like so:
-
-```bash
-curl http://localhost:8098/riak/people/mark/people,brother,0/_,_,_
-```
-
-Now it may not seem so from what we've seen, but link walking is a specialized
-case of MapReduce.
-
-There is another phase of a MapReduce query called "link". Rather than
-executing a function, however, it only requires the same configuration
-that you pass through the shortcut URL query.
-
-```json
-    ...
-    "query":[{
-      "link":{
-        "bucket":"people",
-        "tag":   "brother",
-        "keep":  false
-      }
-    }]
-    ...
-```
-
-As we've seen, MapReduce in Riak is a powerful way of pulling data out of an
+MapReduce in Riak is a powerful way of pulling data out of an
 otherwise straight key/value store. But we have one more method of finding
 data in Riak.
 
 
-<aside class="sidebar"><h3>What Happened to Riak Search?</h3>
+<aside class="sidebar"><h3>Whatever Happened to Riak Search 1.x?</h3>
 
-If you have used Riak before, or have some older documentation,
-you may wonder what the difference is between Riak Search and Yokozuna.
+If you've used Riak before, or have some older documentation,
+you may wonder what the difference is between Riak Search 1.0 and 2.0.
 
 In an attempt to make Riak Search user friendly, it was originally developed
 with a "Solr like" interface. Sadly, due to the complexity of building
@@ -903,39 +857,34 @@ rather than attempting to maintain parity with Solr, a popular and featureful
 search engine in its own right, it made more sense to integrate the two.
 </aside>
 
-<h3>Search (Yokozuna)</h3>
+<h3>Search 2.0</h3>
 
-*Note: This is covering a project still under development. Changes are to be
-expected, so please refer to the
-[yokozuna project page](https://github.com/basho/yokozuna) for the most recent
-information.*
-
-Yokozuna is an extension to Riak that lets you perform searches to find
-data in a Riak cluster. Unlike the original Riak Search, Yokozuna leverages
-distributed Solr to perform the inverted indexing and management of
+Search 2.0 is a complete, from scratch, reimagining of distributed search 
+in Riak. It's an extension to Riak that lets you perform searches to find
+values in a Riak cluster. Unlike the original Riak Search, Search 2.0
+leverages distributed Solr to perform the inverted indexing and management of
 retrieving matching values.
 
-Before using Yokozuna, you'll have to have it installed and a bucket set
+Before using Search 2.0, you'll have to have it installed and a bucket set
 up with an index (these details can be found in the next chapter).
 
 The simplest example is a full-text search. Here we add `ryan` to the
 `people` table (with a default index).
 
 ```bash
-curl -XPUT http://localhost:8098/riak/people/ryan \
+curl -XPUT "$RIAK/type/default/buckets/people/keys/ryan" \
   -H "Content-Type:text/plain" \
   -d "Ryan Zezeski"
 ```
 
-To execute a search, request `/search/[bucket]` along with any distributed
+To execute a search, request `/solr/<index>/select` along with any distributed
 [Solr parameters](http://wiki.apache.org/solr/CommonQueryParameters). Here we
 query for documents that contain a word starting with `zez`, request the
 results to be in json format (`wt=json`), only return the Riak key
 (`fl=_yz_rk`).
 
 ```bash
-curl "http://localhost:8098/search/people?wt=json&\
-      omitHeader=true&fl=_yz_rk&q=zez*" | jsonpp
+curl "$RIAK/solr/people/select?wt=json&omitHeader=true&fl=_yz_rk&q=zez*"
 {
   "response": {
     "numFound": 1,
@@ -953,23 +902,25 @@ curl "http://localhost:8098/search/people?wt=json&\
 With the matching `_yz_rk` keys, you can retrieve the bodies with a simple
 Riak lookup.
 
-Yokozuna supports Solr 4.0, which includes filter queries, ranges, page scores,
+Search 2.0 supports Solr 4.0, which includes filter queries, ranges, page scores,
 start values and rows (the last two are useful for pagination). You can also
 receive snippets of matching
 [highlighted text](http://wiki.apache.org/solr/HighlightingParameters)
 (`hl`,`hl.fl`), which is useful for building a search engine (and something
-we use for [search.basho.com](http://search.basho.com)).
+we use for [search.basho.com](http://search.basho.com)). You can perform
+facet searches, stats, geolocation, bounding shapes, or any other search
+possible with distributed Solr.
 
 
 <h4>Tagging</h4>
 
-Another useful feature of Solr and Yokozuna is the tagging of values. Tagging
+Another useful feature of Search 2.0 is the tagging of values. Tagging
 values give additional context to a Riak value. The current implementation
 requires all tagged values begin with `X-Riak-Meta`, and be listed under
 a special header named `X-Riak-Meta-yz-tags`.
 
 ```bash
-curl -XPUT "http://localhost:8098/riak/people/dave" \
+curl -XPUT "$RIAK/types/default/buckets/people/keys/dave" \
   -H "Content-Type:text/plain" \
   -H "X-Riak-Meta-yz-tags: X-Riak-Meta-nickname_s" \
   -H "X-Riak-Meta-nickname_s:dizzy" \
@@ -980,8 +931,7 @@ To search by the `nickname_s` tag, just prefix the query string followed
 by a colon.
 
 ```bash
-curl "http://localhost:8098/search/people?wt=json&\
-      omitHeader=true&q=nickname_s:dizzy" | jsonpp
+curl "$RIAK/solr/people/select?wt=json&omitHeader=true&q=nickname_s:dizzy"
 {
   "response": {
     "numFound": 1,
@@ -1006,7 +956,59 @@ curl "http://localhost:8098/search/people?wt=json&\
 Notice that the `docs` returned also contain `"nickname_s":"dizzy"` as a
 value. All tagged values will be returned on matching results.
 
-*Expect more features to appear as Yokozuna gets closer to a final release.*
+<h4>Datatypes</h4>
+
+One of the more powerful combinations in Riak 2.0 are datatypes and Search.
+If you set both a datatype and a search index in a bucket type's properties,
+values you set are indexed as you'd expect. Map fields are indexed as their
+given types, sets are multi-field strings, counters as indexed as integers,
+and flags are boolean. Nested maps are also indexed, seperated by dots, and
+queryable in such a manner.
+
+For example, remember Joe, from the datatype section? Let's assume that
+this `people` bucket is indexed. And let's also add another pet.
+
+```bash
+curl -XPOST "$RIAK/types/map/buckets/people/keys/joe" \
+  -H "Content-Type:application/json"
+  -d '{"update": {"pets_set": {"add":"dog"}}}'
+```
+
+Then let's search for `pets_set:dog`, filtering only `type/bucket/key`.
+
+```bash
+{
+  "response": {
+    "numFound": 1,
+    "start": 0,
+    "maxScore": 1.0,
+    "docs": [
+      {
+        "_yz_rt": "map"
+        "_yz_rb": "people"
+        "_yz_rk": "joe"
+      }
+    ]
+  }
+}
+```
+
+Bravo. You've now found the object you wanted. Thanks to Solr's customizable
+schema, you can even store the field you want to return, if it's really that
+important to save a second lookup.
+
+This provides the best of both worlds. You can update and query values without
+fear of conflicts, and can query Riak based on field values. It doesn't require
+much imagination to see that this combination effectively turns Riak into
+a scalable, stable, highly available, document datastore. Throw strong consistency
+into the mix (which we'll do in the next chapter) and you can store and query
+pretty much anything in Riak, in any way.
+
+If you're wondering to yourself, "What exactly does Mongo provide, again?", well,
+I didn't ask it. You did. But that is a great question...
+
+Well, moving on.
+
 
 ## Wrapup
 
@@ -1015,8 +1017,7 @@ standard key-value lookups, like specifying replication values. Since values
 in Riak are opaque, many of these methods either: require custom code to
 extract and give meaning to values,
 such as *MapReduce*; or allow for header metadata to provide an added
-descriptive dimension to the object, such as *secondary indexes*, *link
-walking*, or *search*.
+descriptive dimension to the object, such as *secondary indexes* or *search*.
 
 Next we'll peek further under the hood, and see how to set up and manage
 a cluster of your own, and what you should know.

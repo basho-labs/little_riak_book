@@ -415,7 +415,7 @@ value:  ["MYPFIM-S2-DVD", "BS-III-DVD"]
 
 Datatypes will never return conflicts. This is an important claim to make, because as a developer, you get all of the benefits of dealing with a simple value, with all of the benefits of a distributed, available system. You don't have to think about handling conflicts. It would be like a version control system where (*git*, *svn*, etc) where you never had to merge code---the VCS simply *knew* what you wanted.
 
-How this all works is beyond the scope of this document. Under the covers it's implemented by something called [CRDTs](http://docs.basho.com/riak/2.0.0/theory/concepts/crdts/) \(Conflict-free Replicated Data Types). What's important to note is that Riak supports four datatypes: *map*, *set*, *counter*, *flag* (a binary value). Best of all, maps can nest arbitrarily, so you can create a map whose values are sets, counters, or even other maps. It also supports plain string values called *register*s.
+How this all works is beyond the scope of this document. Under the covers it's implemented by something called [CRDTs](http://docs.basho.com/riak/2.0.0/theory/concepts/crdts/) \(Conflict-free Replicated Data Types). What's important to note is that Riak supports four datatypes: *map*, *set*, *counter*, *flag* (a boolean value). Best of all, maps can nest arbitrarily, so you can create a map whose values are sets, counters, or even other maps. It also supports plain string values called *register*s.
 
 We'll see how to use datatypes in the next chapter.
 

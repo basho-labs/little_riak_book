@@ -887,7 +887,7 @@ curl http://localhost:8098/buckets/pessoas/index/idade_int/0/32
 É mais ou menos isto sobre  índices secundários. É uma implementação simples,
 com uma gama decente de casos de uso.
 
-<h3>MapReduce/Link Walking (</h3>
+<h3>MapReduce</h3>
 
 O *MapReduce* é um método de agregação de grandes quantidades de dados através
 da separação do processamento em duas fases: mapear e reduzir, sendo ambas
@@ -1031,80 +1031,6 @@ o índice que deseja usar: `key`para usar uma chave na pesquisar no índice, ou
        "start": 18,
        "end":   32
     },
-    ...
-```
-
-<h4>Percorrer Links</h4>
-
-Conceptualmente, um link é uma relação de um só sentido, a partir de um objeto
-para outro. *Percorrer Links* é uma opção de consulta conveniente para recuperar
-dados quando você começa com o objeto ligado a partir desse.
-
-Vamos adicionar um link para as nossas pessoas, definindo o `Casey` como o irmão
-do `mark` usando o cabeçalho HTTP `Link`.
-
-```bash
-curl -XPUT http://localhost:8098/riak/pessoas/mark \
-  -H "Content-Type:application/json" \
-  -H "Link: </riak/pessoas/casey>; riaktag=\"irmao\""
-```
-
-Com um link no lugar, agora é hora de percorre-lo. Percorrer links é como um
-pedido normal, mas com o sufixo `/[bucket],[riaktag],[keep]`. Ou seja, o
-*bucket* para onde um possível link aponta, o valor do *riaktag*, e se é para
-manter (*keep*) os resultados desta fase (útil apenas para encadear links).
-Qualquer combinação dos valores nas pesquisas pode ser definido como um
-*wildcard* _, ou seja, qualquer valor serve.
-
-```bash
-curl http://localhost:8098/riak/pessoas/mark/pessoas,irmao,_
-
---8wuTE7VSpvHlAJo6XovIrGFGalP
-Content-Type: multipart/mixed; boundary=991Bi7WVpjYAGUwZlMfJ4nPJROw
-
---991Bi7WVpjYAGUwZlMfJ4nPJROw
-X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgZMzorIYEpkz2NlWCzKcYovCwA=
-Location: /riak/pessoas/casey
-Content-Type: application/json
-Link: </riak/pessoas>; rel="up"
-Etag: Wf02eljDiBa5q5nSbTq2s
-Last-Modified: Fri, 02 Nov 2012 10:00:03 GMT
-x-riak-index-idade_int: 31
-x-riak-index-fridge_bin: fridge-97207
-
-{"trabalho":"palhaço"}
---991Bi7WVpjYAGUwZlMfJ4nPJROw--
-
---8wuTE7VSpvHlAJo6XovIrGFGalP--
-```
-
-Mesmo sem retornar o Content-Type, este tipo de corpo deve ser familiar.
-Percorrer links devolve sempre um `multipart/mixed`, já que uma única chave pode
-conter qualquer número de links, ou seja, qualquer número de objetos devolvidos.
-
-E ainda é mais louco. Você pode na realidade encadear percorridas de links, que
-vão seguir o link seguido. Se o `Casey` tem links, eles podem ser seguidos com
-outro link no final, assim:
-
-```bash
-curl http://localhost:8098/riak/pessoas/mark/pessoas,irmao,0/_,_,_
-```
-
-Pode não parecer pelo que temos visto, mas percorrer links é uma forma
-especializada do MapReduce.
-
-Há uma outra fase no MapReduce chamado de "link". No entanto, em vez de executar
-uma função, requer a mesma configuração que já vimos nos URL acima.
-
-```json
-    ...
-    "query":[{
-      "link":{
-        "bucket":"pessoas",
-        "tag":   "irmao",
-        "keep":  false
-      }
-    }]
     ...
 ```
 
