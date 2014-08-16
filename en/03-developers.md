@@ -702,7 +702,7 @@ If your nodes get out of sync (for example, if you increase the `n_val` on a buc
 
 Although resolving conflicting data during get requests via read repair is sufficient for most needs, data which is never read can eventually be lost as nodes fail and are replaced.
 
-With Riak 1.3, Basho introduced active anti-entropy to proactively identify and repair inconsistent data. This feature is also helpful for recovering data loss in the event of disk corruption or administrative error.
+Riak supports active anti-entropy (AAE), to proactively identify and repair inconsistent data. This feature is also helpful for recovering data loss in the event of disk corruption or administrative error.
 
 The overhead for this functionality is minimized by maintaining sophisticated hash trees ("Merkle trees") which make it easy to compare data sets between vnodes, but if desired the feature can be disabled.
 
@@ -969,7 +969,7 @@ For example, remember Joe, from the datatype section? Let's assume that
 this `people` bucket is indexed. And let's also add another pet.
 
 ```bash
-curl -XPOST "$RIAK/types/map/buckets/people/keys/joe" \
+curl -XPUT "$RIAK/types/map/buckets/people/keys/joe" \
   -H "Content-Type:application/json"
   -d '{"update": {"pets_set": {"add":"dog"}}}'
 ```
