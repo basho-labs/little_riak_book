@@ -1,13 +1,13 @@
 \documentclass[letter]{book}
 <%= isprint ? "\\special{papersize=6in,9in}" : "\\special{papersize=8.5in,11in}" %>
 \usepackage[
-	%urlbordercolor = {1 1 1},
-	%linkbordercolor = {1 1 1},
-	%citebordercolor = {1 1 1},
-	urlcolor = blue,
-	colorlinks = true,
-	citecolor = black,
-	linkcolor = black]{hyperref}
+  %urlbordercolor = {1 1 1},
+  %linkbordercolor = {1 1 1},
+  %citebordercolor = {1 1 1},
+  urlcolor = blue,
+  colorlinks = true,
+  citecolor = black,
+  linkcolor = black]{hyperref}
 \usepackage{graphicx}
 \usepackage{xltxtra}
 \usepackage{fancyhdr}
@@ -101,8 +101,8 @@
 \newcounter{img}[chapter]
 \renewcommand{\theimg}{\thechapter.\arabic{img}}
 \newcommand{\img}[3]{\begin{figure}[ht!]
-	\refstepcounter{img}
-	\label{img:\theimg}
+  \refstepcounter{img}
+  \label{img:\theimg}
   \centering\includegraphics[width=\maxwidth]{figures/#1.#2}
   \textbf{\caption{#3}}
 \end{figure}}

@@ -288,7 +288,7 @@ def gen_html(language, published=false)
     toc << markdown_toc.render(chapter)
     html << markdown.render(chapter)
   end
-  prelude = markdown.render(File.read("en/prelude.pmd"))
+  prelude = markdown.render(File.read("#{language}/prelude.pmd"))
   if published
     html = "<html><head><title>A Little Riak Book</title></head><meta charset=\"utf-8\"><link href=\"style.css\" media=\"screen\" rel=\"stylesheet\" type=\"text/css\"><link href='http://fonts.googleapis.com/css?family=Playfair+Display' rel='stylesheet' type='text/css'><body>#{prelude}#{toc}#{html}</body></html>"
     full_file = "#{OUTPUT_DIR}/book-#{language}.html"
@@ -321,14 +321,14 @@ languages = [ARGV[0] || "en"]
 # generate the pdf
 gen_pdf(languages)
 
-# # generate the ebooks
-# languages.each do |language|
-#   formats = %w{mobi epub}
+# generate the ebooks
+languages.each do |language|
+  formats = %w{mobi epub}
 
-#   html_file = gen_html(language)
-#   formats.each do |format|
-#     gen_book(language, html_file, format)
-#   end
+  html_file = gen_html(language)
+  formats.each do |format|
+    gen_book(language, html_file, format)
+  end
 
-#   gen_html(language, true)
-# end
+  gen_html(language, true)
+end
