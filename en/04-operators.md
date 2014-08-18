@@ -740,10 +740,83 @@ There's a lot more to search than we can possibly cover here without making it a
 
 <h3>Security</h3>
 
+Riak has lived quit well in the first five years of its life without security. So why did Basho add it now? With the kind of security you get through a firewall, you can only get course grained security. Someone can either access the system or not, with a few restrictions, depending on how clever you write your firewall rules.
+
+With the addition of Security, Riak now supports authentication (identifying a user) and authorization (restricting user access to a subset of commands) of users and groups. Access can also be restricted to a known set of sources. The security design was inspired by the full-featured rules in PostgreSQL.
+
+Before you decide to enable security, you should consider this checklist in advance.
+
+1. If you use security, you must upgrade to Riak Search 2.0. The old Search will not work (neither will the deprecated Link Walking). Check any Erlang MapReduce code for invocations of Riak modules other than `riak_kv_mapreduce`. Enabling security will prevent those from succeeding unless those modules are available via `add_path`
+2. Make sure that your application code is using the most recent drivers
+3. Define users and (optionally) groups, and their sources
+4. Grant the necessary permissions to each user/group
+
+With that out of the way, you can `enable` security with a command-line option (you can `disable` security as well). Follow that by checking the `status`.
+
 ```bash
-$ riak-admin security
+$ riak-admin security enable
+$ riak-admin security status
+Enabled
 ```
 
+Adding users is as easy as the `add-user` command. A username is required, and can be followed with any key/value pairs. `password` and `groups` are special cases, but everything is free formed. You can alter existing users as well. Users can belong to any number of groups, and inherit a union of all group settings.
+
+
+```bash
+$ riak-admin security add-group mascots type=mascot
+$ riak-admin security add-user bashoman password=Test1234
+$ riak-admin security alter-user bashoman groups=mascots
+```
+
+You can see the list of all users via `print-users`, or all groups via `print-groups`.
+
+```bash
+$ riak-admin security print-users
++----------+----------+----------------------+---------------------+
+| username |  groups  |       password       |       options       |
++----------+----------+----------------------+---------------------+
+| bashoman | mascots  |983e8ae1421574b8733824| [{"type","mascot"}] |
++----------+----------+----------------------+---------------------+
+```
+
+Creating user and groups is nice and all, but the real reason for doing this is so we can distinguish authorization between different users and groups. You `grant` or `revoke` `permissions` to users and groups by way of the command line, of course. You can grant/revoke a permission to anything, a certain bucket type, or a specific bucket.
+
+```bash
+$ riak-admin security grant riak_kv.get on any to all
+$ riak-admin security grant riak_kv.delete on any to admin
+$ riak-admin security grant search.query on index people to bashoman
+$ riak-admin security revoke riak_kv.delete on any to bad_admin
+```
+
+There are many kinds of permissions, one for every major operation or set of operations in Riak.
+
+* __riak\_kv.get__ --- Retrieve objects
+* __riak\_kv.put__ --- Create or update objects
+* __riak\_kv.delete__  --- Delete objects
+* __riak\_kv.index__ --- Index objects using secondary indexes (2i)
+* __riak\_kv.list\_keys__ --- List all of the keys in a bucket
+* __riak\_kv.list\_buckets__  --- List all buckets
+* __riak\_kv.mapreduce__ --- Can run MapReduce jobs
+* __riak\_core.get\_bucket__  --- Retrieve the props associated with a bucket
+* __riak\_core.set\_bucket__  --- Modify the props associated with a bucket
+* __riak\_core.get\_bucket\_type__ --- Retrieve the set of props associated with a bucket type
+* __riak\_core.set\_bucket\_type__ --- Modify the set of props associated with a bucket type
+* __search.admin__  --- The ability to perform search admin-related tasks, like creating and deleting indexes
+* __search.query__  --- The ability to query an index
+
+Finally, with our group and user created, and given access to a subset of permissions, we have one more major item to deal with. We want to be able to filter connection from specific sources.
+
+```bash
+$ riak-admin security add-source all|<users> <CIDR> <source> [<option>=<value>[...]]
+```
+
+This is powerful security, since Riak will only accept connections that pass specific criteria, such as a certain certificate or password, or from a specific IP address. Here we trust any connection that's initiated locally.
+
+```bash
+$ riak-admin security add-source all 127.0.0.1/32 trust
+```
+
+There's plenty more you can learn about in the [Authentication and Authorization](http://docs.basho.com/riak/2.0.0/ops/running/authz/) online documentation.
 
 <h3>Dynamic Ring Resizing</h3>
 

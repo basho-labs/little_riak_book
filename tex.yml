@@ -13,7 +13,7 @@ default:
   fig: "Figure "
   tab: "Table "
   indent: "\\qquad"
-  thanks: "Special thanks to everyone who helped and all of the folks at Basho"
+  thanks: "Special thanks to everyone who helped, specifically Luc Perkins"
   license: "This book is licensed under the Creative Commons Attribution-Non Commercial-Share Alike 3.0 license."
   typeface: "Body typeface is Crimson."
 zh:
