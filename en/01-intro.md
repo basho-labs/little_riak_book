@@ -47,3 +47,17 @@ So should you use Riak? A good rule of thumb for potential users is to ask yours
 This is not an "install and follow along" guide. This is a "read and comprehend" guide. Don't feel compelled to have Riak, or even have a computer handy, when starting this book. You may feel like installing at some point, and if so, instructions can be found in the [Riak docs](http://docs.basho.com).
 
 In my opinion, the most important section of this book is the [concepts chapter](#concepts). If you already have a little knowledge it may start slow, but it picks up in a hurry. After laying the theoretical groundwork, we'll move onto helping [developers](#developers) use Riak, by learning how to query it and tinker with some settings. Finally, we'll go over the basic details that [operators](#operators) should know, such as how to set up a Riak cluster, configure some values, use optional tools, and more.
+
+## Changes From 1.x
+
+Riak 2.0 represents a major shift in the capabilities and focus of Riak as a data store. Riak has always been primarily focused on operational simplicity, and that has not changed. But when it came to design decisions, operations were always given unilateral priority over the needs of developers. This is changing. With the launch of 2.0, we've finally added a few features that developers have wanted to see for quite a long time. Namely the following:
+
+* __Strong Consistency__. Riak is still Eventually Consistent, too, but now you have a choice. Riak is now the easiest to manage database for adjusting the spectrum smoothly between AP and CP... per bucket, no less.
+* __Better Search__. The makers of Riak have improved search by leveraging the power of the Solr search engine. You now get all of the queryability of distributed Solr, without the hassle of manual indexing.
+* __Datatypes__. Riak historically has provided storage flexibility by allowing the storage of any binary object. This is still the case, but you now have the option of storing distributed maps, sets, counters, and flags that automatically converge in the face of conflicts.
+* __Security__. A long standing request that's day has finally come. Native Group/User access controls.
+* __Bucket types__. Now you can support unlimited custom bucket properties, without the overhead of the old gossip protocol.
+* __Ring Resizing__. Finally! Where in the past you were limited to a fixed ring size, you now have the option to dynamically increase/decrease the number of vnodes in your cluster.
+* __Other improvements__. We've also made many other improvements, like simplified configuration management (no more messing with `app.config` and `vm.args`), reduced sibling explosions (via a new logical clock called DVV), improved internal metadata sharing (reducing gossip chatter), better AAE, and more.
+
+This book also includes a new chapter written by John Daily, to help guide developers to write productive applications with Riak. We hope you enjoy the new, improved, *Not Quite So Little Riak Book*.
