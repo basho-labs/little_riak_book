@@ -37,9 +37,10 @@
 
 \title{A Little Riak Book}
 \author{Eric Redmond \& John Daily}
+\def\authort{Redmond,Daily}
 
 \makeatletter
-\let\savedauthor=\@author
+\let\savedauthor\authort %=\@authort
 \let\savedtitle=\@title
 \def\imgwidth{.6\linewidth}
 \def\maxwidth{\ifdim\Gin@nat@width>\imgwidth\imgwidth
