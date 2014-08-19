@@ -1010,14 +1010,14 @@ I didn't ask it. You did. But that is a great question...
 Well, moving on.
 
 
-## Wrapup
+## Wrap-up
 
 Riak is a distributed data store with several additions to improve upon the
 standard key-value lookups, like specifying replication values. Since values
-in Riak are opaque, many of these methods either: require custom code to
-extract and give meaning to values,
-such as *MapReduce*; or allow for header metadata to provide an added
-descriptive dimension to the object, such as *secondary indexes* or *search*.
+in Riak are opaque, many of these methods either require custom code to
+extract and give meaning to values, such as *MapReduce*m or allow for
+header metadata to provide an added descriptive dimension to the object,
+such as *secondary indexes* or *search*.
 
-Next we'll peek further under the hood, and see how to set up and manage
-a cluster of your own, and what you should know.
+Next, we'll peek further under the hood and show you how to set up and manage
+a cluster of your own.

@@ -1593,7 +1593,7 @@ Once your cluster is to your liking, you can manage individual nodes, either sto
 Vertically (by adding bigger hardware), and Horizontally (by adding more nodes).
  -->
 
-## Wrapup
+## Wrap-up
 
 Once you comprehend the basics of Riak, it's a simple thing to manage. If this seems like
 a lot to swallow, take it from a long-time relational database guy (me), Riak is a
