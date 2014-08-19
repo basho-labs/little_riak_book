@@ -1,7 +1,7 @@
 # Writing Riak Applications
 
 Chapters 2 and 3 covered key concepts that every developer should
-know. In this chapter we look more closely at ways to build (and more
+know. In this chapter, we look more closely at ways to build (and more
 importantly not to build) Riak applications.
 
 ## How Not to Write a Riak App
@@ -9,22 +9,23 @@ importantly not to build) Riak applications.
 Writing a Riak application is very much **not** like writing an
 application that relies on a relational database. The core ideas and
 vocabulary from database theory still apply, of course, but many of
-the decisions that inform the application layer are inverted.
+the decisions that inform the application layer are transformed.
 
-Effectively all of these anti-patterns make some degree of sense when
-writing an application against a SQL database. None of them lend
-themselves to great Riak applications.
+Effectively, _all_ of these anti-patterns make some degree of sense when
+writing an application against an RDBMS (such as MySQL). Unfortunately,
+_none_ of them lend themselves to great Riak applications.
 
 ### Dynamic querying
 
 Riak's tools for finding data (2i, MapReduce, and full-text search)
 are useful but should be used judiciously. None of these scale nearly
-as well as key/value operations; queries that may work well on a few
-nodes in development may run more slowly on a busy development
-environment, particularly as the cluster grows in size.
+as well as key/value operations. Queries that may work well on a few
+nodes in development may run more slowly in a busy production
+environment, especially as the cluster grows in size.
 
-Key/value operations seem primitive (and they are) but you'll find
-they are flexible, scalable, and very very fast (and predictably so).
+Key/value operations seem primitive (and they are) but you'll find that
+they are flexible, scalable, and very, very fast (and predictably so).
+One thing to always bear in mind about key/value operations:
 
 *Reads and writes in Riak should be as fast with ten billion values
 in storage as with ten thousand.*
@@ -36,18 +37,19 @@ stored across dozens of servers.
 
 ### Normalization
 
-Normalizating data is generally a useful approach in a relational
-database, but unlikely to lead to happy results with Riak.
+Normalizing data is generally a useful approach in a relational
+database, but it is unlikely to lead to happy results with Riak.
 
-Riak lacks foreign keys constraints and join operations, two vital
+Riak lacks foreign key constraints and join operations, two vital
 parts of the normalization story, so reconstructing a single record
-from multiple objects would involve multiple read requests; certainly
-possible and fast enough on a small scale, but not ideal for larger
-requests.
+from multiple objects would involve multiple read requests. This is
+certainly possible and fast enough on a small scale, but it is not ideal
+for larger requests.
 
-Imagine the performance of your application if most of your requests
-involved a single read operation. Preparing and storing the answers to
-queries you're going to ask later is a best practice for Riak.
+In contrast, imagine the performance of your application if most of your
+requests involved a single read operation. Much faster and predictably
+so, even at scale. Preparing and storing the answers to
+queries you're going to ask for later is a best practice for Riak.
 
 See [Denormalization] for more discussion.
 
@@ -65,19 +67,20 @@ piece of data.
 The simplest approach to coping with this is to allow Riak to choose a
 winner based on timestamps. It can do this more effectively if
 developers follow Basho's guidance on sending updates with *vector
-clock* metadata to help track causal history, but often concurrent
-updates cannot be automatically resolved via vector clocks, and
+clock* metadata to help track causal history. But concurrent updates
+cannot always be automatically resolved via vector clocks, and
 trusting server clocks to determine which write was the last to arrive
 is a **terrible** conflict resolution method.
 
 Even if your server clocks are magically always in sync, are your
-business needs well-served by blindly applying the most recent update?
+business needs well served by blindly applying the most recent update?
 Some databases have no alternative but to handle it that way, but we think
 you deserve better.
 
 Typed buckets in Riak 2.0 default to retaining conflicts and requiring
-the application to resolve them, but we're also providing replicated
-data types to automate conflict resolution on the servers.
+the application to resolve them, but we're also providing replicated,
+conflict-free data types (we call them Riak Data Types) to automate
+conflict resolution on the server side.
 
 If you want to minimize the need for conflict resolution, modeling
 with as much immutable data as possible is a big win.
@@ -87,16 +90,16 @@ with as much immutable data as possible is a big win.
 ### Mutability
 
 For years, functional programmers have been singing the praises of
-immutable data, and it confers significant advantages when using a
-distributed data store like Riak.
+immutable data, which can confer significant advantages when using a
+distributed datastore like Riak.
 
 Most obviously, conflict resolution is dramatically simplified when
-objects are never updated.
+objects are never updated (because it is avoided entirely).
 
 Even in the world of single-server database servers, updating records
 in place carries costs. Most databases lose all sense of history when
 data is updated, and it's entirely possible for two different clients
-to overwrite the same field in rapid succession leading to unexpected
+to overwrite the same field in rapid succession, leading to unexpected
 results.
 
 Some data is always going to be mutable, but thinking about the
@@ -263,15 +266,15 @@ immutable data.
 ## Data modeling
 
 It can be hard to think outside the table, but once you do, you may
-find interesting patterns that to use in any database, even
-relational.[^sql-databases]
+find interesting patterns that to use in any database, even a
+relational one.[^sql-databases]
 
 [^sql-databases]: Feel free to use a relational database when you're
 willing to sacrifice the scalability, performance, and availability of
 Riak...but why would you?
 
 If you thoroughly absorbed the earlier content, some of this may feel
-redundant, but implications of the key/value model are not always
+redundant, but the implications of the key/value model are not always
 obvious.
 
 ### Rules to live by
@@ -281,8 +284,8 @@ but take them seriously.
 
 (@keys) Know your keys.
 
-    The cardinal rule of any key/value data store: the fastest way to get
-    data is to know the key you want.
+    The cardinal rule of any key/value datastore: the fastest way to get
+    data is to know what to look for, which means knowing which key you want.
 
     How do you pull that off? Well, that's the trick, isn't it?
 
@@ -293,7 +296,7 @@ but take them seriously.
     name the key after the client, magazine, and month/year combo.
 
     Guess what? Retrieving it will be much faster than running a SQL
-    `select` statement in a relational database.
+    `SELECT *` statement in a relational database.
 
     And if it turns out that the magazine didn't exist yet, and there
     are no sales figures for that month? No problem. A negative
@@ -314,8 +317,8 @@ but take them seriously.
     Historically, buckets have been what most thought of as Riak's
     virtual namespaces.
 
-    The newest level: **bucket types**, introduced in Riak 2.0, which
-    group buckets for configuration and security purposes.
+    The newest level is provided by **bucket types**, introduced in Riak 2.0, which
+    allow you to group buckets for configuration and security purposes.
 
     Less obviously, keys are their own namespaces. If you want a
     hierarchy for your keys that looks like `sales/customer/month`,
@@ -325,9 +328,8 @@ but take them seriously.
 
 (@views) Know your queries.
 
-    Writing data is cheap. Disk space is cheap.
-
-    Dynamic queries in Riak are very, very expensive.
+    Writing data is cheap. Disk space is cheap. Dynamic queries in Riak
+    are very, very expensive.
 
     As your data flows into the system, generate the views you're going to
     want later. That magazine sales example from (@keys)? The December
@@ -353,7 +355,7 @@ but take them seriously.
 
 (@indexes) Create your own indexes.
 
-    Riak offers metadata-driven indexes (2i) and full-text indexes
+    Riak offers metadata-driven secondary indexes (2i) and full-text indexes
     (Riak Search) for values, but these face scaling challenges: in
     order to identify all objects for a given index value, roughly a
     third of the cluster must be involved.
@@ -367,21 +369,21 @@ but take them seriously.
 (@immutable) Embrace immutability.
 
     As we discussed in [Mutability], immutable data offers a way out
-    of some of the challenges of running a high volume, high velocity
-    data store.
+    of some of the challenges of running a high-volume, high-velocity
+    datastore.
 
     If possible, segregate mutable from non-mutable data, ideally
     using different buckets for [request tuning][Request tuning].
 
     [Datomic](http://www.datomic.com) is a unique data storage system
     that leverages immutability for all data, with Riak commonly used
-    as a backend data store. It treats any data item in its system as
+    as a backend datastore. It treats any data item in its system as
     a "fact," to be potentially superseded by later facts but never
     updated.
 
 (@hybrid) Don't fear hybrid solutions.
 
-    As much we would all love to have a database that is an excellent
+    As much as we would all love to have a database that is an excellent
     solution for any problem space, we're a long way from that goal.
 
     In the meantime, it's a perfectly reasonable (and very common)
@@ -391,7 +393,7 @@ but take them seriously.
     that problem, don't be afraid to store keys alongside searchable
     metadata in a relational or other database that makes querying
     simpler, and once you have the keys you need, grab the values
-    from Riak
+    from Riak.
 
     Just make sure that you consider failure scenarios when doing so;
     it would be unfortunate to compromise Riak's availability by
