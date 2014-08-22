@@ -2,28 +2,28 @@
 
 <aside class="sidebar"><h3>A Note on "Node"</h3>
 
-It's worth mentioning that I use the word "node" a lot. Realistically, this means a physical/virtual server, but really, the workhorses of Riak are vnodes.
+It's worth mentioning that I use the word "node" a lot. Realistically, this means a physical/virtual server, but really, the workhorses of Riak are vnodes. Each node houses a quantity of vnodes that depend on the total number of nodes in the cluster and the number of partitions in the ring.
 
 When you write to multiple vnodes, Riak will attempt to spread values to as many physical servers as possible. However, this isn't guaranteed (for example, if you have only 2 physical servers with the default `n_val` of 3, some data will be copied to the same server twice). You're safe conceptualizing nodes as Riak instances, and it's simpler than qualifying "vnode" all the time. If something applies specifically to a vnode, I'll mention it.
 </aside>
 
 _We're going to hold off on the details of installing Riak at the moment. If you'd like to follow along, it's easy enough to get started by following the [install documentation](http://docs.basho.com/riak/latest/) on the website (http://docs.basho.com). If not, this is a perfect section to read while you sit on a train without an Internet connection._
 
-Developing with a Riak database is quite easy to do, once you understand some of the finer points. It is a key/value store, in the technical sense (you associate values with keys, and retrieve them using the same keys) but it offers so much more. You can embed write hooks to fire before or after a write, or index data for quick retrieval. Riak has SOLR search, and lets you run MapReduce functions to extract and aggregate data across a huge cluster in relatively short timespans. We'll show some configurable bucket-specific settings.
+Developing with a Riak database is quite easy to do once you understand some of the finer points. It is a key/value store in the technical sense (you associate values with keys and retrieve them using the same keys) but it offers so much more. You can embed write hooks to fire before or after a write or index data for quick retrieval. Riak has SOLR search and lets you run MapReduce functions to extract and aggregate data across a huge cluster in relatively short timespans. We'll show some configurable bucket-specific settings.
 
 ## Lookup
 
 <aside class="sidebar"><h3>Supported Languages</h3>
 
 Riak 2.0 has official drivers for the following languages:
-Erlang, Java, Python, Ruby.
+Java, Ruby, Python, Erlang.
 
 Including community-supplied drivers, supported languages are even more numerous: C/C++, PHP, Clojure, Common Lisp, Dart, Go, Groovy, Haskell, JavaScript (jQuery and NodeJS), Lisp Flavored Erlang, .NET, Perl, PHP, Play, Racket, Scala, Smalltalk.
 
 Dozens of other project-specific addons can be found in the [Basho docs](http://docs.basho.com/riak/latest/).
 </aside>
 
-Since Riak is a KV database, the most basic commands are setting and getting values. We'll use the HTTP interface, via curl, but we could just as easily use Erlang, Ruby, Java, or any other supported language.
+Since Riak is a KV database, the most basic commands are setting and getting values. For simplicity's sake we'll use the HTTP interface, via curl, but we could just as easily use Java, Erlang, Ruby, or any other supported language.
 
 The basic structure of a Riak request is setting a value, reading it,
 and maybe eventually deleting it. The actions are related to HTTP methods
@@ -35,7 +35,7 @@ GET    /types/<type>/buckets/<bucket>/keys/<key>
 DELETE /types/<type>/buckets/<bucket>/keys/<key>
 ```
 
-For the examples in this chapter, let's call an environment variable `$RIAK` that points to our access node's URL.
+For the examples in this chapter, let's call an environment variable `$RIAK` that points to our access node's URL (Riak listens on `localhost` and port 8098 by default).
 
 ```bash
 export RIAK=http://localhost:8098
@@ -51,7 +51,7 @@ curl -XPUT "$RIAK/types/items/buckets/food/keys/favorite" \
   -d "pizza"
 ```
 
-I threw a few curveballs in there. The `-d` flag denotes the next string will be the value. We've kept things simple with the string `pizza`, declaring it as text with the proceeding line `-H 'Content-Type:text/plain'`. This defines the HTTP MIME type of this value as plain text. We could have set any value at all, be it XML or JSON---even an image or a video. Riak does not care at all what data is uploaded, so long as the object size doesn't get much larger than 4MB (a soft limit but one that it is unwise to exceed).
+I threw a few curveballs in there. The `-d` flag denotes the next string will be the value. We've kept things simple with the string `pizza`, declaring it as text with the proceeding line `-H 'Content-Type:text/plain'`. This defines the HTTP MIME type of this value as plain text. We could have set any value at all, be it XML or JSON or even an image or a video. Riak does not care at all what data is uploaded so long as the object size doesn't get much larger than 4MB (a soft limit but one that it is unwise to exceed).
 
 <h4>GET</h4>
 
@@ -66,7 +66,7 @@ This is the simplest form of read, responding with only the value. Riak contains
 
 In `curl` you can access a full response by way of the `-i` flag. Let's perform the above query again, adding that flag (`-XGET` is the default curl method, so we can leave it off).
 
-```bash
+```
 curl -i "$RIAK/types/items/buckets/food/keys/favorite"
 HTTP/1.1 200 OK
 X-Riak-Vclock: a85hYGBgzGDKBVIcypz/fgaUHjmdwZTImMfKcN3h1Um+LAA=
@@ -85,7 +85,7 @@ The anatomy of HTTP is a bit beyond this little book, but let's look at a few pa
 
 <h5>Status Codes</h5>
 
-The first line gives the HTTP version 1.1 response code `200 OK`. You may be familiar with the common website code `404 Not Found`. There are many kinds of [HTTP status codes](http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html), and the Riak HTTP interface stays true to their intent: **1xx Informational**, **2xx Success**, **3xx Further Action**, **4xx Client Error**, **5xx Server Error**
+The first line gives the HTTP version 1.1 response code `200 OK`. You may be familiar with the common website code `404 Not Found`. There are many kinds of [HTTP status codes](http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html), and the Riak HTTP interface stays true to their intent: **1xx Informational**, **2xx Success**, **3xx Further Action**, **4xx Client Error**, **5xx Server Error**.
 
 Different actions can return different response/error codes. Complete lists can be found in the [official API docs](http://docs.basho.com/riak/latest/references/apis/).
 
@@ -114,7 +114,7 @@ Similar to PUT, POST will save a value. But with POST a key is optional. All it 
 
 Let's add a JSON value to represent a person under the `json`/`people` type/bucket. The response header is where a POST will return the key it generated for you.
 
-```bash
+```
 curl -i -XPOST "$RIAK/types/json/buckets/people/keys" \
   -H "Content-Type:application/json" \
   -d '{"name":"aaron"}'
@@ -133,7 +133,7 @@ You can extract this key from the `Location` value. Other than not being pretty,
 
 You may note that no body was returned with the response. For any kind of write, you can add the `returnbody=true` parameter to force a value to return, along with value-related headers like `X-Riak-Vclock` and `ETag`.
 
-```bash
+```
 curl -i -XPOST "$RIAK/types/json/buckets/people/keys?returnbody=true" \
   -H "Content-Type:application/json" \
   -d '{"name":"billy"}'
@@ -155,7 +155,7 @@ This is true for PUTs and POSTs.
 
 <h4>DELETE</h4>
 
-The final basic operation is deleting keys, which is similar to getting a value, but sending the DELETE method to the `type`/`bucket`/`key`.
+The final basic operation is deleting keys, which is like getting a value but instead sending the DELETE method to the `type`/`bucket`/`key`.
 
 ```bash
 curl -XDELETE "$RIAK/types/json/buckets/people/keys/DNQGJY0KtcHMirkidasA066yj5V"
@@ -269,7 +269,7 @@ status will be the result.
 
 Although we've been using bucket types and buckets as namespaces up to now, they are capable of more.
 
-Different use-cases will dictate whether a bucket is heavily written to, or largely read from. You may use one bucket to store logs, one bucket could store session data, while another may store shopping cart data. Sometimes low latency is important, while other times it's high durability. And sometimes we just want buckets to react differently when a write occurs.
+Different use cases will dictate whether a bucket is heavily written to or largely read from. You may use one bucket to store logs while another bucket stores session data and yet another stores shopping cart data. Sometimes low latency is important, while other times it's high durability. And sometimes we just want buckets to react differently when a write occurs.
 
 <h3>Quorum</h3>
 
