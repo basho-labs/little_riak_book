@@ -18,8 +18,8 @@ necessary, I would recommend considering this option.
 
 ## Locks, a cautionary tale
 
-While assembling the *Writing Applications* guide, I tried to develop a data model that
-would allow for reliable locking without strong consistency. While that attempt failed,
+While assembling the *Writing Applications* chapter, I (John) tried to develop a data model
+that would allow for reliable locking without strong consistency. While that attempt failed,
 I thought it would be better to include it to illustrate the complexities of coping
 with eventual consistency than to throw it away entirely.
 

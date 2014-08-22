@@ -38,7 +38,7 @@ The sweet spot of Riak is high-volume (data that's available to read and write w
 
 Riak was built as a solution to real Big Data problems, based on the *Amazon Dynamo* design. Dynamo is a highly available design---meaning that it responds to requests quickly at very large scales, even if your application is storing and serving terabytes of data a day. Riak had been used in production prior to being open-sourced in 2009. It's currently used by Github, Comcast, Voxer, Disqus and others, with the larger systems storing hundreds of TBs of data, and handling several GBs per node daily.
 
-Riak was written on the Erlang programming language. Erlang was chosen due to its strong support for concurrency, solid distributed communication, hot code loading, and fault-tolerance. It runs on a virtual machine, so running Riak requires an Erlang installation.
+Riak was written in the Erlang programming language. Erlang was chosen due to its strong support for concurrency, solid distributed communication, hot code loading, and fault-tolerance. It runs on a virtual machine, so running Riak requires an Erlang installation.
 
 So should you use Riak? A good rule of thumb for potential users is to ask yourself if every moment of downtime will cost you in some way (money, users, etc). Not all systems require such extreme amounts of uptime, and if you don't, Riak may not be for you.
 
@@ -50,12 +50,12 @@ In my opinion, the most important section of this book is the [concepts chapter]
 
 ## Changes From 1.x
 
-Riak 2.0 represents a major shift in the capabilities and focus of Riak as a data store. Riak has always been primarily focused on operational simplicity, and that has not changed. But when it came to design decisions, operations were always given unilateral priority over the needs of developers. This is changing. With the launch of 2.0, we've finally added a few features that developers have wanted to see for quite a long time. Namely the following:
+Riak 2.0 represents a major shift in the capabilities and focus of Riak as a data store. Riak has always been primarily focused on operational simplicity, and that has not changed. But when it came to design decisions, operations were always given priority over the needs of developers. This is changing. With the launch of 2.0, we've added some features that developers have wanted to see for quite a while. Namely, the following:
 
 * __Strong Consistency__. Riak is still Eventually Consistent, too, but now you have a choice. Riak is now the easiest to manage database for adjusting the spectrum smoothly between AP and CP... per bucket, no less.
 * __Better Search__. The makers of Riak have improved search by leveraging the power of the Solr search engine. You now get all of the queryability of distributed Solr, without the hassle of manual indexing.
 * __Datatypes__. Riak historically has provided storage flexibility by allowing the storage of any binary object. This is still the case, but you now have the option of storing distributed maps, sets, counters, and flags that automatically converge in the face of conflicts.
-* __Security__. A long standing request that's day has finally come. Native Group/User access controls.
+* __Security__. A long-standing request that's day has finally come. Native Group/User access controls.
 * __Bucket types__. Now you can support unlimited custom bucket properties, without the overhead of the old gossip protocol.
 * __Ring Resizing__. Finally! Where in the past you were limited to a fixed ring size, you now have the option to dynamically increase/decrease the number of vnodes in your cluster.
 * __Other improvements__. We've also made many other improvements, like simplified configuration management (no more messing with `app.config` and `vm.args`), reduced sibling explosions (via a new logical clock called DVV), improved internal metadata sharing (reducing gossip chatter), better AAE, and more.

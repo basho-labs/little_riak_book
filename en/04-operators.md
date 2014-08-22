@@ -51,12 +51,13 @@ offline or a new one added, the other nodes need to readjust, balancing the part
 then updating the Ring with this new structure. This Ring state gets passed between the nodes by means of
 a *gossip protocol*.
 
-<h3>Gossip</h3>
+<h3>Gossip and CMD</h3>
 
-The *gossip protocol* is Riak's method of keeping all nodes current on the state of the Ring. If a node goes up or down, that information is propagated to other nodes. Periodically, nodes will also send their status to a random peer for added consistency.
+Riak has two methods of keeping nodes current on the state of the Ring. The first, and oldest, is the *gossip protocol*. If a node's state in the cluster is altered, information is propagated to other nodes. Periodically, nodes will also send their status to a random peer for added consistency.
 
-Propagating changes in Ring is an asynchronous operation, and can take a couple minutes depending on
-Ring size.
+A newer method of information exchange in Riak is *cluster metadata* (CMD), which uses a more sophisticated method (plum-tree, DVV consistent state) to pass large amounts of metadata between nodes. The superiority of CMD is one of the benefits of using bucket types in Riak 2.0, discussed below.
+
+In both cases, propagating changes in Ring is an asynchronous operation, and can take a couple minutes depending on Ring size.
 
 <!-- Transfers will not start while a gossip is in progress. -->
 
@@ -564,7 +565,7 @@ You can update a bucket type after it's actived. All of the changes that you mak
 
 Of course, you can always get a `list` of the current bucket types in the system. The list will also say whether the bucket type is activated or not.
 
-Other than that, there's nothing interesting about bucket types from an operations point of view, per se. Sure, there are some cool internal mechanisms at work, such as propogated metadata via a path laied out by a plumbtree and causally tracked by dotted version vectors. But that's only code plumbing. What's most interesting about bucket types are the new features you can take advantage of: datatypes, strong consistency, and search.
+Other than that, there's nothing interesting about bucket types from an operations point of view, per se. Sure, there are some cool internal mechanisms at work, such as propogated metadata via a path laied out by a plum-tree and causally tracked by dotted version vectors. But that's only code plumbing. What's most interesting about bucket types are the new features you can take advantage of: datatypes, strong consistency, and search.
 
 
 <h3>Datatypes</h3>
@@ -740,7 +741,7 @@ There's a lot more to search than we can possibly cover here without making it a
 
 <h3>Security</h3>
 
-Riak has lived quit well in the first five years of its life without security. So why did Basho add it now? With the kind of security you get through a firewall, you can only get course grained security. Someone can either access the system or not, with a few restrictions, depending on how clever you write your firewall rules.
+Riak has lived quite well in the first five years of its life without security. So why did Basho add it now? With the kind of security you get through a firewall, you can only get course-grained security. Someone can either access the system or not, with a few restrictions, depending on how clever you write your firewall rules.
 
 With the addition of Security, Riak now supports authentication (identifying a user) and authorization (restricting user access to a subset of commands) of users and groups. Access can also be restricted to a known set of sources. The security design was inspired by the full-featured rules in PostgreSQL.
 
@@ -751,7 +752,7 @@ Before you decide to enable security, you should consider this checklist in adva
 3. Define users and (optionally) groups, and their sources
 4. Grant the necessary permissions to each user/group
 
-With that out of the way, you can `enable` security with a command-line option (you can `disable` security as well). Follow that by checking the `status`.
+With that out of the way, you can `enable` security with a command-line option (you can `disable` security as well). You can optionally check the `status` of security at any time.
 
 ```bash
 $ riak-admin security enable
@@ -759,7 +760,7 @@ $ riak-admin security status
 Enabled
 ```
 
-Adding users is as easy as the `add-user` command. A username is required, and can be followed with any key/value pairs. `password` and `groups` are special cases, but everything is free formed. You can alter existing users as well. Users can belong to any number of groups, and inherit a union of all group settings.
+Adding users is as easy as the `add-user` command. A username is required, and can be followed with any key/value pairs. `password` and `groups` are special cases, but everything is free form. You can alter existing users as well. Users can belong to any number of groups, and inherit a union of all group settings.
 
 
 ```bash
@@ -788,7 +789,7 @@ $ riak-admin security grant search.query on index people to bashoman
 $ riak-admin security revoke riak_kv.delete on any to bad_admin
 ```
 
-There are many kinds of permissions, one for every major operation or set of operations in Riak.
+There are many kinds of permissions, one for every major operation or set of operations in Riak. It's worth noting that you can't add search permissions without search enabled.
 
 * __riak\_kv.get__ --- Retrieve objects
 * __riak\_kv.put__ --- Create or update objects
@@ -1062,7 +1063,7 @@ under `riak_kv` versus `riak_core`. For example, if `http` is under core, why
 is raw_name under riak. -->
 
 KV is so integral to the function of Riak, that it's hardly worth going over
-it's settings as an independant topic. Many of of the values you set in other
+its settings as an independent topic. Many of of the values you set in other
 subsystems are used by KV in some capacity. So let's move on.
 
 <h3>yokozuna</h3>
