@@ -259,7 +259,7 @@ Riak's solution is based on Amazon Dynamo's novel approach of a *tunable* AP sys
 
 <aside class="sidebar"><h3>Not Quite C</h3>
 
-Strictly speaking, altering R and W values actually creates a tunable availability/latency tradeoff, rather than availability/consistency. Making Riak run faster by keeping R and W values low will increase the likelihood of temporarily inconsistent results (higher availability). Setting those values higher will improving the <em>odds</em> of consistent responses (never quite reaching strong consistency), but will slow down those responses and increase the likelihood that Riak will fail to respond (in the event of a partition).
+Strictly speaking, altering R and W values actually creates a tunable availability/latency tradeoff, rather than availability/consistency. Making Riak run faster by keeping R and W values low will increase the likelihood of temporarily inconsistent results (higher availability). Setting those values higher will improve the <em>odds</em> of consistent responses (never quite reaching strong consistency), but will slow down those responses and increase the likelihood that Riak will fail to respond (in the event of a partition).
 </aside>
 
 Riak allows you to choose how many nodes you want to replicate an object to, and how many nodes must be written to or read from per request. These values are settings labeled `n_val` (the number of nodes to replicate to), `r` (the number of nodes read from before returning), and `w` (the number of nodes written to before considered successful).
@@ -292,7 +292,7 @@ If you've followed thus far, I only have one more conceptual wrench to throw at 
 
 <aside class="sidebar"><h3>DVV</h3>
 
-Since Riak 2.0, some internal values have been migrated over to an alternative logical timestamp called Dot Version Vectors. How they operate isn't really germain to this short lesson. What's important is not so much how they're implemented, but the basic idea of a logical clock that we're talking about in the section. You can read more about DVVs (or any Riak concept) on the [Basho docs website](http://docs.basho.com).
+Since Riak 2.0, some internal values have been migrated over to an alternative logical timestamp called Dot Version Vectors (DVV). How they operate isn't germain to this short lesson, but rather, what is important is basic idea of a logical clock. You can read more about DVVs (or any Riak concept) on the [Basho docs website](http://docs.basho.com).
 </aside>
 
 Vector clocks measure a sequence of events, just like a normal clock. But since we can't reasonably keep the clocks on dozens, or hundreds, or thousands of servers in sync (without really exotic hardware, like geosynchronized atomic clocks, or quantum entanglement), we instead keep a running history of updates, and look for logical, rather than temporal, causality.
@@ -379,7 +379,7 @@ vclock: {Node_A: 1}
 value:  ["MYPFIM-S2-DVD"]
 ```
 
-Once the DVD was added to the cart bucket, your laptop runs out of batteries. So you take out your trusty smartphone, and log into the retailer's mobile app. You decide to also add the *Bloodsport III* DVD. Little did you know, a temporary network partition caused your write to redirect to another node. This partition had no knowledge of of your other purchase.
+Once the DVD was added to the cart bucket, your laptop runs out of batteries. So you take out your trusty smartphone, and log into the retailer's mobile app. You decide to also add the *Bloodsport III* DVD. Little did you know, a temporary network partition caused your write to redirect to another node. This partition had no knowledge of your other purchase.
 
 ```yaml
 type:   set
@@ -390,7 +390,7 @@ vclock: {Node_B: 1}
 value:  ["BS-III-DVD"]
 ```
 
-Happily, the network hiccup was temporary, and thus the cluster heals itself. Undr normal circumstances, since the logical clocks did not decend from one another, you'd end up with siblings like this:
+Happily, the network hiccup was temporary, and thus the cluster heals itself. Under normal circumstances, since the logical clocks did not descend from one another, you'd end up with siblings like this:
 
 ```yaml
 type:   set

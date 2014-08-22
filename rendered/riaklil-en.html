@@ -26,7 +26,7 @@ Other formats:
 <a href="#about-this-book">About This Book</a>
 </li>
 <li>
-<a href="#changes-from-1.x">Changes From 1.x</a>
+<a href="#new-in-2.0">New in 2.0</a>
 </li>
 </ul>
 </li>
@@ -84,7 +84,7 @@ Other formats:
 <a href="#querying">Querying</a>
 </li>
 <li>
-<a href="#wrapup">Wrapup</a>
+<a href="#wrap-up">Wrap-up</a>
 </li>
 </ul>
 </li>
@@ -109,7 +109,7 @@ Other formats:
 <a href="#tools">Tools</a>
 </li>
 <li>
-<a href="#wrapup">Wrapup</a>
+<a href="#wrap-up">Wrap-up</a>
 </li>
 </ul>
 </li>
@@ -119,7 +119,7 @@ Other formats:
 <a href="#writing-riak-applications">Writing Riak Applications</a>
 <ul>
 <li>
-<a href="#how-not-to-write-a-riak-application">How not to write a Riak application</a>
+<a href="#how-not-to-write-a-riak-app">How Not to Write a Riak App</a>
 <ul>
 <li>
 <a href="#dynamic-querying">Dynamic querying</a>
@@ -319,7 +319,7 @@ Other formats:
 
 <p>Riak was built as a solution to real Big Data problems, based on the <em>Amazon Dynamo</em> design. Dynamo is a highly available design---meaning that it responds to requests quickly at very large scales, even if your application is storing and serving terabytes of data a day. Riak had been used in production prior to being open-sourced in 2009. It&#39;s currently used by Github, Comcast, Voxer, Disqus and others, with the larger systems storing hundreds of TBs of data, and handling several GBs per node daily.</p>
 
-<p>Riak was written on the Erlang programming language. Erlang was chosen due to its strong support for concurrency, solid distributed communication, hot code loading, and fault-tolerance. It runs on a virtual machine, so running Riak requires an Erlang installation.</p>
+<p>Riak was written in the Erlang programming language. Erlang was chosen due to its strong support for concurrency, solid distributed communication, hot code loading, and fault-tolerance. It runs on a virtual machine, so running Riak requires an Erlang installation.</p>
 
 <p>So should you use Riak? A good rule of thumb for potential users is to ask yourself if every moment of downtime will cost you in some way (money, users, etc). Not all systems require such extreme amounts of uptime, and if you don&#39;t, Riak may not be for you.</p>
 
@@ -329,15 +329,15 @@ Other formats:
 
 <p>In my opinion, the most important section of this book is the <a href="#concepts">concepts chapter</a>. If you already have a little knowledge it may start slow, but it picks up in a hurry. After laying the theoretical groundwork, we&#39;ll move onto helping <a href="#developers">developers</a> use Riak, by learning how to query it and tinker with some settings. Finally, we&#39;ll go over the basic details that <a href="#operators">operators</a> should know, such as how to set up a Riak cluster, configure some values, use optional tools, and more.</p>
 
-<h2 id="changes-from-1.x">Changes From 1.x</h2>
+<h2 id="new-in-2.0">New in 2.0</h2>
 
-<p>Riak 2.0 represents a major shift in the capabilities and focus of Riak as a data store. Riak has always been primarily focused on operational simplicity, and that has not changed. But when it came to design decisions, operations were always given unilateral priority over the needs of developers. This is changing. With the launch of 2.0, we&#39;ve finally added a few features that developers have wanted to see for quite a long time. Namely the following:</p>
+<p>Riak 2.0 represents a major shift in the capabilities and focus of Riak as a data store. Riak has always been primarily focused on operational simplicity, and that has not changed. But when it came to design decisions, operations were always given priority over the needs of developers. This is changing. With the launch of 2.0, we&#39;ve added some features that developers have wanted to see for quite a while. Namely, the following:</p>
 
 <ul>
-<li><strong>Strong Consistency</strong>. Riak is still Eventually Consistent, too, but now you have a choice. Riak is now the easiest to manage database for adjusting the spectrum smoothly between AP and CP... per bucket, no less.</li>
+<li><strong>Strong Consistency</strong>. Riak is still Eventually Consistent, but now you have a choice. Riak is now the easiest to manage database for adjusting the spectrum smoothly between AP and CP... per bucket, no less.</li>
 <li><strong>Better Search</strong>. The makers of Riak have improved search by leveraging the power of the Solr search engine. You now get all of the queryability of distributed Solr, without the hassle of manual indexing.</li>
 <li><strong>Datatypes</strong>. Riak historically has provided storage flexibility by allowing the storage of any binary object. This is still the case, but you now have the option of storing distributed maps, sets, counters, and flags that automatically converge in the face of conflicts.</li>
-<li><strong>Security</strong>. A long standing request that&#39;s day has finally come. Native Group/User access controls.</li>
+<li><strong>Security</strong>. A long-standing request whose day has finally come. Native Group/User access controls.</li>
 <li><strong>Bucket types</strong>. Now you can support unlimited custom bucket properties, without the overhead of the old gossip protocol.</li>
 <li><strong>Ring Resizing</strong>. Finally! Where in the past you were limited to a fixed ring size, you now have the option to dynamically increase/decrease the number of vnodes in your cluster.</li>
 <li><strong>Other improvements</strong>. We&#39;ve also made many other improvements, like simplified configuration management (no more messing with <code>app.config</code> and <code>vm.args</code>), reduced sibling explosions (via a new logical clock called DVV), improved internal metadata sharing (reducing gossip chatter), better AAE, and more.</li>
@@ -346,7 +346,9 @@ Other formats:
 <p>This book also includes a new chapter written by John Daily, to help guide developers to write productive applications with Riak. We hope you enjoy the new, improved, <em>Not Quite So Little Riak Book</em>.</p>
 <h1 id="concepts">Concepts</h1>
 
-<p>Believe me, dear reader, when I suggest that thinking in a distributed fashion is awkward. When I had first encountered Riak, I was not prepared for some of its more preternatural concepts. Our brains just aren&#39;t hardwired to think in a distributed, asynchronous manner. Richard Dawkins coined the term <em>Middle World</em>---the serial, rote land humans encounter every day, which exists between the extremes of the very small strangeness of quarks and the vastness of outer space. We don&#39;t consider these extremes clearly because we don&#39;t encounter them on a daily basis, just like distributed computations and storage. So we create models and tools to bring the physical act of scattered parallel resources in line to our more ordinary synchronous terms. While Riak takes great pains to simplify the hard parts, it does not pretend that they don&#39;t exist. Just like you can never hope to program at an expert level without any knowledge of memory or CPU management, so too can you never safely develop a highly available cluster without a firm grasp of a few underlying concepts.</p>
+<p>Believe me, dear reader, when I suggest that thinking in a distributed fashion is awkward. When I had first encountered Riak, I was not prepared for some of its more preternatural concepts. Our brains just aren&#39;t hardwired to think in a distributed, asynchronous manner. Richard Dawkins coined the term <em>Middle World</em>---the serial, rote land humans encounter every day, which exists between the extremes of the very small strangeness of quarks and the vastness of outer space.</p>
+
+<p>We don&#39;t consider these extremes clearly because we don&#39;t encounter them on a daily basis, just like distributed computations and storage. So we create models and tools to bring the physical act of scattered parallel resources in line to our more ordinary synchronous terms. While Riak takes great pains to simplify the hard parts, it does not pretend that they don&#39;t exist. Just like you can never hope to program at an expert level without any knowledge of memory or CPU management, so too can you never safely develop a highly available cluster without a firm grasp of a few underlying concepts.</p>
 
 <!-- image: caveman confused by a bunch of atoms -->
 
@@ -598,7 +600,7 @@ places[&quot;bagshot&quot;][&quot;5122&quot;] = &quot;Gas&quot;
 
 <p><aside class="sidebar"><h3>Not Quite C</h3></p>
 
-<p>Strictly speaking, altering R and W values actually creates a tunable availability/latency tradeoff, rather than availability/consistency. Making Riak run faster by keeping R and W values low will increase the likelihood of temporarily inconsistent results (higher availability). Setting those values higher will improving the <em>odds</em> of consistent responses (never quite reaching strong consistency), but will slow down those responses and increase the likelihood that Riak will fail to respond (in the event of a partition).
+<p>Strictly speaking, altering R and W values actually creates a tunable availability/latency tradeoff, rather than availability/consistency. Making Riak run faster by keeping R and W values low will increase the likelihood of temporarily inconsistent results (higher availability). Setting those values higher will improve the <em>odds</em> of consistent responses (never quite reaching strong consistency), but will slow down those responses and increase the likelihood that Riak will fail to respond (in the event of a partition).
 </aside></p>
 
 <p>Riak allows you to choose how many nodes you want to replicate an object to, and how many nodes must be written to or read from per request. These values are settings labeled <code>n_val</code> (the number of nodes to replicate to), <code>r</code> (the number of nodes read from before returning), and <code>w</code> (the number of nodes written to before considered successful).</p>
@@ -631,7 +633,7 @@ places[&quot;bagshot&quot;][&quot;5122&quot;] = &quot;Gas&quot;
 
 <p><aside class="sidebar"><h3>DVV</h3></p>
 
-<p>Since Riak 2.0, some internal values have been migrated over to an alternative logical timestamp called Dot Version Vectors. How they operate isn&#39;t really germain to this short lesson. What&#39;s important is not so much how they&#39;re implemented, but the basic idea of a logical clock that we&#39;re talking about in the section. You can read more about DVVs (or any Riak concept) on the <a href="http://docs.basho.com">Basho docs website</a>.
+<p>Since Riak 2.0, some internal values have been migrated over to an alternative logical timestamp called Dot Version Vectors (DVV). How they operate isn&#39;t germain to this short lesson, but rather, what is important is basic idea of a logical clock. You can read more about DVVs (or any Riak concept) on the <a href="http://docs.basho.com">Basho docs website</a>.
 </aside></p>
 
 <p>Vector clocks measure a sequence of events, just like a normal clock. But since we can&#39;t reasonably keep the clocks on dozens, or hundreds, or thousands of servers in sync (without really exotic hardware, like geosynchronized atomic clocks, or quantum entanglement), we instead keep a running history of updates, and look for logical, rather than temporal, causality.</p>
@@ -712,7 +714,7 @@ vclock: {Node_A: 1}
 value:  [&quot;MYPFIM-S2-DVD&quot;]
 </code></pre>
 
-<p>Once the DVD was added to the cart bucket, your laptop runs out of batteries. So you take out your trusty smartphone, and log into the retailer&#39;s mobile app. You decide to also add the <em>Bloodsport III</em> DVD. Little did you know, a temporary network partition caused your write to redirect to another node. This partition had no knowledge of of your other purchase.</p>
+<p>Once the DVD was added to the cart bucket, your laptop runs out of batteries. So you take out your trusty smartphone, and log into the retailer&#39;s mobile app. You decide to also add the <em>Bloodsport III</em> DVD. Little did you know, a temporary network partition caused your write to redirect to another node. This partition had no knowledge of your other purchase.</p>
 
 <pre><code class="yaml">type:   set
 bucket: cart
@@ -722,7 +724,7 @@ vclock: {Node_B: 1}
 value:  [&quot;BS-III-DVD&quot;]
 </code></pre>
 
-<p>Happily, the network hiccup was temporary, and thus the cluster heals itself. Undr normal circumstances, since the logical clocks did not decend from one another, you&#39;d end up with siblings like this:</p>
+<p>Happily, the network hiccup was temporary, and thus the cluster heals itself. Under normal circumstances, since the logical clocks did not descend from one another, you&#39;d end up with siblings like this:</p>
 
 <pre><code class="yaml">type:   set
 bucket: cart
@@ -1749,17 +1751,17 @@ I didn&#39;t ask it. You did. But that is a great question...</p>
 
 <p>Well, moving on.</p>
 
-<h2 id="wrapup">Wrapup</h2>
+<h2 id="wrap-up">Wrap-up</h2>
 
 <p>Riak is a distributed data store with several additions to improve upon the
 standard key-value lookups, like specifying replication values. Since values
-in Riak are opaque, many of these methods either: require custom code to
-extract and give meaning to values,
-such as <em>MapReduce</em>; or allow for header metadata to provide an added
-descriptive dimension to the object, such as <em>secondary indexes</em> or <em>search</em>.</p>
+in Riak are opaque, many of these methods either require custom code to
+extract and give meaning to values, such as <em>MapReduce*m or allow for
+header metadata to provide an added descriptive dimension to the object,
+such as *secondary indexes</em> or <em>search</em>.</p>
 
-<p>Next we&#39;ll peek further under the hood, and see how to set up and manage
-a cluster of your own, and what you should know.</p>
+<p>Next, we&#39;ll peek further under the hood and show you how to set up and manage
+a cluster of your own.</p>
 <h1 id="operators">Operators</h1>
 
 <!-- What Riak is famous for is its simplicity to operate and stability at increasing scales. -->
@@ -1813,12 +1815,13 @@ offline or a new one added, the other nodes need to readjust, balancing the part
 then updating the Ring with this new structure. This Ring state gets passed between the nodes by means of
 a <em>gossip protocol</em>.</p>
 
-<h3>Gossip</h3>
+<h3>Gossip and CMD</h3>
 
-<p>The <em>gossip protocol</em> is Riak&#39;s method of keeping all nodes current on the state of the Ring. If a node goes up or down, that information is propagated to other nodes. Periodically, nodes will also send their status to a random peer for added consistency.</p>
+<p>Riak has two methods of keeping nodes current on the state of the Ring. The first, and oldest, is the <em>gossip protocol</em>. If a node&#39;s state in the cluster is altered, information is propagated to other nodes. Periodically, nodes will also send their status to a random peer for added consistency.</p>
 
-<p>Propagating changes in Ring is an asynchronous operation, and can take a couple minutes depending on
-Ring size.</p>
+<p>A newer method of information exchange in Riak is <em>cluster metadata</em> (CMD), which uses a more sophisticated method (plum-tree, DVV consistent state) to pass large amounts of metadata between nodes. The superiority of CMD is one of the benefits of using bucket types in Riak 2.0, discussed below.</p>
+
+<p>In both cases, propagating changes in Ring is an asynchronous operation, and can take a couple minutes depending on Ring size.</p>
 
 <!-- Transfers will not start while a gossip is in progress. -->
 
@@ -2304,7 +2307,7 @@ The follow commands can be used to manage bucket types for the cluster:
 
 <p>Of course, you can always get a <code>list</code> of the current bucket types in the system. The list will also say whether the bucket type is activated or not.</p>
 
-<p>Other than that, there&#39;s nothing interesting about bucket types from an operations point of view, per se. Sure, there are some cool internal mechanisms at work, such as propogated metadata via a path laied out by a plumbtree and causally tracked by dotted version vectors. But that&#39;s only code plumbing. What&#39;s most interesting about bucket types are the new features you can take advantage of: datatypes, strong consistency, and search.</p>
+<p>Other than that, there&#39;s nothing interesting about bucket types from an operations point of view, per se. Sure, there are some cool internal mechanisms at work, such as propogated metadata via a path laied out by a plum-tree and causally tracked by dotted version vectors. But that&#39;s only code plumbing. What&#39;s most interesting about bucket types are the new features you can take advantage of: datatypes, strong consistency, and search.</p>
 
 <h3>Datatypes</h3>
 
@@ -2467,7 +2470,7 @@ $ riak-admin bucket-type activate indexed
 
 <h3>Security</h3>
 
-<p>Riak has lived quit well in the first five years of its life without security. So why did Basho add it now? With the kind of security you get through a firewall, you can only get course grained security. Someone can either access the system or not, with a few restrictions, depending on how clever you write your firewall rules.</p>
+<p>Riak has lived quite well in the first five years of its life without security. So why did Basho add it now? With the kind of security you get through a firewall, you can only get course-grained security. Someone can either access the system or not, with a few restrictions, depending on how clever you write your firewall rules.</p>
 
 <p>With the addition of Security, Riak now supports authentication (identifying a user) and authorization (restricting user access to a subset of commands) of users and groups. Access can also be restricted to a known set of sources. The security design was inspired by the full-featured rules in PostgreSQL.</p>
 
@@ -2480,14 +2483,14 @@ $ riak-admin bucket-type activate indexed
 <li>Grant the necessary permissions to each user/group</li>
 </ol>
 
-<p>With that out of the way, you can <code>enable</code> security with a command-line option (you can <code>disable</code> security as well). Follow that by checking the <code>status</code>.</p>
+<p>With that out of the way, you can <code>enable</code> security with a command-line option (you can <code>disable</code> security as well). You can optionally check the <code>status</code> of security at any time.</p>
 
 <pre><code class="bash">$ riak-admin security enable
 $ riak-admin security status
 Enabled
 </code></pre>
 
-<p>Adding users is as easy as the <code>add-user</code> command. A username is required, and can be followed with any key/value pairs. <code>password</code> and <code>groups</code> are special cases, but everything is free formed. You can alter existing users as well. Users can belong to any number of groups, and inherit a union of all group settings.</p>
+<p>Adding users is as easy as the <code>add-user</code> command. A username is required, and can be followed with any key/value pairs. <code>password</code> and <code>groups</code> are special cases, but everything is free form. You can alter existing users as well. Users can belong to any number of groups, and inherit a union of all group settings.</p>
 
 <pre><code class="bash">$ riak-admin security add-group mascots type=mascot
 $ riak-admin security add-user bashoman password=Test1234
@@ -2512,7 +2515,7 @@ $ riak-admin security grant search.query on index people to bashoman
 $ riak-admin security revoke riak_kv.delete on any to bad_admin
 </code></pre>
 
-<p>There are many kinds of permissions, one for every major operation or set of operations in Riak.</p>
+<p>There are many kinds of permissions, one for every major operation or set of operations in Riak. It&#39;s worth noting that you can&#39;t add search permissions without search enabled.</p>
 
 <ul>
 <li><strong>riak_kv.get</strong> --- Retrieve objects</li>
@@ -2772,7 +2775,7 @@ under `riak_kv` versus `riak_core`. For example, if `http` is under core, why
 is raw_name under riak. -->
 
 <p>KV is so integral to the function of Riak, that it&#39;s hardly worth going over
-it&#39;s settings as an independant topic. Many of of the values you set in other
+its settings as an independent topic. Many of of the values you set in other
 subsystems are used by KV in some capacity. So let&#39;s move on.</p>
 
 <h3>yokozuna</h3>
@@ -3286,7 +3289,7 @@ but it has a phenomenal start.</p>
 Vertically (by adding bigger hardware), and Horizontally (by adding more nodes).
  -->
 
-<h2 id="wrapup">Wrapup</h2>
+<h2 id="wrap-up">Wrap-up</h2>
 
 <p>Once you comprehend the basics of Riak, it&#39;s a simple thing to manage. If this seems like
 a lot to swallow, take it from a long-time relational database guy (me), Riak is a
@@ -3299,30 +3302,31 @@ you can sleep (do you remember what that was?), and fix it in the morning.</p>
 <h1 id="writing-riak-applications">Writing Riak Applications</h1>
 
 <p>Chapters 2 and 3 covered key concepts that every developer should
-know. In this chapter we look more closely at ways to build (and more
+know. In this chapter, we look more closely at ways to build (and more
 importantly not to build) Riak applications.</p>
 
-<h2 id="how-not-to-write-a-riak-application">How not to write a Riak application</h2>
+<h2 id="how-not-to-write-a-riak-app">How Not to Write a Riak App</h2>
 
 <p>Writing a Riak application is very much <strong>not</strong> like writing an
 application that relies on a relational database. The core ideas and
 vocabulary from database theory still apply, of course, but many of
-the decisions that inform the application layer are inverted.</p>
+the decisions that inform the application layer are transformed.</p>
 
-<p>Effectively all of these anti-patterns make some degree of sense when
-writing an application against a SQL database. None of them lend
-themselves to great Riak applications.</p>
+<p>Effectively, <em>all</em> of these anti-patterns make some degree of sense when
+writing an application against an RDBMS (such as MySQL). Unfortunately,
+<em>none</em> of them lend themselves to great Riak applications.</p>
 
 <h3 id="dynamic-querying">Dynamic querying</h3>
 
 <p>Riak&#39;s tools for finding data (2i, MapReduce, and full-text search)
 are useful but should be used judiciously. None of these scale nearly
-as well as key/value operations; queries that may work well on a few
-nodes in development may run more slowly on a busy development
-environment, particularly as the cluster grows in size.</p>
+as well as key/value operations. Queries that may work well on a few
+nodes in development may run more slowly in a busy production
+environment, especially as the cluster grows in size.</p>
 
-<p>Key/value operations seem primitive (and they are) but you&#39;ll find
-they are flexible, scalable, and very very fast (and predictably so).</p>
+<p>Key/value operations seem primitive (and they are) but you&#39;ll find that
+they are flexible, scalable, and very, very fast (and predictably so).
+One thing to always bear in mind about key/value operations:</p>
 
 <p><em>Reads and writes in Riak should be as fast with ten billion values
 in storage as with ten thousand.</em></p>
@@ -3334,18 +3338,19 @@ stored across dozens of servers.</p>
 
 <h3 id="normalization">Normalization</h3>
 
-<p>Normalizating data is generally a useful approach in a relational
-database, but unlikely to lead to happy results with Riak.</p>
+<p>Normalizing data is generally a useful approach in a relational
+database, but it is unlikely to lead to happy results with Riak.</p>
 
-<p>Riak lacks foreign keys constraints and join operations, two vital
+<p>Riak lacks foreign key constraints and join operations, two vital
 parts of the normalization story, so reconstructing a single record
-from multiple objects would involve multiple read requests; certainly
-possible and fast enough on a small scale, but not ideal for larger
-requests.</p>
+from multiple objects would involve multiple read requests. This is
+certainly possible and fast enough on a small scale, but it is not ideal
+for larger requests.</p>
 
-<p>Imagine the performance of your application if most of your requests
-involved a single read operation. Preparing and storing the answers to
-queries you&#39;re going to ask later is a best practice for Riak.</p>
+<p>In contrast, imagine the performance of your application if most of your
+requests involved a single read operation. Much faster and predictably
+so, even at scale. Preparing and storing the answers to
+queries you&#39;re going to ask for later is a best practice for Riak.</p>
 
 <p>See [Denormalization] for more discussion.</p>
 
@@ -3363,19 +3368,20 @@ piece of data.</p>
 <p>The simplest approach to coping with this is to allow Riak to choose a
 winner based on timestamps. It can do this more effectively if
 developers follow Basho&#39;s guidance on sending updates with <em>vector
-clock</em> metadata to help track causal history, but often concurrent
-updates cannot be automatically resolved via vector clocks, and
+clock</em> metadata to help track causal history. But concurrent updates
+cannot always be automatically resolved via vector clocks, and
 trusting server clocks to determine which write was the last to arrive
 is a <strong>terrible</strong> conflict resolution method.</p>
 
 <p>Even if your server clocks are magically always in sync, are your
-business needs well-served by blindly applying the most recent update?
+business needs well served by blindly applying the most recent update?
 Some databases have no alternative but to handle it that way, but we think
 you deserve better.</p>
 
 <p>Typed buckets in Riak 2.0 default to retaining conflicts and requiring
-the application to resolve them, but we&#39;re also providing replicated
-data types to automate conflict resolution on the servers.</p>
+the application to resolve them, but we&#39;re also providing replicated,
+conflict-free data types (we call them Riak Data Types) to automate
+conflict resolution on the server side.</p>
 
 <p>If you want to minimize the need for conflict resolution, modeling
 with as much immutable data as possible is a big win.</p>
@@ -3385,16 +3391,16 @@ with as much immutable data as possible is a big win.</p>
 <h3 id="mutability">Mutability</h3>
 
 <p>For years, functional programmers have been singing the praises of
-immutable data, and it confers significant advantages when using a
-distributed data store like Riak.</p>
+immutable data, which can confer significant advantages when using a
+distributed datastore like Riak.</p>
 
 <p>Most obviously, conflict resolution is dramatically simplified when
-objects are never updated.</p>
+objects are never updated (because it is avoided entirely).</p>
 
 <p>Even in the world of single-server database servers, updating records
 in place carries costs. Most databases lose all sense of history when
 data is updated, and it&#39;s entirely possible for two different clients
-to overwrite the same field in rapid succession leading to unexpected
+to overwrite the same field in rapid succession, leading to unexpected
 results.</p>
 
 <p>Some data is always going to be mutable, but thinking about the
@@ -3563,15 +3569,15 @@ immutable data.</p>
 <h2 id="data-modeling">Data modeling</h2>
 
 <p>It can be hard to think outside the table, but once you do, you may
-find interesting patterns that to use in any database, even
-relational.[^sql-databases]</p>
+find interesting patterns that to use in any database, even a
+relational one.[^sql-databases]</p>
 
 <p>[^sql-databases]: Feel free to use a relational database when you&#39;re
 willing to sacrifice the scalability, performance, and availability of
 Riak...but why would you?</p>
 
 <p>If you thoroughly absorbed the earlier content, some of this may feel
-redundant, but implications of the key/value model are not always
+redundant, but the implications of the key/value model are not always
 obvious.</p>
 
 <h3 id="rules-to-live-by">Rules to live by</h3>
@@ -3581,8 +3587,8 @@ but take them seriously.</p>
 
 <p>(@keys) Know your keys.</p>
 
-<pre><code>The cardinal rule of any key/value data store: the fastest way to get
-data is to know the key you want.
+<pre><code>The cardinal rule of any key/value datastore: the fastest way to get
+data is to know what to look for, which means knowing which key you want.
 
 How do you pull that off? Well, that&#39;s the trick, isn&#39;t it?
 
@@ -3593,7 +3599,7 @@ magazines in December 2013? Store it in a **sales** bucket and
 name the key after the client, magazine, and month/year combo.
 
 Guess what? Retrieving it will be much faster than running a SQL
-`select` statement in a relational database.
+`SELECT *` statement in a relational database.
 
 And if it turns out that the magazine didn&#39;t exist yet, and there
 are no sales figures for that month? No problem. A negative
@@ -3615,8 +3621,8 @@ contain contact information).
 Historically, buckets have been what most thought of as Riak&#39;s
 virtual namespaces.
 
-The newest level: **bucket types**, introduced in Riak 2.0, which
-group buckets for configuration and security purposes.
+The newest level is provided by **bucket types**, introduced in Riak 2.0, which
+allow you to group buckets for configuration and security purposes.
 
 Less obviously, keys are their own namespaces. If you want a
 hierarchy for your keys that looks like `sales/customer/month`,
@@ -3627,9 +3633,8 @@ bucket, while each key is prepended with customer name and month.
 
 <p>(@views) Know your queries.</p>
 
-<pre><code>Writing data is cheap. Disk space is cheap.
-
-Dynamic queries in Riak are very, very expensive.
+<pre><code>Writing data is cheap. Disk space is cheap. Dynamic queries in Riak
+are very, very expensive.
 
 As your data flows into the system, generate the views you&#39;re going to
 want later. That magazine sales example from (@keys)? The December
@@ -3657,7 +3662,7 @@ of multiple clients attempting to update the data concurrently.
 
 <p>(@indexes) Create your own indexes.</p>
 
-<pre><code>Riak offers metadata-driven indexes (2i) and full-text indexes
+<pre><code>Riak offers metadata-driven secondary indexes (2i) and full-text indexes
 (Riak Search) for values, but these face scaling challenges: in
 order to identify all objects for a given index value, roughly a
 third of the cluster must be involved.
@@ -3672,22 +3677,22 @@ See [Conflict resolution] for more discussion of this.
 <p>(@immutable) Embrace immutability.</p>
 
 <pre><code>As we discussed in [Mutability], immutable data offers a way out
-of some of the challenges of running a high volume, high velocity
-data store.
+of some of the challenges of running a high-volume, high-velocity
+datastore.
 
 If possible, segregate mutable from non-mutable data, ideally
 using different buckets for [request tuning][Request tuning].
 
 [Datomic](http://www.datomic.com) is a unique data storage system
 that leverages immutability for all data, with Riak commonly used
-as a backend data store. It treats any data item in its system as
+as a backend datastore. It treats any data item in its system as
 a &quot;fact,&quot; to be potentially superseded by later facts but never
 updated.
 </code></pre>
 
 <p>(@hybrid) Don&#39;t fear hybrid solutions.</p>
 
-<pre><code>As much we would all love to have a database that is an excellent
+<pre><code>As much as we would all love to have a database that is an excellent
 solution for any problem space, we&#39;re a long way from that goal.
 
 In the meantime, it&#39;s a perfectly reasonable (and very common)
@@ -3697,7 +3702,7 @@ suboptimal at ad hoc queries. If you can&#39;t model your way out of
 that problem, don&#39;t be afraid to store keys alongside searchable
 metadata in a relational or other database that makes querying
 simpler, and once you have the keys you need, grab the values
-from Riak
+from Riak.
 
 Just make sure that you consider failure scenarios when doing so;
 it would be unfortunate to compromise Riak&#39;s availability by
@@ -3970,39 +3975,38 @@ respond since it won&#39;t yet have a copy of that key.</p>
 
 <h2 id="a-short-note-on-riakcs">A Short Note on RiakCS</h2>
 
-<p><em>Riak CS</em> is Basho&#39;s open source extension to Riak to allow your cluster to act as
-a remote storage mechanism, comparable to (and compatible with) Amazon&#39;s
-S3. There are several reasons you may wish to host your own cloud storage mechanism
+<p><em>Riak CS</em> is Basho&#39;s open-source extension to Riak that allows your cluster to act as
+a remote object storage mechanism, comparable to (and compatible with) Amazon&#39;s
+S3. There are several reasons why you may want to host your own cloud storage mechanism
 (security, legal reasons, you already own lots of hardware, cheaper at scale).
-This is not covered in this short book, though I may certainly be bribed to
+Riak CS is not covered in this short book, but I may certainly be bribed to
 write one.</p>
 
 <h2 id="a-short-note-on-mdc">A Short Note on MDC</h2>
 
-<p><em>MDC</em>, or Multi Data Center, is a commercial extension to Riak provided by Basho.
+<p><em>MDC</em>, or Multi-Datacenter, is a commercial extension to Riak provided by Basho.
 While the documentation is freely available, the source code is not. If you reach
 a scale where keeping multiple Riak clusters in sync on a local or global scale is
 necessary, I would recommend considering this option.</p>
 
 <h2 id="locks,-a-cautionary-tale">Locks, a cautionary tale</h2>
 
-<p>While assembling the <em>Writing Applications</em> guide, I tried to develop a data model that
-would allow for reliable locking without strong consistency. That
-attempt failed, but rather than throw the idea away entirely, I
-decided to include it here to illustrate the complexities of coping
-with eventual consistency.</p>
+<p>While assembling the <em>Writing Applications</em> chapter, I (John) tried to develop a data model
+that would allow for reliable locking without strong consistency. While that attempt failed,
+I thought it would be better to include it to illustrate the complexities of coping
+with eventual consistency than to throw it away entirely.</p>
 
-<p>Basic premise: multiple workers may be assigned data sets to process,
-but each data set should be assigned to no more than one worker.</p>
+<p>Basic premise: multiple workers may be assigned datasets to process,
+but each dataset should be assigned to no more than one worker.</p>
 
 <p>In the absence of strong consistency, the best an application can do
-is use the <code>pr</code> and <code>pw</code> parameters (primary read, primary write) with
+is to use the <code>pr</code> and <code>pw</code> (primary read and primary write) parameters with
 a value of <code>quorum</code> or <code>n_val</code>.</p>
 
-<p>So, common features to all of these models:</p>
+<p>Common features to all of these models:</p>
 
 <ul>
-<li>Lock for any given data set is a known key</li>
+<li>Lock for any given dataset is a known key</li>
 <li>Value is a unique identifier for the worker</li>
 </ul>
 
@@ -4014,9 +4018,9 @@ a value of <code>quorum</code> or <code>n_val</code>.</p>
 
 <ol>
 <li>Worker reads with <code>pr=quorum</code> to determine whether a lock exists</li>
-<li>If it does, move on to another data set</li>
+<li>If it does, move on to another dataset</li>
 <li>If it doesn&#39;t, create a lock with <code>pw=quorum</code></li>
-<li>Process data set to completion</li>
+<li>Process dataset to completion</li>
 <li>Remove the lock</li>
 </ol>
 
@@ -4026,9 +4030,9 @@ a value of <code>quorum</code> or <code>n_val</code>.</p>
 <li>Worker #1 reads the non-existent lock</li>
 <li>Worker #2 reads the non-existent lock</li>
 <li>Worker #2 writes its ID to the lock</li>
-<li>Worker #2 starts processing the data set</li>
+<li>Worker #2 starts processing the dataset</li>
 <li>Worker #1 writes its ID to the lock</li>
-<li>Worker #1 starts processing the data set</li>
+<li>Worker #1 starts processing the dataset</li>
 </ol>
 
 <h3 id="lock,-a-second-draft">Lock, a second draft</h3>
@@ -4039,12 +4043,12 @@ a value of <code>quorum</code> or <code>n_val</code>.</p>
 
 <ol>
 <li>Worker reads with <code>pr=quorum</code> to determine whether a lock exists</li>
-<li>If it does, move on to another data set</li>
+<li>If it does, move on to another dataset</li>
 <li>If it doesn&#39;t, create a lock with <code>pw=quorum</code></li>
 <li>Read lock again with <code>pr=quorum</code></li>
 <li>If the lock exists with another worker&#39;s ID, move on to another
-data set</li>
-<li>Process data set to completion</li>
+dataset</li>
+<li>Process dataset to completion</li>
 <li>Remove the lock</li>
 </ol>
 
@@ -4057,7 +4061,7 @@ data set</li>
 <li>Worker #2 reads the lock and sees its ID</li>
 <li>Worker #1 writes its ID to the lock</li>
 <li>Worker #1 reads the lock and sees its ID</li>
-<li>Both workers process the data set</li>
+<li>Both workers process the dataset</li>
 </ol>
 
 <p>If you&#39;ve done any programming with threads before, you&#39;ll recognize
@@ -4071,12 +4075,12 @@ this as a common problem with non-atomic lock operations.</p>
 
 <ol>
 <li>Worker reads with <code>pr=quorum</code> to determine whether a lock exists</li>
-<li>If it does, move on to another data set</li>
+<li>If it does, move on to another dataset</li>
 <li>If it doesn&#39;t, create a lock with <code>pw=quorum</code></li>
 <li>Read lock again with <code>pr=quorum</code></li>
 <li>If the lock exists with another worker&#39;s ID <strong>or</strong> the lock
-contains siblings, move on to another data set</li>
-<li>Process data set to completion</li>
+contains siblings, move on to another dataset</li>
+<li>Process dataset to completion</li>
 <li>Remove the lock</li>
 </ol>
 
@@ -4089,7 +4093,7 @@ contains siblings, move on to another data set</li>
 <li>Worker #1 writes its ID to the lock</li>
 <li>Worker #1 reads the lock and sees a conflict</li>
 <li>Worker #2 reads the lock and sees a conflict</li>
-<li>Both workers move on to another data set</li>
+<li>Both workers move on to another dataset</li>
 </ol>
 
 <h3 id="lock,-a-fourth-draft">Lock, a fourth draft</h3>
@@ -4100,13 +4104,13 @@ contains siblings, move on to another data set</li>
 
 <ol>
 <li>Worker reads with <code>pr=quorum</code> to determine whether a lock exists</li>
-<li>If it does, move on to another data set</li>
+<li>If it does, move on to another dataset</li>
 <li>If it doesn&#39;t, create a lock with <code>pw=quorum</code> and a timestamp</li>
 <li>Read lock again with <code>pr=quorum</code></li>
 <li>If the lock exists with another worker&#39;s ID <strong>or</strong> the lock
 contains siblings <strong>and</strong> its timestamp is not the earliest, move on
-to another data set</li>
-<li>Process data set to completion</li>
+to another dataset</li>
+<li>Process dataset to completion</li>
 <li>Remove the lock</li>
 </ol>
 
@@ -4117,17 +4121,17 @@ to another data set</li>
 <li>Worker #2 reads the non-existent lock</li>
 <li>Worker #2 writes its ID and timestamp to the lock</li>
 <li>Worker #2 reads the lock and sees its ID</li>
-<li>Worker #2 starts processing the data set</li>
+<li>Worker #2 starts processing the dataset</li>
 <li>Worker #1 writes its ID and timestamp to the lock</li>
 <li>Worker #1 reads the lock and sees its ID with the lowest timestamp</li>
-<li>Worker #1 starts processing the data set</li>
+<li>Worker #1 starts processing the dataset</li>
 </ol>
 
 <p>At this point I may hear you grumbling: clearly worker #2 would have
 the lower timestamp because it attempted its write first, and thus #1
-would skip the data set and try another one.</p>
+would skip the dataset and try another one.</p>
 
-<p>Even <em>if</em> both workers are running on the same server (and thus
+<p><em>Even if</em> both workers are running on the same server (and thus
 <em>probably</em> have timestamps that can be compared)[^clock-comparisons],
 perhaps worker #1 started its write earlier but contacted an overloaded cluster
 member that took longer to process the request.</p>
@@ -4157,15 +4161,15 @@ times that multiple workers tackle the same job, but I have yet to
 find one that guarantees exclusion.</p>
 
 <p>What I found surprising about this exercise is that none of the
-failure scenarios required some of the odder edge conditions that can
+failure scenarios required any of the odder edge conditions that can
 cause unexpected outcomes. For example, <code>pw=quorum</code> writes will return
 an error to the client if 2 of the primary servers are not available,
 but the value will <em>still</em> be written to the 3rd server and 2 fallback
-servers. Predicting what will happens the next time someone tries to
+servers. Predicting what will happen the next time someone tries to
 read the key is challenging.</p>
 
 <p>None of these algorithms required deletion of a value, but that is
 particularly fraught with peril. It&#39;s not difficult to construct
-scenarios where deleted values reappear if servers are temporarily
+scenarios in which deleted values reappear if servers are temporarily
 unavailable during the deletion request.</p>
 </body></html>
