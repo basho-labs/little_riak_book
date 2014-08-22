@@ -40,7 +40,8 @@
 \def\authort{Redmond,Daily}
 
 \makeatletter
-\let\savedauthor\authort %=\@authort
+\let\savedauthors=\@author
+\let\savedauthor\authort
 \let\savedtitle=\@title
 \def\imgwidth{.6\linewidth}
 \def\maxwidth{\ifdim\Gin@nat@width>\imgwidth\imgwidth
@@ -48,7 +49,7 @@
 \makeatother
 
 \title{\textbf{\savedtitle}}
-\author{\textbf{\savedauthor}\thanks{<%= config['thanks'] %>}}
+\author{\textbf{\savedauthors}\thanks{<%= config['thanks'] %>}}
 \def\w3cdtfymd{<%= config['version'] %> <%= "\\the\\year-\\ifnum\\month<10 0\\fi\\the\\month-\\ifnum\\day<10 0\\fi\\the\\day" if !isprint %>}
 \date{\w3cdtfymd}
 \renewcommand{\thefootnote}{\fnsymbol{footnote}}
