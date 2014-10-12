@@ -266,7 +266,7 @@ immutable data.
 ## Data modeling
 
 It can be hard to think outside the table, but once you do, you may
-find interesting patterns that to use in any database, even a
+find interesting patterns to use in any database, even a
 relational one.[^sql-databases]
 
 [^sql-databases]: Feel free to use a relational database when you're
