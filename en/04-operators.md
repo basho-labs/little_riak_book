@@ -741,7 +741,7 @@ There's a lot more to search than we can possibly cover here without making it a
 
 <h3>Security</h3>
 
-Riak has lived quite well in the first five years of its life without security. So why did Basho add it now? With the kind of security you get through a firewall, you can only get course-grained security. Someone can either access the system or not, with a few restrictions, depending on how clever you write your firewall rules.
+Riak has lived quite well in the first five years of its life without security. So why did Basho add it now? With the kind of security you get through a firewall, you can only get coarse-grained security. Someone can either access the system or not, with a few restrictions, depending on how clever you write your firewall rules.
 
 With the addition of Security, Riak now supports authentication (identifying a user) and authorization (restricting user access to a subset of commands) of users and groups. Access can also be restricted to a known set of sources. The security design was inspired by the full-featured rules in PostgreSQL.
 
