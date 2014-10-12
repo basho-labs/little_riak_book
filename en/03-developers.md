@@ -433,7 +433,7 @@ A new feature in Riak 2.0 are datatypes. Rather than the opaque values of days p
 
 <aside id="crdt" class="sidebar"><h3>CRDT</h3>
 
-In the previous chapter I said that Riak datatypes are implemented as CRDTs. The definition of CRDT given was Conflict-free Replicated Data Types. This is only partially correct. In fact, there are two varients of CRDTs, namely, describing how they attempt to keep the replicated datatypes Conflict-free. They are Convergent (CvRDT) and Commutative (CmRDT).
+In the previous chapter I said that Riak datatypes are implemented as CRDTs. The definition of CRDT given was Conflict-free Replicated Data Types. This is only partially correct. In fact, there are two variants of CRDTs, namely, describing how they attempt to keep the replicated datatypes Conflict-free. They are Convergent (CvRDT) and Commutative (CmRDT).
 
 CmRDTs are datatypes that are updated with commutative operations. CvRDTs ensure that disparate states converge to a single value. This distinction is interesting in Riak, because Basho actually implements both. You interface with datatypes by commutative operations (meaning, it doesn't matter which takes place first), while any underlying divergent states will eventually converge.
 </aside>
