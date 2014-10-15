@@ -51,7 +51,7 @@ requests involved a single read operation. Much faster and predictably
 so, even at scale. Preparing and storing the answers to
 queries you're going to ask for later is a best practice for Riak.
 
-See [Denormalization] for more discussion.
+See [Denormalization](#denormalization) for more discussion.
 
 ### Ducking conflict resolution
 
@@ -85,7 +85,7 @@ conflict resolution on the server side.
 If you want to minimize the need for conflict resolution, modeling
 with as much immutable data as possible is a big win.
 
-[Conflict resolution] covers this in much more detail.
+[Conflict Resolution](#conflict-resolution) covers this in much more detail.
 
 ### Mutability
 
@@ -134,7 +134,7 @@ speak, causing significant latency problems.
 Basho generally recommends 1-4MB objects as a soft cap; larger sizes
 are possible with careful tuning, however.
 
-We'll return to object size when discussing [Conflict resolution]; for
+We'll return to object size when discussing [Conflict Resolution](#conflict-resolution); for
 the moment, suffice it to say that if you're planning on storing
 *mutable* objects in the upper ranges of our recommendations, you're
 particularly at risk of latency problems.
@@ -364,7 +364,7 @@ but take them seriously.
     and much faster/more scalable, since you'll be managing and
     retrieving a single object.
 
-    See [Conflict resolution] for more discussion of this.
+    See [Conflict Resolution](#conflict-resolution) for more discussion of this.
 
 (@immutable) Embrace immutability.
 
@@ -405,7 +405,7 @@ but take them seriously.
 
 
 
-## Conflict resolution
+## Conflict Resolution
 
 Conflict resolution is an inherent part of nearly any Riak
 application, whether or not the developer knows it.
@@ -438,7 +438,7 @@ so).
 ### Last write wins
 
 Prior to Riak 2.0, the default behavior was for Riak to resolve
-siblings by default (see [Tuning parameters] for the parameter
+siblings by default (see [Tuning parameters](#tuning-parameters) for the parameter
 `allow_mult`). With Riak 2.0, the default behavior changes to
 retaining siblings for the application to resolve, although this will
 not impact legacy Riak applications running on upgraded clusters.
@@ -550,7 +550,7 @@ behavior.
 #### Configure at the bucket
 
 `allow_mult`
-:    Specify whether this bucket retains conflicts for the application to resolve (`true`) or pick a winner using vector clocks and server timestamp even if the causality history does not indicate that it is safe to do so (`false`). See [Conflict resolution] for more. Default: **`false`** for untyped buckets (including all buckets prior to Riak 2.0), **`true`** otherwise
+:    Specify whether this bucket retains conflicts for the application to resolve (`true`) or pick a winner using vector clocks and server timestamp even if the causality history does not indicate that it is safe to do so (`false`). See [Conflict Resolution](#conflict-resolution) for more. Default: **`false`** for untyped buckets (including all buckets prior to Riak 2.0), **`true`** otherwise
 
     You **should** give this value careful thought. You **must** know what it will be in your environment to do proper key/value data modeling.
 

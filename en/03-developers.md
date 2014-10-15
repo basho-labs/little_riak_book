@@ -394,11 +394,10 @@ Then compile the file.
 erlc my_validators.erl
 ```
 
-Install the file by informing the Riak installation of your new code via `app.config` (restart Riak).
+Install the file by informing the Riak installation of your new code with an `advanced.config` file that lives alongside `riak.conf` in each node, then rolling restart each node.
 
 ```bash
 {riak_kv,
-  ...
   {add_paths, ["./custom"]}
 }
 ```

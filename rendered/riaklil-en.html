@@ -179,7 +179,7 @@ Other formats:
 </ul>
 </li>
 <li>
-<a href="#conflict-resolution">Conflict resolution</a>
+<a href="#conflict-resolution">Conflict Resolution</a>
 <ul>
 <li>
 <a href="#conflict-resolution-strategies">Conflict resolution strategies</a>
@@ -1161,10 +1161,9 @@ value_exists(RiakObject) -&gt;
 <pre><code class="bash">erlc my_validators.erl
 </code></pre>
 
-<p>Install the file by informing the Riak installation of your new code via <code>app.config</code> (restart Riak).</p>
+<p>Install the file by informing the Riak installation of your new code with an <code>advanced.config</code> file that lives alongside <code>riak.conf</code> in each node, then rolling restart each node.</p>
 
 <pre><code class="bash">{riak_kv,
-  ...
   {add_paths, [&quot;./custom&quot;]}
 }
 </code></pre>
@@ -1198,7 +1197,7 @@ A value sized greater than 0 is required
 
 <p><aside id="crdt" class="sidebar"><h3>CRDT</h3></p>
 
-<p>In the previous chapter I said that Riak datatypes are implemented as CRDTs. The definition of CRDT given was Conflict-free Replicated Data Types. This is only partially correct. In fact, there are two varients of CRDTs, namely, describing how they attempt to keep the replicated datatypes Conflict-free. They are Convergent (CvRDT) and Commutative (CmRDT).</p>
+<p>In the previous chapter I said that Riak datatypes are implemented as CRDTs. The definition of CRDT given was Conflict-free Replicated Data Types. This is only partially correct. In fact, there are two variants of CRDTs, namely, describing how they attempt to keep the replicated datatypes Conflict-free. They are Convergent (CvRDT) and Commutative (CmRDT).</p>
 
 <p>CmRDTs are datatypes that are updated with commutative operations. CvRDTs ensure that disparate states converge to a single value. This distinction is interesting in Riak, because Basho actually implements both. You interface with datatypes by commutative operations (meaning, it doesn&#39;t matter which takes place first), while any underlying divergent states will eventually converge.
 </aside></p>
@@ -2470,7 +2469,7 @@ $ riak-admin bucket-type activate indexed
 
 <h3>Security</h3>
 
-<p>Riak has lived quite well in the first five years of its life without security. So why did Basho add it now? With the kind of security you get through a firewall, you can only get course-grained security. Someone can either access the system or not, with a few restrictions, depending on how clever you write your firewall rules.</p>
+<p>Riak has lived quite well in the first five years of its life without security. So why did Basho add it now? With the kind of security you get through a firewall, you can only get coarse-grained security. Someone can either access the system or not, with a few restrictions, depending on how clever you write your firewall rules.</p>
 
 <p>With the addition of Security, Riak now supports authentication (identifying a user) and authorization (restricting user access to a subset of commands) of users and groups. Access can also be restricted to a known set of sources. The security design was inspired by the full-featured rules in PostgreSQL.</p>
 
@@ -3352,7 +3351,7 @@ requests involved a single read operation. Much faster and predictably
 so, even at scale. Preparing and storing the answers to
 queries you&#39;re going to ask for later is a best practice for Riak.</p>
 
-<p>See [Denormalization] for more discussion.</p>
+<p>See <a href="#denormalization">Denormalization</a> for more discussion.</p>
 
 <h3 id="ducking-conflict-resolution">Ducking conflict resolution</h3>
 
@@ -3386,7 +3385,7 @@ conflict resolution on the server side.</p>
 <p>If you want to minimize the need for conflict resolution, modeling
 with as much immutable data as possible is a big win.</p>
 
-<p>[Conflict resolution] covers this in much more detail.</p>
+<p><a href="#conflict-resolution">Conflict Resolution</a> covers this in much more detail.</p>
 
 <h3 id="mutability">Mutability</h3>
 
@@ -3435,7 +3434,7 @@ speak, causing significant latency problems.</p>
 <p>Basho generally recommends 1-4MB objects as a soft cap; larger sizes
 are possible with careful tuning, however.</p>
 
-<p>We&#39;ll return to object size when discussing [Conflict resolution]; for
+<p>We&#39;ll return to object size when discussing <a href="#conflict-resolution">Conflict Resolution</a>; for
 the moment, suffice it to say that if you&#39;re planning on storing
 <em>mutable</em> objects in the upper ranges of our recommendations, you&#39;re
 particularly at risk of latency problems.</p>
@@ -3569,7 +3568,7 @@ immutable data.</p>
 <h2 id="data-modeling">Data modeling</h2>
 
 <p>It can be hard to think outside the table, but once you do, you may
-find interesting patterns that to use in any database, even a
+find interesting patterns to use in any database, even a
 relational one.[^sql-databases]</p>
 
 <p>[^sql-databases]: Feel free to use a relational database when you&#39;re
@@ -3671,7 +3670,7 @@ For many use cases, creating your own indexes is straightforward
 and much faster/more scalable, since you&#39;ll be managing and
 retrieving a single object.
 
-See [Conflict resolution] for more discussion of this.
+See [Conflict Resolution](#conflict-resolution) for more discussion of this.
 </code></pre>
 
 <p>(@immutable) Embrace immutability.</p>
@@ -3715,7 +3714,7 @@ rendering it useless when your other database is offline.
 <li><a href="http://docs.basho.com/riak/latest/dev/data-modeling/">Use Cases</a></li>
 </ul>
 
-<h2 id="conflict-resolution">Conflict resolution</h2>
+<h2 id="conflict-resolution">Conflict Resolution</h2>
 
 <p>Conflict resolution is an inherent part of nearly any Riak
 application, whether or not the developer knows it.</p>
@@ -3749,7 +3748,7 @@ so).</p>
 <h3 id="last-write-wins">Last write wins</h3>
 
 <p>Prior to Riak 2.0, the default behavior was for Riak to resolve
-siblings by default (see [Tuning parameters] for the parameter
+siblings by default (see <a href="#tuning-parameters">Tuning parameters</a> for the parameter
 <code>allow_mult</code>). With Riak 2.0, the default behavior changes to
 retaining siblings for the application to resolve, although this will
 not impact legacy Riak applications running on upgraded clusters.</p>
@@ -3783,7 +3782,7 @@ committed.</p>
 
 <p>This is a useful tool, but keep in mind the tradeoffs: writes will be
 slower due to the coordination overhead, and Riak&#39;s ability to
-continue to serve requests in the prence of network partitions and
+continue to serve requests in the presence of network partitions and
 server failures will be compromised.</p>
 
 <p>For example, if a majority of the primary servers for the data are
@@ -3863,7 +3862,7 @@ behavior.</p>
 <h4 id="configure-at-the-bucket">Configure at the bucket</h4>
 
 <p><code>allow_mult</code>
-:    Specify whether this bucket retains conflicts for the application to resolve (<code>true</code>) or pick a winner using vector clocks and server timestamp even if the causality history does not indicate that it is safe to do so (<code>false</code>). See [Conflict resolution] for more. Default: <strong><code>false</code></strong> for untyped buckets (including all buckets prior to Riak 2.0), <strong><code>true</code></strong> otherwise</p>
+:    Specify whether this bucket retains conflicts for the application to resolve (<code>true</code>) or pick a winner using vector clocks and server timestamp even if the causality history does not indicate that it is safe to do so (<code>false</code>). See <a href="#conflict-resolution">Conflict Resolution</a> for more. Default: <strong><code>false</code></strong> for untyped buckets (including all buckets prior to Riak 2.0), <strong><code>true</code></strong> otherwise</p>
 
 <pre><code>You **should** give this value careful thought. You **must** know what it will be in your environment to do proper key/value data modeling.
 </code></pre>

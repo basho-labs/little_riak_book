@@ -212,7 +212,7 @@ def gen_pdf(languages)
       puts "\tRunning XeTeX:"
       # cd($root)
       i = 0
-      # 3.times do |i|
+      3.times do |i|
         print "\t\tPass #{i + 1}... "
         IO.popen("xelatex -papersize=letter -output-directory=\"#{dir}\" \"#{dir}/riaklil-#{lang}.tex\" 2>&1") do |pipe|
           unless $DEBUG
@@ -227,7 +227,7 @@ def gen_pdf(languages)
         end
         break if abort
         puts "done"
-      # end
+      end
 
       ### Output a PDF suitable for a 6x9 print book 
       isprint = true
@@ -246,7 +246,7 @@ def gen_pdf(languages)
       end
       puts "done"
 
-      # 3.times do |i|
+      3.times do |i|
         print "\t\tPass #{i + 1}... "
         IO.popen("xelatex --debug -papersize=letter -output-directory=\"#{dir}\" \"#{dir}/riaklil-print-#{lang}.tex\" 2>&1") do |pipe|
           unless $DEBUG
@@ -261,7 +261,7 @@ def gen_pdf(languages)
         end
         break if abort
         puts "done"
-      # end
+      end
     end
   end
 end
@@ -321,14 +321,14 @@ languages = [ARGV[0] || "en"]
 # generate the pdf
 gen_pdf(languages)
 
-# # generate the ebooks
-# languages.each do |language|
-#   formats = %w{mobi epub}
+# generate the ebooks
+languages.each do |language|
+  formats = %w{mobi epub}
 
-#   html_file = gen_html(language)
-#   formats.each do |format|
-#     gen_book(language, html_file, format)
-#   end
+  html_file = gen_html(language)
+  formats.each do |format|
+    gen_book(language, html_file, format)
+  end
 
-#   gen_html(language, true)
-# end
+  gen_html(language, true)
+end
