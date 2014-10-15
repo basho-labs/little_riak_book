@@ -472,7 +472,7 @@ committed.
 
 This is a useful tool, but keep in mind the tradeoffs: writes will be
 slower due to the coordination overhead, and Riak's ability to
-continue to serve requests in the prence of network partitions and
+continue to serve requests in the presence of network partitions and
 server failures will be compromised.
 
 For example, if a majority of the primary servers for the data are
