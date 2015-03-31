@@ -537,7 +537,7 @@ The follow commands can be used to manage bucket types for the cluster:
    update <type> <json>           Update a type after activation
 ```
 
-It's rather straightforward to `create` a bucket type. The JSON string accepted after the bucket type name are any valid bucket propertied. Any bucket that uses this type will inherit those properties. For example, say that you wanted to create a bucket type whose n_val was always 1 (rather than the default 3), named unsafe.
+It's rather straightforward to `create` a bucket type. The JSON string accepted after the bucket type name are any valid bucket properties. Any bucket that uses this type will inherit those properties. For example, say that you wanted to create a bucket type whose n_val was always 1 (rather than the default 3), named unsafe.
 
 ```bash
 $ riak-admin bucket-type create unsafe '{"props":{"n_val":1}}'
