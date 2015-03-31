@@ -537,7 +537,7 @@ The follow commands can be used to manage bucket types for the cluster:
    update <type> <json>           Update a type after activation
 ```
 
-It's rather straightforward to `create` a bucket type. The JSON string accepted after the bucket type name are any valid bucket propertied. Any bucket that uses this type will inherit those properties. For example, say that you wanted to create a bucket type whose n_val was always 1 (rather than the default 3), named unsafe.
+It's rather straightforward to `create` a bucket type. The JSON string accepted after the bucket type name are any valid bucket properties. Any bucket that uses this type will inherit those properties. For example, say that you wanted to create a bucket type whose n_val was always 1 (rather than the default 3), named unsafe.
 
 ```bash
 $ riak-admin bucket-type create unsafe '{"props":{"n_val":1}}'
@@ -592,7 +592,7 @@ curl -XPUT "$RIAK/types/counters/buckets/visitors/keys/index_page" \
 
 <h3>Strong Consistency</h3>
 
-Strong consistency (SC) is the opposite of everything that Riak stands for. Where Riak is all about high availability in the face of network or server errors, strong consistency is about safety over liveness. Either the network and servers are working perfectly, or the reads and writes fail. So why on earth would we ever want to provide SC and give up HA? Because you asked for. Really.
+Strong consistency (SC) is the opposite of everything that Riak stands for. Where Riak is all about high availability in the face of network or server errors, strong consistency is about safety over liveness. Either the network and servers are working perfectly, or the reads and writes fail. So why on earth would we ever want to provide SC and give up HA? Because you asked for it. Really.
 
 There are some very good use-cases for strong consistency. For example, when a user is completing a purchase, you might want to ensure that the system is always in a consistent state, or fail the purchase. Communicating that a purchase was made when it in fact was not, is not a good user experience. The opposite is even worse.
 
@@ -604,7 +604,7 @@ strong_consistency = on
 
 One thing to note is, although we generally recommend you have five nodes in a Riak cluster, it's not a hard requirement. Strong consistency, however, requires three nodes. It will not operate with fewer.
 
-Once our SC systme is active, you'll lean on bucket types again. Only buckets that live under a bucket type setup for strong consistency will be strongly consistent. This means that you can have some buckets HA, other SC, in the same database. Let's call our SC bucket type `strong`.
+Once our SC system is active, you'll lean on bucket types again. Only buckets that live under a bucket type setup for strong consistency will be strongly consistent. This means that you can have some buckets HA, other SC, in the same database. Let's call our SC bucket type `strong`.
 
 ```bash
 $ riak-admin bucket-type create strong '{"props":{"consistent":true}}'
