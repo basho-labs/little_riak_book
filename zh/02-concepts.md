@@ -1,22 +1,22 @@
-# Concepts
+# 概念
 
-Believe me, dear reader, when I suggest that thinking in a distributed fashion is awkward. When I had first encountered Riak, I was not prepared for some of its more preternatural concepts. Our brains just aren't hardwired to think in a distributed, asynchronous manner. Richard Dawkins coined the term *Middle World*---the serial, rote land humans encounter every day, which exists between the extremes of the very small strangeness of quarks and the vastness of outer space.
+相信我，亲爱的读者，当我建议以分布式的方式思考是尴尬的。当我第一次遇到Riak时，我没有准备好一些更前卫的概念。我们的大脑并不是用分布式异步的方式来思考的。理查德·道金斯（Richard Dawkins）创造了*中世纪* ---人类每天遇到的连续的人造地带，这个地区存在于极度陌生的夸克与极空的空间之间。
 
-We don't consider these extremes clearly because we don't encounter them on a daily basis, just like distributed computations and storage. So we create models and tools to bring the physical act of scattered parallel resources in line to our more ordinary synchronous terms. While Riak takes great pains to simplify the hard parts, it does not pretend that they don't exist. Just like you can never hope to program at an expert level without any knowledge of memory or CPU management, so too can you never safely develop a highly available cluster without a firm grasp of a few underlying concepts.
+我们不清楚这些极端，因为我们每天都不会遇到它们，就像分布式计算和存储一样。所以我们创造了模型和工具，使分散的并行资源的物理行为符合我们更普通的同步条件。虽然Riak需要很大的努力来简化硬件部件，但它并不假装它们不存在。就像你永远不会希望在没有任何内存或CPU管理知识的情况下在专家级进行编程，所以如果不牢固掌握几个基本概念，您也不会安全地开发高可用性集群。
 
 <!-- image: caveman confused by a bunch of atoms -->
 
-## The Landscape
+## 景观
 
-The existence of databases like Riak is the culmination of two basic trends: accessible technology spurring different data requirements, and gaps in the data management market.
+像Riak这样的数据库的存在是两个基本趋势的结果：无障碍技术刺激了不同的数据需求，以及数据管理市场的差距。
 
 <!-- image: landscape -->
 
-First, as we've seen steady improvements in technology along with reductions in cost, vast amounts of computing power and storage are now within the grasp of nearly anyone. Along with our increasingly interconnected world caused by the web and shrinking, cheaper computers (like smartphones), this has catalyzed an exponential growth of data, and a demand for more predictability and speed by savvier users. In other words, more data is being created on the front-end, while more data is being managed on the backend.
+首先，随着技术的不断提高以及成本的降低，大量的计算能力和存储空间现在几乎掌握在任何人手中。随着网络日益相互关联的世界和互联网的萎缩，便宜的计算机（如智能手机），这促使了数据的指数增长，以及对savvier用户更多的可预测性和速度的需求。换句话说，在前端正在创建更多的数据，而在后台管理更多的数据。
 
-Second, relational database management systems (RDBMS) have become focused over the years for a standard set of use-cases, like business intelligence. They were also technically tuned for squeezing performance out of single larger servers, like optimizing disk access, even while cheap commodity (and virtualized) servers made horizontal growth increasingly attractive. As cracks in relational implementations became apparent, custom implementations arose in response to specific problems not originally envisioned by the relational DBs.
+第二，关系数据库管理系统（RDBMS）已经成为多年来针对一系列用例（如商业智能）的重点。即使在廉价商品（和虚拟化）服务器的水平增长越来越具有吸引力的同时，他们也在技术上针对单个较大服务器的性能进行调整，例如优化磁盘访问。由于关系实现中的裂缝变得显而易见，自定义实现是针对关系数据库最初未设想的特定问题而产生的。
 
-These new databases are collected under the moniker *NoSQL*, and Riak is of its ilk.
+这些新的数据库是在绰号*NoSQL*下收集的，而Riak则是这样的。
 
 <h3>Database Models</h3>
 
