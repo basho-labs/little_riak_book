@@ -1,6 +1,6 @@
-# Developers
+#  开发者
 
-<aside class="sidebar"><h3>A Note on "Node"</h3>
+<aside class="sidebar"><h3>关于“节点”</h3>
 
 It's worth mentioning that I use the word "node" a lot. Realistically, this means a physical/virtual server, but really, the workhorses of Riak are vnodes.
 
