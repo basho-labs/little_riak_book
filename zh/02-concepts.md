@@ -18,7 +18,7 @@
 
 这些新的数据库是在绰号*NoSQL*下收集的，而Riak则是这样的。
 
-<h3>Database Models</h3>
+<h3>数据库模型</h3>
 
 Modern databases can be loosely grouped into the ways they represent data. Although I'm presenting 5 major types (the last 4 are considered NoSQL models), these lines are often blurred---you can use some key/value stores as a document store, you can use a relational database to just store key/value data.
 
