@@ -1,4 +1,4 @@
-# Operators
+# 运维者
 
 <!-- What Riak is famous for is its simplicity to operate and stability at increasing scales. -->
 
@@ -74,9 +74,9 @@ in the `etc/riak.conf` file (we'll dig deeper into this file later).
 ## Number of partitions in the cluster (only valid when first
 ## creating the cluster). Must be a power of 2, minimum 8 and maximum
 ## 1024.
-## 
+##
 ## Default: 64
-## 
+##
 ## Acceptable values:
 ##   - an integer
 ring_size = 8
@@ -115,7 +115,7 @@ Just to illustrate that Erlang binary value is a real number, the next line make
 readable format, similar to the ring partition numbers.
 
 ```bash
-(riak@AAA.cluster)3> DocIdx = 
+(riak@AAA.cluster)3> DocIdx =
 (riak@AAA.cluster)3> riak_core_util:chash_key({<<"food">>,<<"favorite">>}).
 <<80,250,1,193,88,87,95,235,103,144,152,2,21,102,201,9,156,102,128,3>>
 
@@ -688,9 +688,9 @@ The most important setting in Riak Search are the JVM options. These options are
 ## The options to pass to the Solr JVM.  Non-standard options,
 ## i.e. -XX, may not be portable across JVM implementations.
 ## E.g. -XX:+UseCompressedStrings
-## 
+##
 ## Default: -d64 -Xms1g -Xmx1g -XX:+UseStringCache -XX:+UseCompressedOops
-## 
+##
 ## Acceptable values:
 ##   - text
 search.solr.jvm_options = -d64 -Xms1g -Xmx1g -XX:+UseStringCache -XX:+UseCompressedOops
@@ -703,18 +703,18 @@ In the interested of completeness, Riak also communicates to Solr internally thr
 ```bash
 ## The port number which Solr binds to.
 ## NOTE: Binds on every interface.
-## 
+##
 ## Default: 8093
-## 
+##
 ## Acceptable values:
 ##   - an integer
 search.solr.port = 8093
 
 ## The port number which Solr JMX binds to.
 ## NOTE: Binds on every interface.
-## 
+##
 ## Default: 8985
-## 
+##
 ## Acceptable values:
 ##   - an integer
 search.solr.jmx_port = 8985
@@ -954,9 +954,9 @@ My `riak.conf` sets it's node name and cookie like this:
 
 ```bash
 ## Name of the Erlang node
-## 
+##
 ## Default: riak@127.0.0.1
-## 
+##
 ## Acceptable values:
 ##   - text
 nodename = riak@AAA.cluster
@@ -964,9 +964,9 @@ nodename = riak@AAA.cluster
 ## Cookie for distributed node communication.  All nodes in the
 ## same cluster should use the same cookie or they will not be able to
 ## communicate.
-## 
+##
 ## Default: riak
-## 
+##
 ## Acceptable values:
 ##   - text
 distributed_cookie = testing123
@@ -1005,34 +1005,34 @@ ring.state_dir = $(platform_data_dir)/ring
 ## Number of partitions in the cluster (only valid when first
 ## creating the cluster). Must be a power of 2, minimum 8 and maximum
 ## 1024.
-## 
+##
 ## Default: 64
-## 
+##
 ## Acceptable values:
 ##   - an integer
 ring_size = 8
 
 ## listener.http.<name> is an IP address and TCP port that the Riak
 ## HTTP interface will bind.
-## 
+##
 ## Default: 127.0.0.1:8098
-## 
+##
 ## Acceptable values:
 ##   - an IP/port pair, e.g. 127.0.0.1:8098
 listener.http.internal = 0.0.0.0:8098
 
 ## listener.protobuf.<name> is an IP address and TCP port that the Riak
 ## Protocol Buffers interface will bind.
-## 
+##
 ## Default: 127.0.0.1:8087
-## 
+##
 ## Acceptable values:
 ##   - an IP/port pair, e.g. 127.0.0.1:8087
 listener.protobuf.internal = 0.0.0.0:8087
 
 ## listener.https.<name> is an IP address and TCP port that the Riak
 ## HTTPS interface will bind.
-## 
+##
 ## Acceptable values:
 ##   - an IP/port pair, e.g. 127.0.0.1:8069
 ## listener.https.internal = 127.0.0.1:8069
@@ -1098,9 +1098,9 @@ Using a backend is simply a matter of setting the `storage_backend` with one of 
 ```bash
 ## Specifies the storage engine used for Riak's key-value data
 ## and secondary indexes (if supported).
-## 
+##
 ## Default: bitcask
-## 
+##
 ## Acceptable values:
 ##   - one of: bitcask, leveldb, memory, multi
 storage_backend = memory
@@ -1121,9 +1121,9 @@ Bitcask is a simple soul. It's the backend of choice, and generally the most com
 
 ```bash
 ## A path under which bitcask data files will be stored.
-## 
+##
 ## Default: $(platform_data_dir)/bitcask
-## 
+##
 ## Acceptable values:
 ##   - the path to a directory
 bitcask.data_root = $(platform_data_dir)/bitcask
@@ -1135,9 +1135,9 @@ bitcask.data_root = $(platform_data_dir)/bitcask
 ## workloads, but has the potential to negatively impact
 ## the Erlang VM, leading to higher worst-case latencies
 ## and possible throughput collapse.
-## 
+##
 ## Default: erlang
-## 
+##
 ## Acceptable values:
 ##   - one of: erlang, nif
 bitcask.io_mode = erlang
@@ -1178,9 +1178,9 @@ There are many configuration values for leveldb. But most of the time, you're be
 ## cache sizes to stay within this size.  The memory size can
 ## alternately be assigned as a byte count via leveldb.maximum_memory
 ## instead.
-## 
+##
 ## Default: 70
-## 
+##
 ## Acceptable values:
 ##   - an integer
 leveldb.maximum_memory.percent = 70
@@ -1274,9 +1274,9 @@ for presenting those interfaces, managing connections, providing entry points.
 ```bash
 ## listener.protobuf.<name> is an IP address and TCP port that the Riak
 ## Protocol Buffers interface will bind.
-## 
+##
 ## Default: 127.0.0.1:8087
-## 
+##
 ## Acceptable values:
 ##   - an IP/port pair, e.g. 127.0.0.1:8087
 listener.protobuf.internal = 0.0.0.0:8087
@@ -1285,9 +1285,9 @@ listener.protobuf.internal = 0.0.0.0:8087
 ## may grow. If set, it must be an integer > 0. If you anticipate a
 ## huge number of connections being initialized *simultaneously*, set
 ## this number higher.
-## 
+##
 ## Default: 128
-## 
+##
 ## Acceptable values:
 ##   - an integer
 protobuf.backlog = 128
@@ -1313,75 +1313,75 @@ However, you can configure lager via `riak.conf`.
 ## file: the file specified by log.console.file
 ## console: to standard output (seen when using `riak attach-direct`)
 ## both: log.console.file and standard out.
-## 
+##
 ## Default: both
-## 
+##
 ## Acceptable values:
 ##   - one of: off, file, console, both
 log.console = both
 
 ## The severity level of the console log, default is 'info'.
-## 
+##
 ## Default: info
-## 
+##
 ## Acceptable values:
 ##   - one of: debug, info, warning, error
 log.console.level = info
 
 ## When 'log.console' is set to 'file' or 'both', the file where
 ## console messages will be logged.
-## 
+##
 ## Default: $(platform_log_dir)/console.log
-## 
+##
 ## Acceptable values:
 ##   - the path to a file
 log.console.file = $(platform_log_dir)/console.log
 
 ## The file where error messages will be logged.
-## 
+##
 ## Default: $(platform_log_dir)/error.log
-## 
+##
 ## Acceptable values:
 ##   - the path to a file
 log.error.file = $(platform_log_dir)/error.log
 
 ## When set to 'on', enables log output to syslog.
-## 
+##
 ## Default: off
-## 
+##
 ## Acceptable values:
 ##   - on or off
 log.syslog = off
 
 ## Whether to enable the crash log.
-## 
+##
 ## Default: on
-## 
+##
 ## Acceptable values:
 ##   - on or off
 log.crash = on
 
 ## If the crash log is enabled, the file where its messages will
 ## be written.
-## 
+##
 ## Default: $(platform_log_dir)/crash.log
-## 
+##
 ## Acceptable values:
 ##   - the path to a file
 log.crash.file = $(platform_log_dir)/crash.log
 
 ## Maximum size in bytes of individual messages in the crash log
-## 
+##
 ## Default: 64KB
-## 
+##
 ## Acceptable values:
 ##   - a byte size with units, e.g. 10GB
 log.crash.maximum_message_size = 64KB
 
 ## Maximum size of the crash log in bytes, before it is rotated
-## 
+##
 ## Default: 10MB
-## 
+##
 ## Acceptable values:
 ##   - a byte size with units, e.g. 10GB
 log.crash.size = 10MB
@@ -1389,18 +1389,18 @@ log.crash.size = 10MB
 ## The schedule on which to rotate the crash log.  For more
 ## information see:
 ## https://github.com/basho/lager/blob/master/README.md#internal-log-rotation
-## 
+##
 ## Default: $D0
-## 
+##
 ## Acceptable values:
 ##   - text
 log.crash.rotation = $D0
 
 ## The number of rotated crash logs to keep. When set to
 ## 'current', only the current open log file is kept.
-## 
+##
 ## Default: 5
-## 
+##
 ## Acceptable values:
 ##   - an integer
 ##   - the text "current"
@@ -1507,28 +1507,28 @@ authority, add the `cacertfile` too.
 ```bash
 ## listener.https.<name> is an IP address and TCP port that the Riak
 ## HTTPS interface will bind.
-## 
+##
 ## Acceptable values:
 ##   - an IP/port pair, e.g. 127.0.0.1:8069
 listener.https.internal = 127.0.0.1:8069
 
 ## Default cert location for https can be overridden
 ## with the ssl config variable, for example:
-## 
+##
 ## Acceptable values:
 ##   - the path to a file
 ssl.certfile = $(platform_etc_dir)/cert.pem
 
 ## Default key location for https can be overridden with the ssl
 ## config variable, for example:
-## 
+##
 ## Acceptable values:
 ##   - the path to a file
 ssl.keyfile = $(platform_etc_dir)/key.pem
 
 ## Default signing authority location for https can be overridden
 ## with the ssl config variable, for example:
-## 
+##
 ## Acceptable values:
 ##   - the path to a file
 ssl.cacertfile = $(platform_etc_dir)/cacertfile.pem
@@ -1541,17 +1541,17 @@ the keys to the kingdom.
 
 ```bash
 ## Set to 'off' to disable the admin panel.
-## 
+##
 ## Default: off
-## 
+##
 ## Acceptable values:
 ##   - on or off
 riak_control = on
 
 ## Authentication mode used for access to the admin panel.
-## 
+##
 ## Default: off
-## 
+##
 ## Acceptable values:
 ##   - one of: off, userlist
 riak_control.auth.mode = on
@@ -1563,7 +1563,7 @@ riak_control.auth.mode = on
 ## riak_control.auth.user.USERNAME.password = PASSWORD
 ## replacing USERNAME with the desired username and PASSWORD with the
 ## desired password for that user.
-## 
+##
 ## Acceptable values:
 ##   - text
 riak_control.auth.user.admin.password = lovesecretsexgod
