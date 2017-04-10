@@ -20,55 +20,55 @@
 
 <h3>数据库模型</h3>
 
-Modern databases can be loosely grouped into the ways they represent data. Although I'm presenting 5 major types (the last 4 are considered NoSQL models), these lines are often blurred---you can use some key/value stores as a document store, you can use a relational database to just store key/value data.
+现代数据库可以根据它们代表数据的方式进行松散分组。 虽然我提供了5种主要类型（最后4个被认为是NoSQL模型），但这些行通常是模糊的,你可以使用一些键/值存储作为文档存储，也可以使用关系数据库来存储键/值数据。
 
 <aside id="joins" class="sidebar"><h3>A Quick note on JOINs</h3>
 
-Unlike relational databases, but similar to document and columnar stores, objects cannot be joined by Riak. Client code is responsible for accessing values and merging them, or by other code such as MapReduce.
+与关系数据库不同，但与文档和列存储类似，对象不能由Riak加入。 客户端代码负责访问值并将其合并，或由其他代码（如MapReduce）负责。
+在物理服务器之间轻松地加入数据的能力是将单个节点数据库（如关系和图形）与*自然可分割的*系统（如文档，柱状和键/值存储）进行分隔的权衡。
 
-The ability to easily join data across physical servers is a tradeoff that separates single node databases like relational and graph, from *naturally partitionable* systems like document, columnar, and key/value stores.
-
-This limitation changes how you model data. Relational normalization (organizing data to reduce redundancy) exists for systems that can cheaply join data together per request. However, the ability to spread data across multiple nodes requires a denormalized approach, where some data is duplicated, and computed values may be stored for the sake of performance.
+此限制更改了数据建模。 对于每个请求可以廉价地连接数据的系统，存在关系规范化（组织数据以减少冗余）。 然而，跨多个节点传播数据的能力需要非规范化的方法，其中一些数据被复制，并且为了性能而存储计算值。
 </aside>
 
 <!-- image: icons for each of these types -->
 
-  1. **Relational**. Traditional databases usually use SQL to model and query data.
-    They are useful for data which can be stored in a highly structured schema, yet
-    require flexible querying. Scaling a relational database (RDBMS) traditionally
-    occurs by more powerful hardware (vertical growth).
+  1. **关系**。 传统数据库通常使用SQL来建模和查询数据。
+     它们对于可以存储在高度结构化模式中的数据有用
+     而非灵活查询。 扩展关系数据库（RDBMS）
+     则是由更强大的硬件（垂直增长）发生。
 
-    Examples: *PostgreSQL*, *MySQL*, *Oracle*
-  2. **Graph**. These exist for highly interconnected data. They excel in
-    modeling complex relationships between nodes, and many implementations can
-    handle multiple billions of nodes and relationships (or edges and vertices). I tend to include *triplestores* and *object DBs* as specialized variants.
+    示例: *PostgreSQL*, *MySQL*, *Oracle*
+  2. **图形**。 图形存在于高度互联的数据中。 他们擅长
+     建立节点之间的复杂关系，并且许多都可以实现
+     处理多达数十亿个节点和关系（或边和顶点）。 我倾向于将* triplestores *和* object DBs *作为特殊变体。
 
-    Examples: *Neo4j*, *Graphbase*, *InfiniteGraph*
-  3. **Document**. Document datastores model hierarchical values called documents,
-    represented in formats such as JSON or XML, and do not enforce a document schema.
-    They generally support distributing across multiple servers (horizontal growth).
+    示例: *Neo4j*, *Graphbase*, *InfiniteGraph*
+  3. **文件**。 文档数据存储模型分层值称为文档，
+     以JSON或XML格式表示，并且不强制执行文档模式。
+     它们通常支持跨多个服务器分布（横向增长）。
 
-    Examples: *CouchDB*, *MongoDB*, *Couchbase*
-  4. **Columnar**. Popularized by [Google's BigTable](http://research.google.com/archive/bigtable.html),
-    this form of database exists to scale across multiple servers, and groups similar data into
-    column families. Column values can be individually versioned and managed, though families
-    are defined in advance, not unlike RDBMS schemas.
+     示例：* CouchDB *，* MongoDB *，* Couchbase *
+  4. **柱**。 由[Google的BigTable]（http://research.google.com/archive/bigtable.html）推广，
+     存在这种形式的数据库可以跨多个服务器进行扩展，并将类似的数据分组
+     列组。 列值可以单独版本化和管理，但组
+     预先定义，与RDBMS模式不同。
 
-    Examples: *HBase*, *Cassandra*, *BigTable*
-  5. **Key/Value**. Key/Value, or KV stores, are conceptually like hashtables,
-    where values are stored and accessed by an immutable key. They range from
-    single-server varieties like *Memcached* used for high-speed caching, to
-    multi-datacenter distributed systems like *Riak Enterprise*.
+     示例：* HBase *，* Cassandra *，* BigTable *
+  5. **键/值**。 键/值或KV存储，在概念上像哈希表，
+     其中值由不可变键存储和访问。 他们的范围从
+     单服务器品种* Memcached *用于高速缓存，至
+     多数据中心分布式系统，如* Riak Enterprise *。
 
-    Examples: *Riak*, *Redis*, *Voldemort*
+     示例：* Riak *，* Redis *，* Voldemort *
 
-## Riak Components
+## Riak组件
 
-Riak is a Key/Value (KV) database, built from the ground up to safely distribute data across a cluster of physical servers, called nodes. A Riak cluster is also known as a ring (we'll cover why later).
+Riak是一个键/值（KV）数据库，从数据库构建的角度来看，可以将数据安全地分布在称为节点的物理服务器集群上。 
+Riak群集也被称为戒指（我们将介绍以后的原因）。
 
 <!-- For now, we'll only consider the concepts required to be a Riak users, and cover operations later. -->
 
-Riak functions similarly to a very large hash space. Depending on your background, you may call it hashtable, a map, a dictionary, or an object. But the idea is the same: you store a value with an immutable key, and retrieve it later.
+
 
 <h3>Key and Value</h3>
 
