@@ -20,7 +20,7 @@ Erlang, Java, Python, Ruby.
 
 包括社区提供的驱动程序，支持的语言甚至更多: C/C++, PHP, Clojure, Common Lisp, Dart, Go, Groovy, Haskell, JavaScript (jQuery and NodeJS), Lisp Flavored Erlang, .NET, Perl, PHP, Play, Racket, Scala, Smalltalk.
 
-在 [Basho docs]（http://docs.basho.com/riak/latest/） 中可以找到数十个其他项目特定的插件。
+在  [Basho docs](http://docs.basho.com/riak/latest/)  中可以找到数十个其他项目特定的插件。
 </aside>
 
 由于Riak是KV数据库，因此最基本的命令是设置和获取值。我们将使用HTTP接口，通过curl，但我们可以很容易地使用Erlang，Ruby，Java或任何其他支持的语言。
