@@ -26,7 +26,7 @@ While the documentation is freely available, the source code is not. If you reac
 a scale where keeping multiple Riak clusters in sync on a local or global scale is
 necessary, I would recommend considering this option.
 
-MDC（Multi-Datacenter）是Basho对于Riak的一个商业性的扩展。尽管相关文档是可以免费获得的，但源码却不能免费获取。
+多数据中心（MDC，Multi-Datacenter）是Basho对于Riak的一个商业性的扩展。尽管相关文档是可以免费获得的，但源码却不能免费获取。
 如果你达到一定规模，保持多个Riak集群在本地或全局同步是必要的，我建议考虑此选项。
 
 ## Locks, a cautionary tale  
