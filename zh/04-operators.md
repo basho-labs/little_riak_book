@@ -2,9 +2,7 @@
 
 <!-- What Riak is famous for is its simplicity to operate and stability at increasing scales. -->
 
-In some ways, Riak is downright mundane in its role as the easiest
-NoSQL database to operate. Want more servers? Add them. A network
-cable is cut at 2am? Deal with it after a few more hours of
+在某些方面， Riak作为最易操作的一种NoSQl数据库，它所扮演角色绝对是通俗易懂的。想要更多的服务吗? 添加他们. 一个网络电缆 is cut at 2am? Deal with it after a few more hours of
 sleep. Understanding this integral part of your application stack is
 still important, however, despite Riak's reliability.
 
