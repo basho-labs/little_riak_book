@@ -2,18 +2,13 @@
 
 <!-- What Riak is famous for is its simplicity to operate and stability at increasing scales. -->
 
-在某些方面， Riak作为最易操作的一种NoSQl数据库，它所扮演角色绝对是通俗易懂的。想要更多的服务吗? 添加他们. 一个网络电缆 is cut at 2am? Deal with it after a few more hours of
-sleep. Understanding this integral part of your application stack is
-still important, however, despite Riak's reliability.
+在某些方面， Riak作为最易操作的一种NoSQl数据库，它所扮演角色绝对是通俗易懂的。想要更多的服务吗? 添加他们. 一个网络电缆会早晨两点被切断吗？几小时睡觉醒来才回去处理它. 但是处理Riak的可靠性，理解你的应用程序栈的主要部分依然很重要。
 
-We've covered the core concepts of Riak, and I've provided a taste of
-how to use it, but there is more to the database than that. There are
-details you should know if you plan on operating a Riak cluster of
-your own.
+我们已经学习了Riak的核心概念，并且我已经提供了一系列如何使用它的说明，但是关于这个数据库的还有更多需要掌握的。如果你计划操作一个你自己的Riak集群，还有一些你需要了解的细节。
 
-## Clusters
+## 集群
 
-Up to this point you've conceptually read about "clusters" and the "Ring" in
+到目前为止，你已经conceptually read about "clusters" and the "Ring" in
 nebulous summations. What exactly do we mean, and what are the practical
 implications of these details for Riak developers and operators?
 
