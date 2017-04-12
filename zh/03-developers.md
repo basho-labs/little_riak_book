@@ -7,7 +7,7 @@
 当你写入多个v节点(vnode)时，Riak将尝试将值传播到尽可能多的物理服务器。 但是，这不能保证（例如，如果你只有2台物理服务器的默认`n_val`为3，某些数据将被复制到同一服务器两次）。你将节点概念化为Riak实例是安全的，它在所有时候都比符合“v节点(vnode)”要简单。如果某些东西适用于v节点(vnode)，我会提及它
 </aside>
 
-_眼下我们打算暂缓安装Riak的细节部分。如果你想自己一个人开始，可以通过遵循网站(http://docs.basho.com)上的[install documentation](http://docs.basho.com/riak/latest/)轻松的开始. 不然的话，这会是一个很棒的阅读部分当你坐在没有网络的火车上时。_
+_眼下我们打算暂缓安装Riak的细节部分。如果你想自己一个人开始，可以通过遵循网站(http://docs.basho.com)上的 [install documentation](http://docs.basho.com/riak/latest/) 轻松的开始. 不然的话，这会是一个很棒的阅读部分当你坐在没有网络的火车上时。_
 
 一旦了解了一些更细微的点，用Riak数据库进行开发是非常容易的。在技术意义上，它是一个键/值存储（您将值与键相关联，并使用相同的键检索它们），但它为用户提供了更多。您可以在写入之前或之后嵌入写入钩子，或者用于快速检索的索引数据。Riak具有SOLR搜索功能，可让您运行MapReduce函数，以便在相对较短的时间范围内跨巨大的集群提取和聚合数据。 我们将显示一些可配置的具体的储存桶设置。
 
@@ -20,7 +20,7 @@ Erlang, Java, Python, Ruby.
 
 包括社区提供的驱动程序，支持的语言甚至更多: C/C++, PHP, Clojure, Common Lisp, Dart, Go, Groovy, Haskell, JavaScript (jQuery and NodeJS), Lisp Flavored Erlang, .NET, Perl, PHP, Play, Racket, Scala, Smalltalk.
 
-在[Basho docs]（http://docs.basho.com/riak/latest/）中可以找到数十个其他项目特定的插件。
+在 [Basho docs]（http://docs.basho.com/riak/latest/） 中可以找到数十个其他项目特定的插件。
 </aside>
 
 由于Riak是KV数据库，因此最基本的命令是设置和获取值。我们将使用HTTP接口，通过curl，但我们可以很容易地使用Erlang，Ruby，Java或任何其他支持的语言。
@@ -886,14 +886,6 @@ curl "$RIAK/solr/people/select?wt=json&omitHeader=true&fl=_yz_rk&q=zez*"
 
 使用匹配的`_yz_rk`键，您可以使用简单的Riak查找检索文本。
 
-Search 2.0 supports Solr 4.0, which includes filter queries, ranges, page scores,
-start values and rows (the last two are useful for pagination). You can also
-receive snippets of matching
-[highlighted text](http://wiki.apache.org/solr/HighlightingParameters)
-(`hl`,`hl.fl`), which is useful for building a search engine (and something
-we use for [search.basho.com](http://search.basho.com)). You can perform
-facet searches, stats, geolocation, bounding shapes, or any other search
-possible with distributed Solr.
 Search 2.0支持Solr 4.0，其中包括过滤器查询，范围，页面分数，
 起始值和行（最后两个对分页有用）。 您还可以接收匹配的[高亮文本]（http://wiki.apache.org/solr/HighlightingParameters）（`hl`，`hl.fl`），
 这对构建搜索引擎非常有用（而且有用于 [search.basho.com]（http://search.basho.com））。
