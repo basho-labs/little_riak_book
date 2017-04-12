@@ -22,6 +22,7 @@ managed by vnodes). This partition range is treated as circular, from 0 to
 limited to 2^160 nodes, which is a limit of a 1.46 quindecillion, or
 `1.46 x 10^48`, node cluster. For comparison, there are only `1.92 x 10^49`
 [silicon atoms on Earth](http://education.jlab.org/qa/mathatom_05.html).)
+
 首先，环表示一致的哈希分区 (分区由 vnodes 管理。此分区范围被视为循环, 从零到2^ 160-1 再回到零。(如果你想知道的话, 这意味着我们的分区
 限制为2^ 160 节点, 也是一个被限制为1.46乘以千的16次幂或者
 "1.46 x 10 ^48"的节点群集。为了比较, 只有 "1.92 x 10 ^49"。[地球上的硅原子](http://education.jlab.org/qa/mathatom_05.html).)
@@ -31,6 +32,7 @@ replicated to. Riak makes a best attempt at spreading that value to as many
 nodes as it can, so it copies to the next N adjacent nodes, starting with the
 primary partition and counting around the Ring, if it reaches the last
 partition, it loops around back to the first one.
+
 当我们考虑复制时, n 值定义了一个对象被复制的节点数。riak 尽其所能尝试将该值传播为尽可能多的节点, 这样它就可以复制到相邻的 n 个节点, 从主分区开始, 并在环上计数, 如果它到达最后一个分区, 它会绕回第一个分区。
 
 Secondly, the Ring is also used as a shorthand for describing the state of the
@@ -40,17 +42,20 @@ of the entire cluster. Which node manages which vnodes? If a node gets a
 request for an object managed by other nodes, it consults the Ring and forwards
 the request to the proper nodes. It's a local copy of a contract that all of
 the nodes agree to follow.
+
 其次, 这个环也被用作描述我刚才提到的循环哈希环（hash ring）的状态的简称。这个环 (aka *环状态* ) 是一个数据结构, 通过在节点之间传递, 让每个人都知道整个集群的状态。哪个节点管理哪个 vnodes？如果一个节点获取了由其他节点管理的对象的请求, 那它会咨询该环, 并将请求转发到适当的节点。这是一个所有的节点都同意遵循的合同的本地副本 。
 
 Obviously, this contract needs to stay in sync between all of the nodes. If a node is permanently taken
 offline or a new one added, the other nodes need to readjust, balancing the partitions around the cluster,
 then updating the Ring with this new structure. This Ring state gets passed between the nodes by means of
 a *gossip protocol*.
+
 显然, 此合同需要在所有节点之间保持同步。如果一个节点被永久性地下线或一个新的节点被添加, 其他节点需要重新调整来平衡集群周围的分区, 然后更新这个环的新结构。此环形状态通过 *"gossip协议"* 在节点之间传递。
 
 <h3>Gossip（办公室八卦）和CMD（网络命令大全）</h3>
 
 Riak has two methods of keeping nodes current on the state of the Ring. The first, and oldest, is the *gossip protocol*. If a node's state in the cluster is altered, information is propagated to other nodes. Periodically, nodes will also send their status to a random peer for added consistency.
+
 riak有两种方法 使节点的状态保持环的状态。第一个, 最古老的, 是 *gossip协议*。如果群集中的节点状态被改变, 信息将传播到其他节点。周期性地, 节点也将它们的状态发送到随机对等点, 以增加一致性。
 
 A newer method of information exchange in Riak is *cluster metadata* (CMD), which uses a more sophisticated method (plum-tree, DVV consistent state) to pass large amounts of metadata between nodes. The superiority of CMD is one of the benefits of using bucket types in Riak 2.0, discussed below.
