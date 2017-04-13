@@ -129,7 +129,7 @@ To discover which partition the bucket/key `food/favorite` object would be store
 we execute `riak_core_util:chash_key( {<<"food">>, <<"favorite">>} )` and get a wacky 160 bit Erlang
 number we named `DocIdx` (document index).
 
-例如, 为了发现存储桶/钥匙的 "食物/收藏" 对象的分区将被存放在, 我们执行 ' riak_core_util: chash_key ({<"food">, < $xmltag$ >}), 并得到一个古怪的160比特的erlang数值, 我们将其命名为 "DocIdx" (文档索引)。
+例如, 为了发现存储桶/钥匙的 "食物/收藏" 对象将被存放在哪个分区, 我们执行 ' riak_core_util: chash_key ({<"food">, < $xmltag$ >}), 并得到一个古怪的160比特的erlang数值, 我们将其命名为 "DocIdx" (文档索引)。
 
 Just to illustrate that Erlang binary value is a real number, the next line makes it a more
 readable format, similar to the ring partition numbers.
@@ -149,6 +149,8 @@ With this `DocIdx` number, we can order the partitions, starting with first numb
 `DocIdx`. The remaining partitions are in numerical order, until we reach zero, then
 we loop around and continue to exhaust the list.
 
+有了"DocIdx"这个数字, 我们可以使分区有序化, 从第一个大于"DocIdx"的数字开始。剩下的分区按数字顺序排列, 直到我们达到零, 然后我们循环遍历直到穷尽list。
+
 ```bash
 (riak@AAA.cluster)5> Preflist = riak_core_ring:preflist(DocIdx, Ring).
 [{548063113999088594326381812268606132370974703616, 'riak@DDD.cluster'},
@@ -166,57 +168,88 @@ down the list N times. If we set N=3, then the `food/favorite` object will be wr
 the `riak@DDD.cluster` node's partition `5480631...` (I truncated the number here),
 `riak@AAA.cluster` partition `7307508...`, and `riak@BBB.cluster` partition `9134385...`.
 
+那么, 所有这些都与复制有关？在上面的list中, 我们只需复制一个写下的list N次。如果我们设置 N=3, 然后,“食物/喜爱”的对象将被写到“riak@DDD.cluster”点的分区 "5480631" (此处截断了数字), "riak@AAA.cluster"分区"7307508..."和"riak@BBB.cluster"分区 "9134385..."。
+
 If something has happened to one of those nodes, like a network split
 (confusingly also called a partition---the "P" in "CAP"), the remaining
 active nodes in the list become candidates to hold the data.
+
+如果这些节点之一发生了某些变化，如网络划分（广义上也称为分区 ———“CAP”中的“P”），list中剩余的活动节点将成为保存数据的候选者。
 
 So if the node coordinating the write could not reach node
 `riak@AAA.cluster` to write to partition `7307508...`, it would then attempt
 to write that partition `7307508...` to `riak@CCC.cluster` as a fallback
 (it's the next node in the list preflist after the 3 primaries).
 
+因此，如果协调写入的节点无法到达节点“riak @ AAA.cluster”而写入分区“7307508 ...”，则会尝试将该分区“7307508 ...”写入"riak@CCC.cluster “作为回退（即list中的下一个节点，在3个基准之后的preflist）。
+
 The way that the Ring is structured allows Riak to ensure data is always
 written to the appropriate number of physical nodes, even in cases where one
 or more physical nodes are unavailable. It does this by simply trying the next
 available node in the preflist.
 
-<h3>Hinted Handoff</h3>
+Ring的结构方式允许Riak确保数据总是被写入适当数量的物理节点，即使在一个或多个物理节点不可用的情况下也是如此。 它通过简单地尝试preflist中的下一个可用节点来实现。
+
+<h3>提示移交（Hinted Handoff）</h3>
 
 When a node goes down, data is replicated to a backup node. This is
 not permanent; Riak will periodically examine whether each vnode
 resides on the correct physical node and hands them off to the proper
 node when possible.
 
+当节点停机时, 数据将复制到备份节点。这不是永久性的;riak会定期检查是否每个vnode驻留在正确的物理节点上, 并在可能需要的时候将它们交给适当的节点。
+
 As long as the temporary node cannot connect to the primary, it will continue
 to accept write and read requests on behalf of its incapacitated brethren.
+
+只要临时节点无法连接到主点, 它就会继续代表其无行为能力的兄弟节点接受读写请求。
 
 Hinted handoff not only helps Riak achieve high availability, it also facilitates
 data migration when physical nodes are added or removed from the Ring.
 
+提示移交不仅有助于riak实现高可用性, 而且在从环中添加或删除物理节点时, 它也便于数据迁移。
 
-## Managing a Cluster
+
+## 管理集群
 
 Now that we have a grasp of the general concepts of Riak, how users query it,
 and how Riak manages replication, it's time to build a cluster. It's so easy to
 do, in fact, I didn't bother discussing it for most of this book.
 
-<h3>Install</h3>
+现在, 我们掌握了 riak 的一般概念, 用户如何查询它 以及riak如何管理复制, 所以是时候构建集群了。事实上，这是很容易做到的, 但是这本书的大部分我都没有费心讨论它。
+
+<h3>安装</h3>
 
 The Riak docs have all of the information you need to [install](http://docs.basho.com/riak/latest/tutorials/installation/) it per operating system. The general sequence is:
+riak 文档的所有信息都需要 [安装] (http://docs.basho.com/riak/latest/tutorials/installation/) 每个操作系统。一般顺序是:
 
 1. Install Erlang
+
+1. 安装Erlang
+
 2. Get Riak from a package manager (<em>a la</em> `apt-get` or Homebrew), or build from source (the results end up under `rel/riak`, with the binaries under `bin`).
+
+2.从包管理器 (<em>a la</em> `apt-get` or Homebrew) 获取 riak, 或从源生成 (结果最终在 "riak" 下, 二进制文件在 "bin" 下)。
+
 3. Run `riak start`
+
+3. 运行`riak start`
 
 Install Riak on four or five nodes---five being the recommended safe minimum for production. Fewer nodes are OK during software development and testing.
 
-<h3>Command Line</h3>
+在四或五个节点上安装 riak-五个是推荐的安全生产线。在软件开发和测试期间, 较少的节点是可行的的。
+
+<h3>命令行（Command Line）</h3>
 
 Most Riak operations can be performed though the command line. We'll concern ourselves with two commands: `riak` and `riak-admin`.
+
+大多数 riak 操作都可以通过命令行执行。我们将关注两个命令: “riak” 和“riak-admin”。
 
 <h4>riak</h4>
 
 Simply typing the `riak` command will give a usage list. If you want more information, you can try `riak help`.
+
+只需键入 "riak" 命令就会给出一个使用表。如果您需要更多信息, 可以尝试 "riak help"。
 
 ```bash
 Usage: riak <command>
@@ -226,12 +259,16 @@ where <command> is one of the following:
       top [-interval N] [-sort { reductions | memory | msg_q }] [-lines N] } |
       config { generate | effective | describe VARIABLE } [-l debug]
 
-Run 'riak help' for more detailed information.
+运行"riak help"来得到更多细节上的信息.
 ```
 
 Most of these commands are self explanatory, once you know what they mean. `start` and `stop` are simple enough. `restart` means to stop the running node and restart it inside of the same Erlang VM (virtual machine), while `reboot` will take down the Erlang VM and restart everything.
 
+这些命令大多是自我解释的, 一旦你知道它们的含义。“开始”和“停止”是很简单的。"重新启动" 意味着停止运行的节点并在同一个erlang vm(虚拟机) 内重新启动它, 而 "重新启动" 将占用erlang vm并重新启动所有内容。
+
 You can print the current running `version`. `ping` will return `pong` if the server is in good shape, otherwise you'll get the *just-similar-enough-to-be-annoying* response `pang` (with an *a*), or a simple `Node X not responding to pings` if it's not running at all.
+
+您可以打印当前运行的 "版本"。如果服务器处于良好状态, "ping" 将返回 "pong". 否则,如果它没有运行,您将得到 *只是类似的足以令人讨厌* 响应 "pong"(带一个*a*), 或一个简单的"节点 x 没有响应 pings"。
 
 `chkconfig` is useful if you want to ensure your `etc/riak.conf` is not broken
 (that is to say, it's parsable). I mentioned `attach` briefly above, when
