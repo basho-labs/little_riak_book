@@ -52,7 +52,7 @@ a *gossip protocol*.
 
 显然, 此合同需要在所有节点之间保持同步。如果一个节点被永久性地下线或一个新的节点被添加, 其他节点需要重新调整来平衡集群周围的分区, 然后更新这个环的新结构。此环形状态通过 *"gossip协议"* 在节点之间传递。
 
-<h3>Gossip（办公室八卦）和CMD（网络命令大全）</h3>
+<h3>Gossip（办公室八卦）和CMD（集群元数据）</h3>
 
 Riak has two methods of keeping nodes current on the state of the Ring. The first, and oldest, is the *gossip protocol*. If a node's state in the cluster is altered, information is propagated to other nodes. Periodically, nodes will also send their status to a random peer for added consistency.
 
@@ -60,18 +60,27 @@ riak有两种方法 使节点的状态保持环的状态。第一个, 最古老�
 
 A newer method of information exchange in Riak is *cluster metadata* (CMD), which uses a more sophisticated method (plum-tree, DVV consistent state) to pass large amounts of metadata between nodes. The superiority of CMD is one of the benefits of using bucket types in Riak 2.0, discussed below.
 
+
+Riak中更新的信息交换方法是 *集群元数据（CMD）*，它使用更复杂的方法（plum-tree，数据仓库一致状态）在节点之间传递大量的元数据。 CMD的优势是在Riak 2.0中使用储存桶类型的好处之一，将在下面讨论。
+
 In both cases, propagating changes in Ring is an asynchronous operation, and can take a couple minutes depending on Ring size.
+
+在这两种情况下, 在环中传播变化是一个异步操作, 并且可能需要几分钟的时间，其时间取决于环形大小。
 
 <!-- Transfers will not start while a gossip is in progress. -->
 
-<h3>How Replication Uses the Ring</h3>
+<h3>如何重复使用环</h3>
 
 Even if you are not a programmer, it's worth taking a look at this Ring example. It's also worth
 remembering that partitions are managed by vnodes, and in conversation are sometimes interchanged,
 though I'll try to be more precise here.
 
+即使你不是一个程序员, 也值得看看这个环的例子。还值得记住的是, 分区是由 vnodes 管理的, 在对话中有时会互换, 但我在这里会尝试更精确。
+
 Let's start with Riak configured to have 8 partitions, which are set via `ring_creation_size`
 in the `etc/riak.conf` file (we'll dig deeper into this file later).
+
+让我们从被配置为有八分区的Riak开始, 分区是通过在`etc/riak.conf`文件中的"ring_creation_size"设置的(稍后我们将深入到此文件中)。
 
 ```bash
 ## Number of partitions in the cluster (only valid when first
@@ -88,12 +97,18 @@ ring_size = 8
 In this example, I have a total of 4 Riak nodes running on `riak@AAA.cluster`,
 `riak@BBB.cluster`, `riak@CCC.cluster`, and `riak@DDD.cluster`, each with two partitions (and thus vnodes)
 
+在本例中, 我共有有四个运行在 `riak@AAA.cluster`,`riak@BBB.cluster`, `riak@CCC.cluster`和`riak@DDD.cluster`上的riak节点，并且每个有两个分区 (因而是 vnodes)
+
 Riak has the amazing, and dangerous, `attach` command that attaches an Erlang console to a live Riak
 node, with access to all of the Riak modules.
+
+riak 具有惊人的、危险的 "附加" 命令, 它将erlang控制台附加到实时的Riak节点, 并访问所有的Riak模块。  
 
 The `riak_core_ring:chash(Ring)` function extracts the total count of partitions (8), with an array
 of numbers representing the start of the partition, some fraction of the 2^160 number, and the node
 name that represents a particular Riak server in the cluster.
+
+"riak_core_ring: chash (环)" 函数提取分区的总数 (8), 其中一个数字数组表示分区的开头、2^160个数的一部分以及表示群集中特定riak服务器的节点名称。
 
 ```bash
 $ bin/riak attach
@@ -114,8 +129,12 @@ To discover which partition the bucket/key `food/favorite` object would be store
 we execute `riak_core_util:chash_key( {<<"food">>, <<"favorite">>} )` and get a wacky 160 bit Erlang
 number we named `DocIdx` (document index).
 
+例如, 为了发现存储桶/钥匙的 "食物/收藏" 对象的分区将被存放在, 我们执行 ' riak_core_util: chash_key ({<"food">, < $xmltag$ >}), 并得到一个古怪的160比特的erlang数值, 我们将其命名为 "DocIdx" (文档索引)。
+
 Just to illustrate that Erlang binary value is a real number, the next line makes it a more
 readable format, similar to the ring partition numbers.
+
+只是为了说明 erlang 二进制值是实数, 下一行使它成为一种更可读的格式, 类似于环分区号。
 
 ```bash
 (riak@AAA.cluster)3> DocIdx =
