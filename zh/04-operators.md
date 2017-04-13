@@ -276,9 +276,17 @@ we looked into the details of the Ring---it attaches a console to the local
 running Riak server so you can execute Riak's Erlang code. `escript` is similar
 to `attach`, except you pass in script file of commands you wish to run automatically.
 
+"chkconfig"是有用的, 如果你想确保你的 "etc/riak.conf"没有被破坏(也就是说, 它是可解析的)。我在前面简要地提到了“附加” ，当我们看到环的细节-它附加一个控制台到本地运行的 riak 服务器, 以便您可以执行 riak 的 erlang 代码。"escript" 与 "附加" 类似,  只不过是在你希望自动运行的命令的脚本文件中传递。
+
 <!--
 If you want to build this on a single dev machine, here is a truncated guide.
+
+如果要在单个 dev 计算机上生成此项, 请使用截取的指南。
+
 Download the Riak source code, then run the following:
+
+下载 riak 源代码, 然后运行以下内容:
+
 make deps
 make devrel
 for i in {1..5}; do dev/dev$i/bin/riak start; done
@@ -287,11 +295,16 @@ for i in {2..5}; do dev/dev$i/bin/riak-admin cluster join riak@AAA.cluster; done
 dev/dev1/bin/riak-admin cluster plan
 dev/dev1/bin/riak-admin cluster commit
 You should now have a 5 node cluster running locally.
+
+现在, 您应该在本地运行五个节点群集。
+
 -->
 
-<h4>riak-admin</h4>
+<h4>riak-admin命令</h4>
 
 The `riak-admin` command is the meat operations, the tool you'll use most often. This is where you'll join nodes to the Ring, diagnose issues, check status, and trigger backups.
+
+"riak-admin" 命令是meat操作, 你最常使用的工具。这是您将节点加入到环中、诊断问题、检查状态和触发备份的地方。
 
 ```bash
 Usage: riak-admin { cluster | join | leave | backup | restore | test |
@@ -306,10 +319,16 @@ Usage: riak-admin { cluster | join | leave | backup | restore | test |
 
 For more information on commands, you can try `man riak-admin`.
 
+更多关于命令的信息，你可以尝试“man riak-admin”。
+
 A few of these commands are deprecated, and many don't make sense without a
 cluster, but some we can look at now.
 
+这些命令中的大部分是不推荐的, 许多没有集群的意义, 但我们现在可以看到一些。
+
 `status` outputs a list of information about this cluster. It's mostly the same information you can get from getting `/stats` via HTTP, although the coverage of information is not exact (for example, riak-admin status returns `disk`, and `/stats` returns some computed values like `gossip_received`).
+
+"状态" 输出有关此群集的信息表。通过 http 获取 "/stats" 的信息大部分是相同的, 尽管信息的覆盖率并不确切 (例如,riak-admin状态返回 "disk", "/stats" 返回一些计算值, 如 "gossip_received")。
 
 ```bash
 $ riak-admin status
@@ -331,9 +350,13 @@ vnode_index_deletes : 0
 
 New JavaScript or Erlang files (as we did in the [developers](#developers) chapter) are not usable by the nodes until they are informed about them by the `js-reload` or `erl-reload` command.
 
+新的 javascript 或 erlang 文件 (正如我们在 [开发人员] (# 开发者) 章节中所做的那样）, 这些节点都无法使用, 直到它们被 "js-reload" 或 "erl-reload"命令告知它们。
+
 `riak-admin` also provides a little `test` command, so you can perform a read/write cycle
 to a node, which I find useful for testing a client's ability to connect, and the node's
 ability to write.
+
+"riak-admin" 还提供了一个小的 "测试" 命令, 因此您可以对节点执行读/写循环, 这对于测试客户端的连接能力和节点的写入能力非常有用。
 
 Finally, `top` is an analysis command checking the Erlang details of a particular node in
 real time. Different processes have different process ids (Pids), use varying amounts of memory,
@@ -341,9 +364,11 @@ queue up so many messages at a time (MsgQ), and so on. This is useful for advanc
 and is especially useful if you know Erlang or need help from other users, the Riak team, or
 Basho.
 
+最后, "top" 是一个分析命令, 实时检查特定节点的 erlang 细节。不同的进程具有不同的进程ids (pids), 使用不同数量的内存, 一次将这么多消息排队 (MsgQ) 等。这对于高级诊断非常有用, 如果您知道 erlang 或需要来自其他用户、riak团队或Basho的帮助, 则特别有用。
+
 ![Top](../assets/top.png)
 
-<h3>Making a Cluster</h3>
+<h3>制作群集（Making a Cluster）</h3>
 
 With several solitary nodes running---assuming they are networked and are able to communicate to
 each other---launching a cluster is the simplest part.
