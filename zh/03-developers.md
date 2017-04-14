@@ -2,32 +2,32 @@
 
 <aside class="sidebar"><h3>关于“节点”</h3>
 
-It's worth mentioning that I use the word "node" a lot. Realistically, this means a physical/virtual server, but really, the workhorses of Riak are vnodes.
+值得一提的是，我使用“节点”这个词很多。实际上，这意味着一个物理/虚拟服务器，但真正的Riak工作母机是“v节点(vnode)”。
 
-When you write to multiple vnodes, Riak will attempt to spread values to as many physical servers as possible. However, this isn't guaranteed (for example, if you have only 2 physical servers with the default `n_val` of 3, some data will be copied to the same server twice). You're safe conceptualizing nodes as Riak instances, and it's simpler than qualifying "vnode" all the time. If something applies specifically to a vnode, I'll mention it.
+当你写入多个v节点(vnode)时，Riak将尝试将值传播到尽可能多的物理服务器。 但是，这不能保证（例如，如果你只有2台物理服务器的默认`n_val`为3，某些数据将被复制到同一服务器两次）。你将节点概念化为Riak实例是安全的，它在所有时候都比符合“v节点(vnode)”要简单。如果某些东西适用于v节点(vnode)，我会提及它
 </aside>
 
-_We're going to hold off on the details of installing Riak at the moment. If you'd like to follow along, it's easy enough to get started by following the [install documentation](http://docs.basho.com/riak/latest/) on the website (http://docs.basho.com). If not, this is a perfect section to read while you sit on a train without an Internet connection._
+_眼下我们打算暂缓安装Riak的细节部分。如果你想自己一个人开始，可以通过遵循网站 (http://docs.basho.com) 上的  [install documentation](http://docs.basho.com/riak/latest/) 轻松的开始. 不然的话，这会是一个很棒的阅读部分当你坐在没有网络的火车上时。_
 
-Developing with a Riak database is quite easy to do, once you understand some of the finer points. It is a key/value store, in the technical sense (you associate values with keys, and retrieve them using the same keys) but it offers so much more. You can embed write hooks to fire before or after a write, or index data for quick retrieval. Riak has SOLR search, and lets you run MapReduce functions to extract and aggregate data across a huge cluster in relatively short timespans. We'll show some configurable bucket-specific settings.
+一旦了解了一些更细微的点，用Riak数据库进行开发是非常容易的。在技术意义上，它是一个键/值存储（您将值与键相关联，并使用相同的键检索它们），但它为用户提供了更多。您可以在写入之前或之后嵌入写入钩子，或者用于快速检索的索引数据。Riak具有SOLR搜索功能，可让您运行MapReduce函数，以便在相对较短的时间范围内跨巨大的集群提取和聚合数据。 我们将显示一些可配置的具体的储存桶设置。
 
-## Lookup
+## 查找 Lookup
 
-<aside class="sidebar"><h3>Supported Languages</h3>
+<aside class="sidebar"><h3>支持的语言 Supported Languages</h3>
 
-Riak 2.0 has official drivers for the following languages:
+Ruby.Riak 2.0具有以下语言的官方驱动程序:
 Erlang, Java, Python, Ruby.
 
-Including community-supplied drivers, supported languages are even more numerous: C/C++, PHP, Clojure, Common Lisp, Dart, Go, Groovy, Haskell, JavaScript (jQuery and NodeJS), Lisp Flavored Erlang, .NET, Perl, PHP, Play, Racket, Scala, Smalltalk.
+包括社区提供的驱动程序，支持的语言甚至更多: C/C++, PHP, Clojure, Common Lisp, Dart, Go, Groovy, Haskell, JavaScript (jQuery and NodeJS), Lisp Flavored Erlang, .NET, Perl, PHP, Play, Racket, Scala, Smalltalk.
 
-Dozens of other project-specific addons can be found in the [Basho docs](http://docs.basho.com/riak/latest/).
+在  [Basho docs](http://docs.basho.com/riak/latest/)  中可以找到数十个其他项目特定的插件。
 </aside>
 
-Since Riak is a KV database, the most basic commands are setting and getting values. We'll use the HTTP interface, via curl, but we could just as easily use Erlang, Ruby, Java, or any other supported language.
+由于Riak是KV数据库，因此最基本的命令是设置和获取值。我们将使用HTTP接口，通过curl，但我们可以很容易地使用Erlang，Ruby，Java或任何其他支持的语言。
 
-The basic structure of a Riak request is setting a value, reading it,
-and maybe eventually deleting it. The actions are related to HTTP methods
-(PUT, GET, POST, DELETE).
+Riak请求的基本结构是设置一个值，读取它，
+也可能最终删除它。这些操作与HTTP方法有关
+ (PUT, GET, POST, DELETE).
 
 ```bash
 PUT    /types/<type>/buckets/<bucket>/keys/<key>
@@ -35,7 +35,7 @@ GET    /types/<type>/buckets/<bucket>/keys/<key>
 DELETE /types/<type>/buckets/<bucket>/keys/<key>
 ```
 
-For the examples in this chapter, let's call an environment variable `$RIAK` that points to our access node's URL.
+对于本章的例子，我们来调用一个指向我们访问节点的URL的环境变量`$RIAK`。
 
 ```bash
 export RIAK=http://localhost:8098
@@ -43,7 +43,7 @@ export RIAK=http://localhost:8098
 
 <h4>PUT</h4>
 
-The simplest write command in Riak is putting a value. It requires a key, value, and a bucket. In curl, all HTTP methods are prefixed with `-X`. Putting the value `pizza` into the key `favorite` under the `food` bucket and `items` bucket type is done like this:
+Riak中最简单的写入命令是放置一个值。它需要一个键，值和一个存储桶。在curl中，所有HTTP方法都以`-X`为前缀。把一个`pizza`的值放入在`food`储存桶下的`favorite` 键中，这个项目的`items`储存桶类型如下:
 
 ```bash
 curl -XPUT "$RIAK/types/items/buckets/food/keys/favorite" \
@@ -51,20 +51,20 @@ curl -XPUT "$RIAK/types/items/buckets/food/keys/favorite" \
   -d "pizza"
 ```
 
-I threw a few curveballs in there. The `-d` flag denotes the next string will be the value. We've kept things simple with the string `pizza`, declaring it as text with the proceeding line `-H 'Content-Type:text/plain'`. This defines the HTTP MIME type of this value as plain text. We could have set any value at all, be it XML or JSON---even an image or a video. Riak does not care at all what data is uploaded, so long as the object size doesn't get much larger than 4MB (a soft limit but one that it is unwise to exceed).
+我在里面出了一些难题。`-d`标志表示下一个字符串将会是该值。我们用字符串`pizza`保持简单，用文本`-H 'Content-Type:text/plain'`声明为文本。这将此值的HTTP MIME类型定义为纯文本。我们可以设置任何值，无论是XML还是JSON ---即使是图像或视频。只要对象大小不超过4MB（软限制，超出限制是不明智的），Riak就不关心所上传的数据。
 
 <h4>GET</h4>
 
-The next command reads the value `pizza` under the type/bucket/key `items`/`food`/`favorite`.
+下一个命令在`items`/`food`/`favorite`下读取值`pizza`.
 
 ```bash
 curl -XGET "$RIAK/types/items/buckets/food/keys/favorite"
 pizza
 ```
 
-This is the simplest form of read, responding with only the value. Riak contains much more information, which you can access if you read the entire response, including the HTTP header.
+这是最简单的读取形式，仅响应值。Riak包含了更多信息，如果你读取整个响应（包括HTTP标头），你可以访问它们。
 
-In `curl` you can access a full response by way of the `-i` flag. Let's perform the above query again, adding that flag (`-XGET` is the default curl method, so we can leave it off).
+在`curl`中，您可以通过`-i`标记访问完整的响应。我们再次执行上面的查询，添加该标志（`-XGET`是默认的curl方法，所以我们可以把它关掉）。
 
 ```bash
 curl -i "$RIAK/types/items/buckets/food/keys/favorite"
@@ -81,38 +81,38 @@ Content-Length: 5
 pizza
 ```
 
-The anatomy of HTTP is a bit beyond this little book, but let's look at a few parts worth noting.
+虽然HTTP的解剖结构有点超出这本小书的内容，但是我们还是可以来看几个值得注意的部分。
 
-<h5>Status Codes</h5>
+<h5>状态码 Status Codes</h5>
 
-The first line gives the HTTP version 1.1 response code `200 OK`. You may be familiar with the common website code `404 Not Found`. There are many kinds of [HTTP status codes](http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html), and the Riak HTTP interface stays true to their intent: **1xx Informational**, **2xx Success**, **3xx Further Action**, **4xx Client Error**, **5xx Server Error**
+第一行给出HTTP版本1.1响应代码`200 OK`。 你可能熟悉常见的网站代码`404 Not Found`。有多种[HTTP 状态码](http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html)，Riak HTTP接口会对其目标保持true: **1xx Informational**, **2xx Success**, **3xx Further Action**, **4xx Client Error**, **5xx Server Error**
 
-Different actions can return different response/error codes. Complete lists can be found in the [official API docs](http://docs.basho.com/riak/latest/references/apis/).
+不同的操作可以返回不同的响应/错误代码。 完整的列表可以在[官方API文档](http://docs.basho.com/riak/latest/references/apis/)中找到。
 
-<h5>Timings</h5>
+<h5>校时 Timings</h5>
 
-A block of headers represents different timings for the object or the request.
+一组标题表示对象或请求的不同时序。
 
-* **Last-Modified** - The last time this object was modified (created or updated).
-* **ETag** - An *[entity tag](http://en.wikipedia.org/wiki/HTTP_ETag)* which can be used for cache validation by a client.
-* **Date** - The time of the request.
-* **X-Riak-Vclock** - A logical clock which we'll cover in more detail later.
+* **最后更改Last-Modified** - 最后一次修改此对象（创建或更新）。
+* **被请求变量的实体值ETag** - 可用于客户端高速缓存验证的*[实体标签](http://en.wikipedia.org/wiki/HTTP_ETag)* 。
+* **日期Date** - 请求的时间。
+* **X-Riak-Vclock** - 一个逻辑时钟，我们将在后面详细介绍。
 
-<h5>Content</h5>
+<h5>内容 Content</h5>
 
-These describe the HTTP body of the message (in Riak's terms, the *value*).
+这些描述消息的HTTP主体（以Riak的术语，值）。
 
-* **Content-Type** - The type of value, such as `text/xml`.
-* **Content-Length** - The length, in bytes, of the message body.
+* **内容类型Content-Type** - 值的类型, 比如 `text/xml`.
+* **内容长度Content-Length** - 消息体的长度（以字节为单位）。
 
-Some other headers like `Link` will be covered later in this chapter.
+其他一些标题如 `Link` 将在本章后面介绍。
 
 
 <h4>POST</h4>
 
-Similar to PUT, POST will save a value. But with POST a key is optional. All it requires is a bucket name (and should include a type), and it will generate a key for you.
+与PUT类似，POST将保存一个值。但是用POST键是可选的。它需要的是一个桶名称（并且应该包括一个类型），它将为你生成一个键。
 
-Let's add a JSON value to represent a person under the `json`/`people` type/bucket. The response header is where a POST will return the key it generated for you.
+我们添加一个JSON值来表示一个人在`json`/`people` type/bucket下。 响应头是POST返回为你生成的键的位置。
 
 ```bash
 curl -i -XPOST "$RIAK/types/json/buckets/people/keys" \
@@ -127,11 +127,11 @@ Content-Type: application/json
 Content-Length: 0
 ```
 
-You can extract this key from the `Location` value. Other than not being pretty, this key is treated the same as if you defined your own key via PUT.
+你可以从 `Location` 值提取此键。除了不是很好之外，这个键被视为与通过PUT定义自己的键一样。
 
-<h5>Body</h5>
+<h5>主体Body</h5>
 
-You may note that no body was returned with the response. For any kind of write, you can add the `returnbody=true` parameter to force a value to return, along with value-related headers like `X-Riak-Vclock` and `ETag`.
+你可能会注意到没有主体被响应返回。对于任何类型的写入，你可以添加`returnbody=true`参数来强制返回值，以及与`X-Riak-Vclock`和`ETag`等值相关的头。
 
 ```bash
 curl -i -XPOST "$RIAK/types/json/buckets/people/keys?returnbody=true" \
@@ -151,28 +151,28 @@ Content-Length: 16
 {"name":"billy"}
 ```
 
-This is true for PUTs and POSTs.
+这对于PUT和POST是正确的。
 
-<h4>DELETE</h4>
+<h4>删除DELETE</h4>
 
-The final basic operation is deleting keys, which is similar to getting a value, but sending the DELETE method to the `type`/`bucket`/`key`.
+最后的基本操作是删除键，类似于获取值，但将DELETE方法发送到 `type`/`bucket`/`key`。
 
 ```bash
 curl -XDELETE "$RIAK/types/json/buckets/people/keys/DNQGJY0KtcHMirkidasA066yj5V"
 ```
 
-A deleted object in Riak is internally marked as deleted, by writing a marker known as a *tombstone*. Unless configured otherwise, another process called a *reaper* will later finish deleting the marked objects.
+通过编写一个标记为墓碑的标记，将Riak中的一个已删除的对象内部标记为已删除。 除非另有配置，否则称为收割者（reaper）的另一过程将在以后完成删除标记对象。
 
-This detail isn't normally important, except to understand two things:
+这个细节通常不是重要的，除了理解两件事情：
 
-1. In Riak, a *delete* is actually a *read* and a *write*, and should be considered as such when calculating read/write ratios.
-2. Checking for the existence of a key is not enough to know if an object exists. You might be reading a key after it has been deleted, so you should check for tombstone metadata.
+1. 在Riak中，*删除*实际上是一个*读取*和*写入*，并且在计算读/写比率时应该被认为是这样。
+2. 检查键的存在还不足以知道对象是否存在。删除后可能会读取键，因此您应该检查墓碑元数据。
 
-<h4>Lists</h4>
+<h4>列表Lists</h4>
 
-Riak provides two kinds of lists. The first lists all *buckets* in your cluster, while the second lists all *keys* under a specific bucket. Both of these actions are called in the same way, and come in two varieties.
+Riak提供了两种列表。 第一个列出了群集中的所有*桶*，而第二个列出了特定桶下的所有*键*。这两个行动都是以同样的方式召唤的，有两种变化。
 
-The following will give us all of our buckets as a JSON object.
+以下将给我们所有的桶作为JSON对象。
 
 ```bash
 curl "$RIAK/types/default/buckets?buckets=true"
@@ -180,7 +180,7 @@ curl "$RIAK/types/default/buckets?buckets=true"
 {"buckets":["food"]}
 ```
 
-And this will give us all of our keys under the `food` bucket.
+这将给我们在`food`桶下的所有键。
 
 ```bash
 curl "$RIAK/types/default/buckets/food/keys?keys=true"
@@ -192,7 +192,7 @@ curl "$RIAK/types/default/buckets/food/keys?keys=true"
 }
 ```
 
-If we had very many keys, clearly this might take a while. So Riak also provides the ability to stream your list of keys. `keys=stream` will keep the connection open, returning results in chunks of arrays. When it has exhausted its list, it will close the connection. You can see the details through curl in verbose (`-v`) mode (much of that response has been stripped out below).
+如果我们有很多键，这显然可能需要一段时间。 因此，Riak还提供了流式传输键。`keys=stream`的功能，可以保持连接的打开状态，并以数组的形式返回结果。 当它已经用完列表时，它将关闭连接。 你可以通过curl在verbose（-v）mode下来查看详细信息（其中的大部分内容已被删除）。
 
 ```bash
 curl -v "$RIAK/types/default/buckets/food/keys?keys=stream"
@@ -207,31 +207,26 @@ curl -v "$RIAK/types/default/buckets/food/keys?keys=stream"
 
 <!-- Transfer-Encoding -->
 
-You should note that list actions should *not* be used in production (they're really expensive operations). But they are useful for development, investigations, or for running occasional analytics at off-peak hours.
+你应该注意，列表操作不应该在作业中使用（它们确实是费力的操作）。但它们对于开发，调查或在非高峰时段进行偶尔的分析是有用的。
 
-## Conditional requests
+## 有条件的请求 Conditional requests
 
-It is possible to use conditional requests with Riak, but these are
-fragile due to the nature of its availability/eventual consistency
-model.
+可以使用Riak的条件请求，但是由于其可用性/最终一致性模型的性质，这些条件是脆弱的。
 
 ### GET
 
-When retrieving values from Riak via HTTP, a last-modified timestamp
-and an [ETag](https://en.wikipedia.org/wiki/HTTP_ETag) are
-included. These may be used for future `GET` requests; if the value
-has not changed, a `304 Not Modified` status will be returned.
+通过HTTP从Riak检索值时，会包含最后修改的时间戳和[ETag](https://en.wikipedia.org/wiki/HTTP_ETag)。 这些可能用于将来的 `GET` 请求; 如果值未更改，将返回304未更改状态。
 
-For example, let's assume you receive the following headers.
+例如，假设你收到以下标题。
 
 ```bash
 Last-Modified: Thu, 17 Jul 2014 21:01:16 GMT
 ETag: "3VhRP0vnXbk5NjZllr0dDE"
 ```
 
-Note that the quotes are part of the ETag.
+请注意，引号是ETag的一部分。
 
-If the ETag is used via the `If-None-Match` header in the next request:
+如果ETag通过下一个请求中的`If-None-Match`头部使用：
 
 ```bash
 curl -i "$RIAK/types/default/buckets/food/keys/dinner" \
@@ -243,7 +238,7 @@ ETag: "3VhRP0vnXbk5NjZllr0dDE"
 Date: Mon, 28 Jul 2014 19:48:13 GMT
 ```
 
-Similarly, the last-modified timestamp may be used with `If-Modified-Since`:
+类似地，最后修改的时间戳可以与`If-Modified-Since`一起使用：
 
 ```bash
 curl -i "$RIAK/types/default/buckets/food/keys/dinner" \
@@ -255,31 +250,28 @@ ETag: "3VhRP0vnXbk5NjZllr0dDE"
 Date: Mon, 28 Jul 2014 19:51:39 GMT
 ```
 
-### PUT & DELETE
+### 放&删除 PUT & DELETE
 
-When adding, updating, or removing content, the HTTP headers
-`If-None-Match`, `If-Match`, `If-Modified-Since`, and
-`If-Unmodified-Since` can be used to specify ETags and timestamps.
+当添加，更新或删除内容时，HTTP头如果`If-None-Match`, `If-Match`, `If-Modified-Since`, and
+`If-Unmodified-Since`可以用于指定ETag和时间戳。
 
-If the specified condition cannot be met, a `412 Precondition Failed`
-status will be the result.
+如果无法满足指定的条件，则会导致`412 Precondition Failed`状态。
 
+## 桶类型/桶 Bucket Types/Buckets
 
-## Bucket Types/Buckets
+尽管目前我们一直在使用桶类型和桶作为命名空间，但是它们有更多的功能。
 
-Although we've been using bucket types and buckets as namespaces up to now, they are capable of more.
+不同的用例将决定桶是大量写入还是大部分读取。 您可以使用一个桶来存储日志，一个桶可以存储会话数据，而另一个可以存储购物车数据。 有时低延迟是重要的，而其他时候它的耐用性很高。 有时我们只是希望在发生写操作时，桶会产生不同的反应。
 
-Different use-cases will dictate whether a bucket is heavily written to, or largely read from. You may use one bucket to store logs, one bucket could store session data, while another may store shopping cart data. Sometimes low latency is important, while other times it's high durability. And sometimes we just want buckets to react differently when a write occurs.
+<h3>法定人数 Quorum</h3>
 
-<h3>Quorum</h3>
-
-The basis of Riak's availability and tolerance is that it can read from, or write to, multiple nodes. Riak allows you to adjust these N/R/W values (which we covered under [Concepts](#practical-tradeoffs)) on a per-bucket basis.
+Riak的可用性和宽容性的基础是它可以读取或写入多个节点。 Riak允许您在每个桶的基础上调整这些N / R / W值（我们在概念下涵盖）。
 
 <h4>N/R/W</h4>
 
-N is the number of total nodes that a value should be replicated to, defaulting to 3. But we can set this `n_val` to less than the total number of nodes.
+N是要复制值的总节点数，默认为3.但是我们可以将此`n_val`设置为小于总节点数。
 
-Any bucket property, including `n_val`, can be set by sending a `props` value as a JSON object to the bucket URL. Let's set the `n_val` to 5 nodes, meaning that objects written to `cart` will be replicated to 5 nodes.
+任何桶属性（包括`n_val`）可以通过将一个 `props` 值作为JSON对象发送到桶URL来设置。 让我们将`n_val`设置为5个节点，这意味着写入`cart`的对象将被复制到5个节点。
 
 ```bash
 curl -i -XPUT "$RIAK/types/default/buckets/cart/props" \
@@ -287,9 +279,9 @@ curl -i -XPUT "$RIAK/types/default/buckets/cart/props" \
   -d '{"props":{"n_val":5}}'
 ```
 
-You can take a peek at the bucket's properties by issuing a GET to the bucket.
+你可以通过向桶中发出GET来窥探桶的属性。
 
-*Note: Riak returns unformatted JSON. If you have a command-line tool like jsonpp (or json_pp) installed, you can pipe the output there for easier reading. The results below are a subset of all the `props` values.*
+*注意：Riak返回未格式化的JSON。 如果你安装了jsonpp（或json_pp）等命令行工具，则可以将通过管道的输出更容易阅读。 以下结果是所有`props`值的一个子集。*
 
 ```bash
 curl "$RIAK/types/default/buckets/cart/props" | jsonpp
@@ -311,17 +303,17 @@ curl "$RIAK/types/default/buckets/cart/props" | jsonpp
 }
 ```
 
-As you can see, `n_val` is 5. That's expected. But you may also have noticed that the cart `props` returned both `r` and `w` as `quorum`, rather than a number. So what is a *quorum*?
+你可以看到，`n_val`是5.这是可以预料的。 但是你也可能已经注意到，`props`将`r`和`w`两个作为`quorum`，而不是一个数字。 那么什么是*法定人数*？
 
-<h5>Symbolic Values</h5>
+<h5>符号价值 Symbolic Values</h5>
 
-A *quorum* is one more than half of all the total replicated nodes (`floor(N/2) + 1`). This figure is important, since if more than half of all nodes are written to, and more than half of all nodes are read from, then you will get the most recent value (under normal circumstances).
+*法定人数*是所有总复制节点的一半以上（`floor（N / 2）+ 1`）。 这个数字很重要，因为如果超过一半的节点被写入，并且超过一半的节点被读取，那么你将获得最新的值（在正常情况下）。
 
-Here's an example with the above `n_val` of 5 ({A,B,C,D,E}). Your `w` is a quorum (which is `3`, or `floor(5/2)+1`), so a PUT may respond successfully after writing to {A,B,C} ({D,E} will eventually be replicated to). Immediately after, a read quorum may GET values from {C,D,E}. Even if D and E have older values, you have pulled a value from node C, meaning you will receive the most recent value.
+这里有一个例子，上面的`n_val`为5（{A，B，C，D，E}）。 你的`w`是一个法定人数（这是`3`，或`floor(5/2)+1`），所以在写入{A，B，C}（{D，E} 最终被复制到）。 紧接着，读取法定人数可以从{C，D，E}获取值。 即使D和E具有较旧的值，您也从节点C中提取了一个值，这意味着您将收到最近的值。
 
-What's important is that your reads and writes *overlap*. As long as `r+w > n`, in the absence of *sloppy quorum* (below), you'll be able to get the newest values. In other words, you'll have a reasonable level of consistency.
+重要的是你的读写重叠。 只要`r+w > n`，在没有草率的法定人数（下）的情况下，您将能够获得最新的值。 换句话说，你将有一个合理的一致性。
 
-A `quorum` is an excellent default, since you're reading and writing from a balance of nodes. But if you have specific requirements, like a log that is often written to, but rarely read, you might find it make more sense to wait for a successful write from a single node, but read from all of them. This affords you an overlap
+法定人数`quorum`是一个很好的默认值，因为你从平衡的节点读写。 但是，如果你有特定要求，例如通常写入但很少读取的日志，则可能会发现从单个节点等待成功写入更有意义，但从所有这些读取。 这会给你一个重叠
 
 ```bash
 curl -i -XPUT "$RIAK/types/default/buckets/logs/props" \
@@ -333,31 +325,31 @@ curl -i -XPUT "$RIAK/types/default/buckets/logs/props" \
 * `one` - Setting `r` or `w` equal to `1`
 * `quorum` - A majority of the replicas must respond, that is, “half plus one”.
 
-<h4>Sloppy Quorum</h4>
+<h4>草率的法定人数Sloppy Quorum</h4>
 
-In a perfect world, a strict quorum would be sufficient for most write requests. However, at any moment a node could go down, or the network could partition, or squirrels get caught in the tubes, triggering the unavailability of a required nodes. This is known as a strict quorum. Riak defaults to what's known as a *sloppy quorum*, meaning that if any primary (expected) node is unavailable, the next available node in the ring will accept requests.
+理想的状况是严格的法定人数对于大部分的写入请求都是足够的。然而，在任何时刻，一个节点可能会下降，或者网络可能分区，或松鼠被捕获在管中，从而触发不可用的所需节点。 这被称为严格的法定人数。 Riak默认为所谓的草率的法定人数，这意味着如果任何主（预期）节点不可用，则环中的下一个可用节点将接受请求。
 
-Think about it like this. Say you're out drinking with your friend. You order 2 drinks (W=2), but before they arrive, she leaves temporarily. If you were a strict quorum, you could merely refuse both drinks, since the required people (N=2) are unavailable. But you'd rather be a sloppy drunk... erm, I mean sloppy *quorum*. Rather than deny the drink, you take both, one accepted *on her behalf* (you also get to pay).
+想像这样。比如你和你的朋友一起喝酒 您订购2杯饮料（W = 2），但在到达之前，她暂时离开。如果你是一个严格的法定人数，你只能拒绝这两种饮料，因为所需的人（N = 2）不可用。但是你宁愿喝醉了，呃，我的意思是草率的法定人数。不要拒绝喝酒，而是取两个，一个被接受（你也得付钱）。
 
 ![A Sloppy Quorum](../assets/decor/drinks.png)
 
-When she returns, you slide her drink over. This is known as *hinted handoff*, which we'll look at again in the next chapter. For now it's sufficient to note that there's a difference between the default sloppy quorum (W), and requiring a strict quorum of primary nodes (PW).
+当她回来的时候，你把她的饮料倒过来。 这被称为暗示切换，我们将在下一章再次讨论。 现在，足够的是，默认的草率的法定人数（W）之间存在差异，并且需要主节点（PW）的严格法定人数。
 
-<h5>More than R's and W's</h5>
+<h5>超过R和W More than R's and W's</h5>
 
-Some other values you may have noticed in the bucket's `props` object are `pw`, `pr`, and `dw`.
+你在桶的`props`对象中可能注意到的其他一些值是`pw`,`pr`,和`dw`。
 
-`pr` and `pw` ensure that many *primary* nodes are available before a read or write. Riak will read or write from backup nodes if one is unavailable, because of network partition or some other server outage. This `p` prefix will ensure that only the primary nodes are used, *primary* meaning the vnode which matches the bucket plus N successive vnodes.
+`pr`和`pw`确保在读取或写入之前有许多主节点可用。 由于网络分区或某些其他服务器中断，Riak将从备份节点读取或写入数据。 该p前缀将确保仅使用主节点，主要意味着与桶加N连接的v节点匹配的v节点。
 
-(We mentioned above that `r+w > n` provides a reasonable level of consistency, violated when sloppy quorums are involved.  `pr+pw > n` allows for a much stronger assertion of consistency, although there are always scenarios involving conflicting writes or significant disk failures where that too may not be enough.)
+(我们上面提到，`r+w > n`提供了一个合理的一致性，在涉及到草率的法定人数时被违反.`pr+pw > n`允许更坚定的一致性断言，尽管总是存在涉及写入冲突或重大磁盘故障的场景 那也可能还不够)
 
-Finally `dw` represents the minimal *durable* writes necessary for success. For a normal `w` write to count a write as successful, a vnode need only promise a write has started, with no guarantee that write has been written to disk, aka, is durable. The `dw` setting means the backend service (for example Bitcask) has agreed to write the value. Although a high `dw` value is slower than a high `w` value, there are cases where this extra enforcement is good to have, such as dealing with financial data.
+最后，`dw`表示成功所需的最小持久写入。 对于正常的`w`写入来计算写入成功，v节点只需要承诺写入已经开始，不能保证写入已经写入磁盘，也是耐用的。 `dw`设置意味着后端服务（例如Bitcask）已同意写入该值。 虽然高`dw`值低于高`w`值，但有些情况下，这种额外的执行情况很好，例如处理财务数据。
 
-<h5>Per Request</h5>
+<h5>每个请求 Per Request</h5>
 
-It's worth noting that these values (except for `n_val`) can be overridden *per request*.
+值得注意的是，每个请求可以覆盖这些值（`n_val`除外）。
 
-Consider a scenario in which you have data that you find very important (say, credit card checkout), and want to help ensure it will be written to every relevant node's disk before success. You could add `?dw=all` to the end of your write.
+考虑一个你搜寻非常重要的数据（例如信用卡结帐）的场景，并希望确保在成功之前将其写入每个相关节点的磁盘。 你可以添加`?dw=all`到你的写作结尾。
 
 ```bash
 curl -i -XPUT "$RIAK/types/default/buckets/cart/keys/cart1?dw=all" \
@@ -365,15 +357,15 @@ curl -i -XPUT "$RIAK/types/default/buckets/cart/keys/cart1?dw=all" \
   -d '{"paid":true}'
 ```
 
-If any of the nodes currently responsible for the data cannot complete the request (i.e., hand off the data to the storage backend), the client will receive a failure message. This doesn't mean that the write failed, necessarily: if two of three primary vnodes successfully wrote the value, it should be available for future requests. Thus trading availability for consistency by forcing a high `dw` or `pw` value can result in unexpected behavior.
+如果当前负责数据的任何节点无法完成请求（即将数据切换到存储后端），则客户端将收到故障消息。 这并不意味着写入失败，必然：如果三个主要v节点中的两个成功写入了该值，那么它应该可用于将来的请求。 因此，通过强制一个高`dw`或`pw`值可以获得一致性可能会导致意外的行为。
 
-<h3>Hooks</h3>
+<h3>钩 Hooks</h3>
 
-Another utility of buckets are their ability to enforce behaviors on writes by way of hooks. You can attach functions to run either before, or after, a value is committed to a bucket.
+桶的另一个实用程序是他们通过钩来执行写入行为的能力。 您可以附加函数以在值提交到桶的之前或之后运行。
 
-Precommit hooks are functions that run before a write is called. A precommit hook has the ability to cancel a write altogether if the incoming data is considered bad in some way. A simple precommit hook is to check if a value exists at all.
+预先钩是在调用写入之前运行的函数。如果输入的数据在某些方面被认为是坏的，则预先钩具有完全取消写入的能力。一个简单的预先钩是检查一个值是否存在。
 
-I put my custom Erlang code files under the riak installation `./custom/my_validators.erl`.
+我把我的自定义Erlang代码文件在riak中安装到 `./custom/my_validators.erl`下。
 
 ```java
 -module(my_validators).
@@ -388,13 +380,13 @@ value_exists(RiakObject) ->
   end.
 ```
 
-Then compile the file.
+然后编译文件。
 
 ```bash
 erlc my_validators.erl
 ```
 
-Install the file by informing the Riak installation of your new code with an `advanced.config` file that lives alongside `riak.conf` in each node, then rolling restart each node.
+通过向Riak安装新的代码安装文件，并在每个节点中的`riak.conf`旁边安装`advanced.config`文件，然后重新启动每个节点。
 
 ```bash
 {riak_kv,
@@ -402,7 +394,7 @@ Install the file by informing the Riak installation of your new code with an `ad
 }
 ```
 
-Then you need to do set the Erlang module (`my_validators`) and function (`value_exists`) as a JSON value to the bucket's precommit array `{"mod":"my_validators","fun":"value_exists"}`.
+那么你需要设置Erlang模块(`my_validators`)和函数 (`value_exists`) 作为一个JSON值给桶的预占数组`{"mod":"my_validators","fun":"value_exists"}`。
 
 ```bash
 curl -i -XPUT "$RIAK/types/default/buckets/cart/props" \
@@ -410,7 +402,7 @@ curl -i -XPUT "$RIAK/types/default/buckets/cart/props" \
   -d '{"props":{"precommit":[{"mod":"my_validators","fun":"value_exists"}]}}'
 ```
 
-If you try and post to the `cart` bucket without a value, you should expect a failure.
+如果你尝试并将其发布到 `cart` 桶中，而无需值，则应该会发生故障。
 
 ```bash
 curl -XPOST "$RIAK/types/default/buckets/cart/keys" \
@@ -418,26 +410,26 @@ curl -XPOST "$RIAK/types/default/buckets/cart/keys" \
 A value sized greater than 0 is required
 ```
 
-You can also write precommit functions in JavaScript, though Erlang code will execute faster.
+你还可以在JavaScript中编写预提交函数，通过Erlang代码将执行得更快。
 
-Post-commits are similar in form and function, albeit executed after the write has been performed. Key differences:
+后提交在形式和功能上是相似的，只不过是在执行写入之后执行。主要差异：
 
-* The only language supported is Erlang.
-* The function's return value is ignored, thus it cannot cause a failure message to be sent to the client.
+* 唯一支持的语言是Erlang。
+* 函数的返回值被忽略，因此不能将失败消息发送到客户端。
 
 
-## Datatypes
+## 数据类型 Datatypes
 
-A new feature in Riak 2.0 are datatypes. Rather than the opaque values of days past, these new additions allow a user to define the type of values that are accepted under a given bucket type. In addition to the benefits listed in the previous chapter of automatic conflict resolution, you also interact with datatypes in a different way.
+Riak 2.0中的一个新功能是数据类型。 而不是过去的不透明值，这些新添加允许用户定义在给定桶类型下接受的值的类型。 除了上一章自动解决冲突中列出的好处之外，你还可以以不同的方式与数据类型进行交互。
 
 <aside id="crdt" class="sidebar"><h3>CRDT</h3>
 
-In the previous chapter I said that Riak datatypes are implemented as CRDTs. The definition of CRDT given was Conflict-free Replicated Data Types. This is only partially correct. In fact, there are two variants of CRDTs, namely, describing how they attempt to keep the replicated datatypes Conflict-free. They are Convergent (CvRDT) and Commutative (CmRDT).
+在上一章中，我说Riak数据类型被实现为CRDT。 给出的CRDT的定义是无冲突的复制数据类型。 这只是部分正确。 实际上，CRDT有两种变体，即描述如何保持复制的数据类型无冲突。 它们是Convergent（CvRDT）和Commutative（CmRDT）。
 
-CmRDTs are datatypes that are updated with commutative operations. CvRDTs ensure that disparate states converge to a single value. This distinction is interesting in Riak, because Basho actually implements both. You interface with datatypes by commutative operations (meaning, it doesn't matter which takes place first), while any underlying divergent states will eventually converge.
+CmRDT是用交换操作更新的数据类型。 CvRDT确保不同的状态收敛到单个值。 这个区别在Riak中很有趣，因为Basho实际上是两者兼而有之。 您可以通过交换操作与数据类型进行交互（意味着首先发生的事情无关紧要），而任何潜在的分歧状态最终都会收敛。
 </aside>
 
-In normal Riak operations, as we've seen, you put a value with a given key into a type/bucket object. If you wanted to store a map, say, as a JSON object representing a person, you would put the entire object with every field/value as an operation.
+在正常的Riak操作中，如我们所见，您将带有给定键的值放入类型/桶对象中。 如果要存储图，比如说，作为代表一个人的JSON对象，你可以把整个对象的每个字段/值作为一个操作。
 
 ```bash
 curl -XPOST "$RIAK/types/json/buckets/people/keys/joe" \
@@ -445,7 +437,7 @@ curl -XPOST "$RIAK/types/json/buckets/people/keys/joe" \
   -d '{"name_register":"Joe", "pets_set":["cat"]}'
 ```
 
-But if you wanted to add a `fish` as a pet, you'd have to replace the entire object.
+但是，如果你想添加一条`fish`作为宠物，你必须更换整个对象。
 
 ```bash
 curl -XPOST "$RIAK/types/json/buckets/people/keys/joe" \
@@ -453,14 +445,14 @@ curl -XPOST "$RIAK/types/json/buckets/people/keys/joe" \
   -d '{"name_register":"Joe", "pets_set":["cat", "fish"]}'
 ```
 
-As we saw in the previous chapter, this runs the risk of conflicting, thus creating a sibling.
+正如我们在上一章中看到的那样，这样会有冲突的风险，从而创造了一个siblings。
 
 ```
 {"name_register":"Joe", "pets_set":["cat"]}
 {"name_register":"Joe", "pets_set":["cat", "fish"]}
 ```
 
-But if we used a map, we'd instead issue only updates to create a map. So, assume that the bucket type `map` is of a map datatype (we'll see how operators can assign datatypes to bucket types in the next chapter). This command will insert a map object with two fields (`name_register` and `pets_set`).
+但是，如果我们使用图，我们只会发布更新来创建图。 因此，假设桶类型`map`是图数据类型（我们将在下一章中看到操作员可以如何将数据类型分配给桶类型）。 该命令将插入一个具有两个字段(`name_register` 和 `pets_set`)的图对象。
 
 ```bash
 curl -XPOST "$RIAK/types/map/buckets/people/keys/joe" \
@@ -475,7 +467,7 @@ curl -XPOST "$RIAK/types/map/buckets/people/keys/joe" \
   }'
 ```
 
-Next, we want to update the `pets_set` contained within `joe`'s map. Rather than set Joe's name and his pet cat, we only need to inform the object of the change. Namely, that we want to add a `fish` to his `pets_set`.
+接下来，我们要更新`joe`地图中包含的`pets_set`。而不是设置joe的名字和他的宠物猫，我们只需要通知对象的变化。也就是说，我们想给他的`pets_set`添加一条`fish`。
 
 ```bash
 curl -XPOST "$RIAK/types/map/buckets/people/keys/joe" \
@@ -489,36 +481,36 @@ curl -XPOST "$RIAK/types/map/buckets/people/keys/joe" \
   }'
 ```
 
-This has a few benefits. Firstly, we don't need to send duplicate data. Second, it doesn't matter what order the two requests happen in, the outcome will be the same. Third, because the operations are CmRDTs, there is no possibility of a datatype returning siblings, making your client code that much easier.
+这有一些好处。 首先，我们不需要发送重复的数据。 其次，两个请求发生的顺序并不重要，结果将是一样的。 第三，由于操作是CmRDTs，所以没有数据类型返回siblings的可能性，使您的客户端代码更容易。
 
-As we've noted before, there are four Riak datatypes: *map*, *set*, *counter*, *flag*. The object type is set as a bucket type property. However, when populating a map, as we've seen, you must suffix the field name with the datatype that you wish to store: \*\_map, \*\_set, \*\_counter, \*\_flag. For plain string values, there's a special \*\_register datatype suffix.
+如前所述，有四个Riak数据类型：*map*, *set*, *counter*, *flag*。 对象类型设置为桶类型属性。 但是，如我们所见，填充地图时，您必须使用要存储的数据类型对字段名称进行后缀：\*\_map, \*\_set, \*\_counter, \*\_flag。 对于纯字符串值，有一个特殊的\*\_注册数据类型后缀。
 
-You can read more about [datatypes in the docs](http://docs.basho.com/riak/latest/dev/using/data-types).
+您可以在[datatypes in the docs](http://docs.basho.com/riak/latest/dev/using/data-types)阅读更多信息。
 
 
-## Entropy
+## 熵 Entropy
 
-Entropy is a byproduct of eventual consistency. In other words: although eventual consistency says a write will replicate to other nodes in time, there can be a bit of delay during which all nodes do not contain the same value.
+熵是最终一致性的副产品。 换句话说：尽管最终的一致性表示写入将及时复制到其他节点，但是在所有节点不包含相同值的情况下可能会有一点延迟。
 
-That difference is *entropy*, and so Riak has created several *anti-entropy* strategies (abbreviated as *AE*). We've already talked about how an R/W quorum can deal with differing values when write/read requests overlap at least one node. Riak can repair entropy, or allow you the option to do so yourself.
+这个差异是*熵*，因此Riak已经创建了几个*反熵*策略（缩写为*AE*）。 当写入/读取请求与至少一个节点重叠时，我们已经讨论了R/W仲裁如何处理不同的值。 Riak可以修复熵，或者允许你自己选择这样做。
 
-Riak has two basic strategies to address conflicting writes.
+Riak有两个基本的策略来解决冲突的写入。
 
-<h3>Last Write Wins</h3>
+<h3>最后一次写入胜利 Last Write Wins</h3>
 
-The most basic, and least reliable, strategy for curing entropy is called *last write wins*. It's the simple idea that the last write based on a node's system clock will overwrite an older one. This is currently the default behavior in Riak (by virtue of the `allow_mult` property defaulting to `false`). You can also set the `last_write_wins` property to `true`, which improves performance by never retaining vector clock history.
+最基本的，最不可靠的解决熵的策略称为*最后一次写入胜利*。 这是一个简单的想法，基于节点的系统时钟的最后一个写入将覆盖旧的。 这是Riak中的默认行为（由于`allow_mult`属性默认为`false`）。 您也可以将`last_write_wins`属性设置为`true`，通过永久保留向量时钟历史来提高性能。
 
-Realistically, this exists for speed and simplicity, when you really don't care about true order of operations, or the possibility of losing data. Since it's impossible to keep server clocks truly in sync (without the proverbial geosynchronized atomic clocks), this is a best guess as to what "last" means, to the nearest millisecond.
+实际上，当你真的不在乎真正的操作顺序，或丢失数据的可能性时，这是为了提高速度和简单性。 由于不可能保持服务器时钟真正的同步（没有众所周知的与地质同步的原子钟），这是一个最好的猜测，关于“最后”是什么意思，关于最近的毫秒。
 
 <h3>Vector Clocks</h3>
 
 As we saw under [Concepts](#practical-tradeoffs), *vector clocks* are Riak's way of tracking a true sequence of events of an object. Let's take a look at using vector clocks to allow for a more sophisticated conflict resolution approach than simply retaining the last-written value.
 
-<h4>Siblings</h4>
+<h4>原型Siblings</h4>
 
-*Siblings* occur when you have conflicting values, with no clear way for Riak to know which value is correct. As of Riak 2.0, as long as you use a custom (not `default`) bucket type that isn't a datatype, conflicting writes should create siblings. This is a good thing, since it ensures no data is ever lost.
+*原型*发生时，你会有冲突值，没有明确的方式让Riak知道哪个值是正确的。 从Riak 2.0开始，只要你使用不是数据类型的自定义（不是“默认”）存储桶类型，冲突的写入应创建原型。 这是一件好事，因为它确保没有数据丢失。
 
-In the case where you forgo a custom bucket type, Riak will try to resolve these conflicts itself if the `allow_mult` parameter is configured to `false`. You should generally always have your buckets set to retain siblings, to be resolved by the client by ensuring `allow_mult` is `true`.
+在放弃自定义桶类型的情况下，如果`allow_mult`参数配置为`false`，Riak将尝试解决这些冲突本身。 你通常应该把你的桶设置为保留原型，由客户端解决，确保`allow_mult`是`true`。
 
 ```bash
 curl -i -XPUT "$RIAK/types/default/buckets/cart/props" \
@@ -526,20 +518,20 @@ curl -i -XPUT "$RIAK/types/default/buckets/cart/props" \
   -d '{"props":{"allow_mult":true}}'
 ```
 
-Siblings arise in a couple cases.
+原型出现在几种情况下。
 
-1. A client writes a value using a stale (or missing) vector clock.
-2. Two clients write at the same time with the same vector clock value.
+1. 客户端使用陈旧（或缺失）向量时钟写入一个值。
+2. 两个客户端以相同的向量时钟值同时写入。
 
-We used the second scenario to manufacture a conflict in the previous chapter when we introduced the concept of vector clocks, and we'll do so again here.
+当我们介绍矢量时钟的概念时，我们使用第二个场景来制造前一章的冲突，我们再次这样做。
 
-<h4>Creating an Example Conflict</h4>
+<h4>创建示例冲突 Creating an Example Conflict</h4>
 
-Imagine we create a shopping cart for a single refrigerator, but several people in a household are able to order food for it. Because losing orders would result in an unhappy household, Riak is using a custom bucket type `shopping` which keeps the default `allow_mult=true`.
+想象一下，我们为单个冰箱创建一个购物车，但是家里的几个人能够为其订购食物。 由于丢失订单会导致家庭不愉快，Riak正在使用自定义桶类型“购物”，它保留默认值`allow_mult=true`。
 
-First Casey (a vegan) places 10 orders of kale in the cart.
+首先 Casey（素食主义者）将10羽羽衣甘蓝放在购物车中。
 
-Casey writes `[{"item":"kale","count":10}]`.
+Casey 写入 `[{"item":"kale","count":10}]`.
 
 ```bash
 curl -i -XPUT "$RIAK/types/shopping/buckets/fridge/keys/97207?returnbody=true" \
@@ -558,11 +550,11 @@ Content-Length: 28
 [{"item":"kale","count":10}]
 ```
 
-Note the opaque vector clock (via the `X-Riak-Vclock` header) returned by Riak. That same value will be returned with any read request issued for that key until another write occurs.
+注意Riak返回的不透明向量时钟（通过`X-Riak-Vclock`标题）。 对于该密钥发出的任何读取请求将返回相同的值，直到发生另一个写入。
 
-His roommate Mark, reads the order and adds milk. In order to allow Riak to track the update history properly, Mark includes the most recent vector clock with his PUT.
+他的室友Mark，读了订单，加了牛奶。 为了让Riak正确跟踪更新历史记录，Mark在他的PUT中包含了最近的矢量时钟。
 
-Mark writes `[{"item":"kale","count":10},{"item":"milk","count":1}]`.
+Mark 写入 `[{"item":"kale","count":10},{"item":"milk","count":1}]`.
 
 ```bash
 curl -i -XPUT "$RIAK/types/shopping/buckets/fridge/keys/97207?returnbody=true" \
@@ -582,14 +574,14 @@ Content-Length: 54
 [{"item":"kale","count":10},{"item":"milk","count":1}]
 ```
 
-If you look closely, you'll notice that the vector clock changed with the second write request
+如果仔细观察，您会发现矢量时钟随着第二个写请求而改变
 
 * a85hYGBgzGDKBVIcypz/fgaUHjmTwZTI<strong>mMfKsMK</strong>K7RRfFgA= (after the write by Casey)
 * a85hYGBgzGDKBVIcypz/fgaUHjmTwZTI<strong>lMfKcMa</strong>K7RRfFgA= (after the write by Mark)
 
-Now let's consider a third roommate, Andy, who loves almonds. Before Mark updates the shared cart with milk, Andy retrieved Casey's kale order and appends almonds. As with Mark, Andy's update includes the vector clock as it existed after Casey's original write.
+现在让我们考虑一个第三个室友，Andy，喜欢杏仁。 在Mark用牛奶更新共享车之前，Andy检索了Casey的羽衣甘蓝命令并附加了杏仁。 与马克一样，安迪的更新包括在凯西的原始写作之后存在的向量时钟。
 
-Andy writes `[{"item":"kale","count":10},{"item":"almonds","count":12}]`.
+Andy 写入 `[{"item":"kale","count":10},{"item":"almonds","count":12}]`.
 
 ```bash
 curl -i -XPUT "$RIAK/types/shopping/buckets/fridge/keys/97207?returnbody=true" \
@@ -622,15 +614,15 @@ Last-Modified: Thu, 01 Nov 2012 00:24:07 GMT
 --Ql3O0enxVdaMF3YlXFOdmO5bvrs--
 ```
 
-Whoa! What's all that?
+哇！ 那是什么
 
-Since there was a conflict between what Mark and Andy set the fridge value to be, Riak kept both values.
+由于Mark和Andy设定冰箱值之间存在冲突，Riak保持了两者的值。
 
 <h4>VTag</h4>
 
-Since we're using the HTTP client, Riak returned a `300 Multiple Choices` code with a `multipart/mixed` MIME type. It's up to you to parse the results (or you can request a specific value by its Etag, also called a Vtag).
+由于我们使用HTTP客户端，Riak用`multipart/mixed`MIME类型返回了一个`300 Multiple Choices`代码。 你可以解析结果（或者你可以通过它的Etag请求一个特定值，也称为Vtag）。
 
-Issuing a plain get on the `shopping/fridge/97207` key will also return the vtags of all siblings.
+发布一个简单的`shopping/fridge/97207`键也将返回所有原型的vtags。
 
 ```
 curl "$RIAK/types/shopping/buckets/fridge/keys/97207"
@@ -639,37 +631,37 @@ Siblings:
 7kfvPXisoVBfC43IiPKYNb
 ```
 
-What can you do with this tag? Namely, you request the value of a specific sibling by its `vtag`. To get the first sibling in the list (Mark's milk):
+你能用这个标签做什么？ 也就是说，你通过它的`vtag`请求一个特定原型的价值。 要获得列表中的第一个原型（Mark的牛奶）：
 
 ```bash
 curl "$RIAK/types/shopping/buckets/fridge/keys/97207?vtag=62NRijQH3mRYPRybFneZaY"
 [{"item":"kale","count":10},{"item":"milk","count":1}]
 ```
 
-If you want to retrieve all sibling data, tell Riak that you'll accept the multipart message by adding `-H "Accept:multipart/mixed"`.
+如果要检索所有原型数据，请告诉Riak，你将通过添加`-H "Accept:multipart/mixed"`来接受multipart消息。
 
 ```bash
 curl "$RIAK/types/shopping/buckets/fridge/keys/97207" \
   -H "Accept:multipart/mixed"
 ```
 
-<aside class="sidebar"><h3>Use-Case Specific?</h3>
+<aside class="sidebar"><h3>具体用例？ Use-Case Specific?</h3>
 
-When siblings are created, it's up to the application to know how to deal
-with the conflict. In our example, do we want to accept only one of the
-orders? Should we remove both milk and almonds and only keep the kale?
-Should we calculate the cheaper of the two and keep the cheapest option?
-Should we merge all of the results into a single order? This is why we asked
-Riak not to resolve this conflict automatically... we want this flexibility.
+当原型被创建时，由应用程序决定知道如何处理
+与冲突。 在我们的例子中，我们只想接受其中的一个
+命令？ 我们应该除去牛奶和杏仁，只能保持羽衣甘蓝吗？
+我们应该计算两者的便宜，并保持最便宜的选择吗？
+我们应该将所有的结果合并成一个单一的顺序吗？ 这就是为什么我们要求
+Riak不能自动解决这个冲突...我们想要这种灵活性。
 </aside>
 
-<h4>Resolving Conflicts</h4>
+<h4>解决冲突 Resolving Conflicts</h4>
 
-When we have conflicting writes, we want to resolve them. Since that problem is typically *use-case specific*, Riak defers it to us, and our application must decide how to proceed.
+当我们有冲突的写入时，我们想解决它们。 由于该问题通常是*用例特定*，Riak将其延伸到我们，我们的应用程序必须决定如何进行。
 
-For our example, let's merge the values into a single result set, taking the larger *count* if the *item* is the same. When done, write the new results back to Riak with the vclock of the multipart object, so Riak knows you're resolving the conflict, and you'll get back a new vector clock.
+对于我们的示例，让我们将值合并成一个单一的结果集，如果*类型*相同，则使用较大的*计数*。 完成后，使用多部分对象的vclock将新结果写回Riak，因此Riak知道你正在解决冲突，你将获得一个新的向量时钟。
 
-Successive reads will receive a single (merged) result.
+连续读取将获得单个（合并）结果。
 
 ```bash
 curl -i -XPUT "$RIAK/types/shopping/buckets/fridge/keys/97207?returnbody=true" \
@@ -679,48 +671,48 @@ curl -i -XPUT "$RIAK/types/shopping/buckets/fridge/keys/97207?returnbody=true" \
       {"item":"almonds","count":12}]'
 ```
 
-<h3>Last write wins vs. siblings</h3>
+<h3>最后写入胜利对原型Last write wins vs. siblings</h3>
 
-Your data and your business needs will dictate which approach to conflict resolution is appropriate. You don't need to choose one strategy globally; instead, feel free to take advantage of Riak's buckets to specify which data uses siblings and which blindly retains the last value written.
+您的数据和业务需求将决定哪种解决方案适合。 你不需要在全局选择一个策略; 相反，可以自由地利用Riak的桶来指定哪些数据使用原型，并且盲目保留写入的最后一个值。
 
-A quick recap of the two configuration values you'll want to set:
+简要介绍下你要设置的两个配置值：
 
-* `allow_mult` defaults to `false`, which means that the last write wins.
-* Setting `allow_mult` to `true` instructs Riak to retain conflicting writes as siblings.
-* `last_write_wins` defaults to `false`, which (perhaps counter-intuitively) still can mean that the behavior is last write wins: `allow_mult` is the key parameter for the behavioral toggle.
-* Setting `last_write_wins` to true will optimize writes by assuming that previous vector clocks have no inherent value.
-* Setting both `allow_mult` and `last_write_wins` to `true` is unsupported and will result in undefined behavior.
+* `allow_mult`默认为`false`，这意味着最后一次写入胜利。
+* 将`allow_mult`设置为`true`指示Riak将冲突的写入保留为原型。
+* `last_write_wins`默认为`false`，（可能是反直觉的）仍然意味着行为是最后一次写入胜利：`allow_mult`是行为切换的关键参数。
+* 将`last_write_wins`设置为true将通过假设先前的向量时钟没有内在值来优化写入。
+* 将“allow_mult”和“last_write_wins”设置为“true”不受支持，并将导致未定义的行为。
 
-<h3>Read Repair</h3>
+<h3>读取修复 Read Repair</h3>
 
-When a successful read happens, but not all replicas agree upon the value, this triggers a *read repair*. This means that Riak will update the replicas with the most recent value. This can happen either when an object is not found (the vnode has no copy) or a vnode contains an older value (older means that it is an ancestor of the newest vector clock). Unlike `last_write_wins` or manual conflict resolution, read repair is (obviously, I hope, by the name) triggered by a read, rather than a write.
+当成功读取发生时，但并非所有副本都符合该值，这将触发*读取修复*。 这意味着Riak将使用最新值更新副本。 当没有找到对象（vnode没有副本）或vnode包含较旧的值（旧的表示它是最新的向量时钟的祖先）时，可能会发生这种情况。 与`last_write_wins`或手动解决冲突不同，读取修复（显然是希望通过名称）由读取而不是写入触发。
 
-If your nodes get out of sync (for example, if you increase the `n_val` on a bucket), you can force read repair by performing a read operation for all of that bucket's keys. They may return with `not found` the first time, but later reads will pull the newest values.
+如果您的节点不同步（例如，如果您增加了一个桶上的`n_val`），则可以通过执行所有该级别的键的读取操作来强制读取修复。 他们可能会第一次返回“未找到”，但后来的读取将拉出最新的值。
 
-<h3>Active Anti-Entropy (AAE)</h3>
+<h3>主动反熵 Active Anti-Entropy (AAE)</h3>
 
-Although resolving conflicting data during get requests via read repair is sufficient for most needs, data which is never read can eventually be lost as nodes fail and are replaced.
+尽管通过读取修复获取请求期间解决冲突的数据足以满足大多数需求，但是由于节点失败并被替换，所以永远不会读取的数据最终可能会丢失。
 
-Riak supports active anti-entropy (AAE), to proactively identify and repair inconsistent data. This feature is also helpful for recovering data loss in the event of disk corruption or administrative error.
+Riak支持主动反熵（AAE），以主动识别和修复不一致的数据。 此功能还有助于在磁盘损坏或管理错误的情况下恢复数据丢失。
 
-The overhead for this functionality is minimized by maintaining sophisticated hash trees ("Merkle trees") which make it easy to compare data sets between vnodes, but if desired the feature can be disabled.
+通过维护复杂的散列树（“Merkle tree”），可以轻松地比较vnodes之间的数据集，但是如果需要，可以禁用该功能，从而最大程度地减少了此功能的开销。
 
-## Querying
+## 查询 Querying
 
-So far we've only dealt with key-value lookups. The truth is, key-value is a pretty powerful mechanism that spans a spectrum of use-cases. However, sometimes we need to lookup data by value, rather than key. Sometimes we need to perform some calculations, or aggregations, or search.
+到目前为止，我们只处理了键值查找。 事实是，键值是跨越一系列用例的非常强大的机制。 然而，有时我们需要通过值查找数据，而不是键。 有时我们需要执行一些计算，聚合或搜索。
 
-<h3>Secondary Indexing (2i)</h3>
+<h3>二次索引 Secondary Indexing (2i)</h3>
 
-A *secondary index* (2i) is a data structure that lowers the cost of
-finding non-key values. Like many other databases, Riak has the
-ability to index data. However, since Riak has no real knowledge of
-the data it stores (they're just binary values), it uses metadata to
-index defined by a name pattern to be either integers or binary values.
+*二次索引*（2i）是降低成本的数据结构
+查找非关键值。 像许多其他数据库一样，Riak有
+索引数据的能力。 但是，由于Riak没有真正的认知
+它存储的数据（它们只是二进制值），它使用元数据
+索引由名称模式定义为整数或二进制值。
 
-If your installation is configured to use 2i (shown in the next chapter),
-simply writing a value to Riak with the header will be indexes,
-provided it's prefixed by `X-Riak-Index-` and suffixed by `_int` for an
-integer, or `_bin` for a string.
+如果您的安装配置为使用2i（如下一章所示），
+只需用一个标头将值写入Riak就会成为索引，
+前提是它的前缀是'X-Riak-Index-`，后缀为`_int`
+整数或`_bin`作为字符串。
 
 ```bash
 curl -i -XPUT $RIAK/types/shopping/buckets/people/keys/casey \
@@ -730,48 +722,47 @@ curl -i -XPUT $RIAK/types/shopping/buckets/people/keys/casey \
   -d '{"work":"rodeo clown"}'
 ```
 
-Querying can be done in two forms: exact match and range. Add a couple more people and we'll see what we get: `mark` is `32`, and `andy` is `35`, they both share `97207`.
+查询可以通过两种形式完成：完全匹配和范围。添加更多的人，我们会看到我们得到的东西：`mark`是`32`，和`andy`是`35`，它们共用`97207`。
 
-What people own `97207`? It's a quick lookup to receive the
-keys that have matching index values.
+什么人拥有“97207”？ 这是一个快速查找接收
+具有匹配索引值的键。
 
 ```bash
 curl "$RIAK/types/shopping/buckets/people/index/fridge_bin/97207"
 {"keys":["mark","casey","andy"]}
 ```
 
-With those keys it's a simple lookup to get the bodies.
+使用这些键，这是一个简单的查找来获取主体。
 
-The other query option is an inclusive ranged match. This finds all
-people under the ages of `32`, by searching between `0` and `32`.
+另一个查询选项是包容性的范围匹配。 这找到所有
+`32`岁以下的人，通过在`0`和`32`之间进行搜索。
 
 ```bash
 curl "$RIAK/types/shopping/buckets/people/index/age_int/0/32"
 {"keys":["mark","casey"]}
 ```
 
-That's about it. It's a basic form of 2i, with a decent array of utility.
+就是这样 这是一个2i的基本形式，具有不错的效用。
 
-<h3>MapReduce</h3>
+<h3>映射归约MapReduce</h3>
 
-MapReduce is a method of aggregating large amounts of data by separating the
-processing into two phases, map and reduce, that themselves are executed
-in parts. Map will be executed per object to convert/extract some value,
-then those mapped values will be reduced into some aggregate result. What
-do we gain from this structure? It's predicated on the idea that it's cheaper
-to move the algorithms to where the data lives, than to transfer massive
-amounts of data to a single server to run a calculation.
+MapReduce是一种通过分离大量数据来聚合大量数据的方法
+处理成两个阶段，映射和缩小，自己执行
+各自的部分。 每个对象将执行映射来转换/提取一些值，
+那么那些映射的值将被减少为一些聚合结果。
+我们能从这个结构中获益什么吗？ 这是基于它更便宜的想法
+将算法移动到数据所在的位置，而不是转移大量数据
+数据量到单个服务器运行计算。
 
-This method, popularized by Google, can be seen in a wide array of NoSQL
-databases. In Riak, you execute a MapReduce job on a single node, which
-then propagates to the other nodes. The results are mapped and reduced,
-then further reduced down to the calling node and returned.
+这种由Google普及的方法可以在各种NoSQL数据库中看到。
+在Riak中，您可以在单个节点上执行MapReduce作业
+然后传播到其他节点。 结果被映射和缩小，
+然后进一步减少到调用节点并返回。
 
 ![MapReduce Returning Name Char Count](../assets/mapreduce.svg)
 
-Let's assume we have a bucket for log values that stores messages
-prefixed by either INFO or ERROR. We want to count the number of INFO
-logs that contain the word "cart".
+假设我们有一个存储消息的日志值桶
+以INFO或ERROR为前缀。 我们要计算包含单词“cart”的日志的INFO原型的数量。
 
 ```bash
 LOGS=$RIAK/types/default/buckets/logs/keys
@@ -781,9 +772,9 @@ curl -XPOST $LOGS -d "INFO: Milk added to shopping cart"
 curl -XPOST $LOGS -d "ERROR: shopping cart cancelled"
 ```
 
-MapReduce jobs can be either Erlang or JavaScript code. This time we'll go the
-easy route and write JavaScript. You execute MapReduce by posting JSON to the
-`/mapred` path.
+MapReduce作业可以是Erlang或JavaScript代码。 这一次我们会去的
+容易的路由和写JavaScript。 您可以通过发布JSON来执行MapReduce
+`/ mapred`路径。
 
 ```bash
 curl -XPOST "$RIAK/mapred" \
@@ -813,20 +804,19 @@ curl -XPOST "$RIAK/mapred" \
 EOF
 ```
 
-The result should be `[2]`, as expected. Both map and reduce phases should
-always return an array. The map phase receives a single riak object, while
-the reduce phase received an array of values, either the result of multiple
-map function outputs, or of multiple reduce outputs. I probably cheated a
-bit by using JavaScript's `reduce` function to sum the values, but, well,
-welcome to the world of thinking in terms of MapReduce!
-
+结果应该是`[2]`，如预期的那样。 图和缩减阶段都应该
+总是返回一个数组。 图阶段接收一个单独的riak对象
+缩减阶段接收到一个值的数组，无论是多个结果
+图功能输出或多个减少输出。 我可能被骗了而
+通过使用JavaScript的“reduce”函数来计算值，但是，
+欢迎来到MapReduce的思维世界！
 
 <h4>MR + 2i</h4>
 
-Another option when using MapReduce is to combine it with secondary indexes.
-You can pipe the results of a 2i query into a MapReducer, simply specify the
-index you wish to use, and either a `key` for an index lookup, or `start` and
-`end` values for a ranged query.
+使用MapReduce时的另一个选择是将其与次要索引组合在一起。
+您可以将2i查询的结果管道传输到MapReducer中，只需指定
+索引，以及用于索引查找的`key`或
+对于远程查询的`end`值和`start`值。
 
 ```json
     ...
@@ -839,36 +829,33 @@ index you wish to use, and either a `key` for an index lookup, or `start` and
     ...
 ```
 
-MapReduce in Riak is a powerful way of pulling data out of an
-otherwise straight key/value store. But we have one more method of finding
-data in Riak.
+在Riak中的MapReduce是拉出数据的强大方式对于间接键/值存储。
+但是我们还有一种寻找方法Riak中的数据。
 
+<aside class="sidebar"><h3>无论发生什么Riak搜索1.x？ Whatever Happened to Riak Search 1.x?</h3>
 
-<aside class="sidebar"><h3>Whatever Happened to Riak Search 1.x?</h3>
+如果您以前使用过Riak，或者有一些较旧的文档，
+您可能会想知道Riak Search 1.0和2.0之间有什么区别。
 
-If you've used Riak before, or have some older documentation,
-you may wonder what the difference is between Riak Search 1.0 and 2.0.
-
-In an attempt to make Riak Search user friendly, it was originally developed
-with a "Solr like" interface. Sadly, due to the complexity of building
-distributed search engines, it was woefully incomplete. Basho decided that,
-rather than attempting to maintain parity with Solr, a popular and featureful
-search engine in its own right, it made more sense to integrate the two.
+为了对Riak Search用户友好，最初开发的是
+具有“Solr like”的界面。 但可悲的是，由于构建
+分布式搜索引擎的复杂性，这是非常不完整的。 Basho决定，
+与其试图与Solr保持平等，倒不如一个受欢迎和有特色的
+搜索引擎本身就是整合两者的意义更大。
 </aside>
 
 <h3>Search 2.0</h3>
 
-Search 2.0 is a complete, from scratch, reimagining of distributed search 
-in Riak. It's an extension to Riak that lets you perform searches to find
-values in a Riak cluster. Unlike the original Riak Search, Search 2.0
-leverages distributed Solr to perform the inverted indexing and management of
-retrieving matching values.
+Search 2.0是一个完整的，从零开始的在Riak的重新分配搜索。
+它是Riak的扩展，可让您执行搜索查找Riak群集中的值。
+不像原来的Riak Search，Search 2.0
+利用分布式Solr执行倒排索引和管理检索匹配值。
 
-Before using Search 2.0, you'll have to have it installed and a bucket set
-up with an index (these details can be found in the next chapter).
+在使用Search 2.0之前，您必须安装它并设置一个桶
+使用索引（这些细节可以在下一章中找到）。
 
-The simplest example is a full-text search. Here we add `ryan` to the
-`people` table (with a default index).
+最简单的例子是全文搜索。 在这里我们添加`ryan`到
+`people`表（带有默认索引）。
 
 ```bash
 curl -XPUT "$RIAK/type/default/buckets/people/keys/ryan" \
@@ -876,11 +863,10 @@ curl -XPUT "$RIAK/type/default/buckets/people/keys/ryan" \
   -d "Ryan Zezeski"
 ```
 
-To execute a search, request `/solr/<index>/select` along with any distributed
-[Solr parameters](http://wiki.apache.org/solr/CommonQueryParameters). Here we
-query for documents that contain a word starting with `zez`, request the
-results to be in json format (`wt=json`), only return the Riak key
-(`fl=_yz_rk`).
+要执行搜索，请与任何分布式请求`/ solr / <index> / select`
+[Solr 参数]（http://wiki.apache.org/solr/CommonQueryParameters）。 在这里，我们
+查询包含以“zez”开头的单词的文档，
+请求结果是以json格式（`wt = json`），只返回Riak键（`fl = _yz_rk`）。
 
 ```bash
 curl "$RIAK/solr/people/select?wt=json&omitHeader=true&fl=_yz_rk&q=zez*"
@@ -898,25 +884,19 @@ curl "$RIAK/solr/people/select?wt=json&omitHeader=true&fl=_yz_rk&q=zez*"
 }
 ```
 
-With the matching `_yz_rk` keys, you can retrieve the bodies with a simple
-Riak lookup.
+使用匹配的`_yz_rk`键，您可以使用简单的Riak查找检索文本。
 
-Search 2.0 supports Solr 4.0, which includes filter queries, ranges, page scores,
-start values and rows (the last two are useful for pagination). You can also
-receive snippets of matching
-[highlighted text](http://wiki.apache.org/solr/HighlightingParameters)
-(`hl`,`hl.fl`), which is useful for building a search engine (and something
-we use for [search.basho.com](http://search.basho.com)). You can perform
-facet searches, stats, geolocation, bounding shapes, or any other search
-possible with distributed Solr.
+Search 2.0支持Solr 4.0，其中包括过滤器查询，范围，页面分数，
+起始值和行（最后两个对分页有用）。 您还可以接收匹配的[高亮文本]（http://wiki.apache.org/solr/HighlightingParameters）（`hl`，`hl.fl`），
+这对构建搜索引擎非常有用（而且有用于 [search.basho.com]（http://search.basho.com））。
+您可以使用分布式Solr执行搜索，统计，地理定位，边界形状或任何其他搜索。
 
+<h4>标记 Tagging</h4>
 
-<h4>Tagging</h4>
-
-Another useful feature of Search 2.0 is the tagging of values. Tagging
-values give additional context to a Riak value. The current implementation
-requires all tagged values begin with `X-Riak-Meta`, and be listed under
-a special header named `X-Riak-Meta-yz-tags`.
+搜索2.0的另一个有用的功能是标记值。
+标记值为Riak值提供附加上下文。
+当前的实现需要所有标记的值都以`X-Riak-Meta`开头，
+并列在名为`X-Riak-Meta-yz-tags`的特殊标题下。
 
 ```bash
 curl -XPUT "$RIAK/types/default/buckets/people/keys/dave" \
@@ -926,8 +906,7 @@ curl -XPUT "$RIAK/types/default/buckets/people/keys/dave" \
   -d "Dave Smith"
 ```
 
-To search by the `nickname_s` tag, just prefix the query string followed
-by a colon.
+要通过`nickname_s`标记进行搜索，只需要在查询字符串前加一个冒号即可。
 
 ```bash
 curl "$RIAK/solr/people/select?wt=json&omitHeader=true&q=nickname_s:dizzy"
@@ -952,20 +931,20 @@ curl "$RIAK/solr/people/select?wt=json&omitHeader=true&q=nickname_s:dizzy"
 }
 ```
 
-Notice that the `docs` returned also contain `"nickname_s":"dizzy"` as a
-value. All tagged values will be returned on matching results.
+请注意，返回的`docs`还包含`"nickname_s":"dizzy"`作为值。 所有标记的值将在匹配结果中返回。
 
-<h4>Datatypes</h4>
+<h4>数据类型 Datatypes</h4>
 
-One of the more powerful combinations in Riak 2.0 are datatypes and Search.
-If you set both a datatype and a search index in a bucket type's properties,
-values you set are indexed as you'd expect. Map fields are indexed as their
-given types, sets are multi-field strings, counters as indexed as integers,
-and flags are boolean. Nested maps are also indexed, seperated by dots, and
-queryable in such a manner.
+Riak 2.0中更强大的组合之一是数据类型和搜索。
+如果您将数据类型和搜索索引都设置在一个存储桶类型的属性中，
+那么您设置的值将按照您的预期进行索引。
+映射字段被索引为其给定类型，集合是多字段字符串，
+计数器作为整数索引，并且标志是布尔值。
+嵌套图也被索引，以点分隔，并以这种方式可查询。
 
-For example, remember Joe, from the datatype section? Let's assume that
-this `people` bucket is indexed. And let's also add another pet.
+例如，还记的来自数据类型部分的Joe么？
+我们假设这个`people`桶被编入索引。
+我们还添加另一只宠物。
 
 ```bash
 curl -XPUT "$RIAK/types/map/buckets/people/keys/joe" \
@@ -973,7 +952,7 @@ curl -XPUT "$RIAK/types/map/buckets/people/keys/joe" \
   -d '{"update": {"pets_set": {"add":"dog"}}}'
 ```
 
-Then let's search for `pets_set:dog`, filtering only `type/bucket/key`.
+然后让我们搜索`pets_set：dog`，只过滤`type / bucket / key`。
 
 ```bash
 {
@@ -992,31 +971,32 @@ Then let's search for `pets_set:dog`, filtering only `type/bucket/key`.
 }
 ```
 
-Bravo. You've now found the object you wanted. Thanks to Solr's customizable
-schema, you can even store the field you want to return, if it's really that
-important to save a second lookup.
+Bravo 你现在找到了你想要的对象。
+感谢Solr的可定制模式，
+如果保存第二个查找非常重要，
+你甚至可以存储要返回的字段。
 
-This provides the best of both worlds. You can update and query values without
-fear of conflicts, and can query Riak based on field values. It doesn't require
-much imagination to see that this combination effectively turns Riak into
-a scalable, stable, highly available, document datastore. Throw strong consistency
-into the mix (which we'll do in the next chapter) and you can store and query
-pretty much anything in Riak, in any way.
+这里提供了两个世界最好的。
+您可以更新和查询值，而不用担心发生冲突，
+并可以根据字段值查询Riak。
+不需要太多的想象力，
+看到这种组合有效地将Riak转变为可扩展，
+稳定，高可用性的文档数据存储。
+将强大的一致性投入到组合中（我们将在下一章中做），
+您可以以任何方式存储和查询Riak中的任何内容。
 
-If you're wondering to yourself, "What exactly does Mongo provide, again?", well,
-I didn't ask it. You did. But that is a great question...
+如果你想知道自己，“Mongodb是怎么提供的，”那么，我没有问过。 你做过 但这是一个很好的问题...
 
-Well, moving on.
+好了，让我们继续。
 
 
-## Wrap-up
+## 综合报导 Wrap-up
 
-Riak is a distributed data store with several additions to improve upon the
-standard key-value lookups, like specifying replication values. Since values
-in Riak are opaque, many of these methods either require custom code to
-extract and give meaning to values, such as *MapReduce*m or allow for
-header metadata to provide an added descriptive dimension to the object,
-such as *secondary indexes* or *search*.
+Riak是一个分布式数据存储，具有多个添加功能，
+可以改进标准的键值查找，例如指定复制值。
+由于Riak中的值是不透明的，
+所以这些方法中的许多方法都需要自定义代码来提取值并赋予值，
+例如*MapReduce*m或允许头元数据为对象提供添加的描述性维度，
+例如*辅助索引* 或*搜索*。
 
-Next, we'll peek further under the hood and show you how to set up and manage
-a cluster of your own.
+接下来，我们将进一步了解引擎盖，并向您展示如何设置和管理您自己的群集。......

@@ -17,8 +17,6 @@ Riak CS是Basho对Riak的开源的扩展，Riak允许你的集群以远程对象
 有几个原因可能会使你想要建立自己的云存储机制（安全、法律、你已拥有了大量硬件、扩展更加便宜）。
 Riak CS没有包括在这本简书中，但是我可能被收买写一本关于它的书。
 
-## A Short Note on MDC
-
 ## 关于MDC的简述
 
 *MDC*, or Multi-Datacenter, is a commercial extension to Riak provided by Basho.
@@ -26,7 +24,7 @@ While the documentation is freely available, the source code is not. If you reac
 a scale where keeping multiple Riak clusters in sync on a local or global scale is
 necessary, I would recommend considering this option.
 
-MDC（Multi-Datacenter）是Basho对于Riak的一个商业性的扩展。尽管相关文档是可以免费获得的，但源码却不能免费获取。
+多数据中心（MDC，Multi-Datacenter）是Basho对于Riak的一个商业性的扩展。尽管相关文档是可以免费获得的，但源码却不能免费获取。
 如果你达到一定规模，保持多个Riak集群在本地或全局同步是必要的，我建议考虑此选项。
 
 ## Locks, a cautionary tale  

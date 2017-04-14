@@ -1,29 +1,20 @@
-# 运维者
+# 运维者 
 
 <!-- What Riak is famous for is its simplicity to operate and stability at increasing scales. -->
 
-In some ways, Riak is downright mundane in its role as the easiest
-NoSQL database to operate. Want more servers? Add them. A network
-cable is cut at 2am? Deal with it after a few more hours of
-sleep. Understanding this integral part of your application stack is
-still important, however, despite Riak's reliability.
+在某些方面， Riak作为最易操作的一种NoSQl数据库，它所扮演角色绝对是通俗易懂的。想要更多的服务吗? 添加他们. 一个网络电缆会早晨两点被切断吗？几小时睡觉醒来才回去处理它. 但是处理Riak的可靠性，理解你的应用程序栈的主要部分依然很重要。
 
-We've covered the core concepts of Riak, and I've provided a taste of
-how to use it, but there is more to the database than that. There are
-details you should know if you plan on operating a Riak cluster of
-your own.
+我们已经学习了Riak的核心概念，并且我已经提供了一系列如何使用它的说明，但是关于这个数据库的还有更多需要掌握的。如果你计划操作一个你自己的Riak集群，还有一些你需要了解的细节。
 
-## Clusters
+## 集群
 
-Up to this point you've conceptually read about "clusters" and the "Ring" in
-nebulous summations. What exactly do we mean, and what are the practical
-implications of these details for Riak developers and operators?
+到目前为止，你已经从概念上了解了有关“集群”和“环”的大概的总结。 我们究竟意图什么，这些细节对 riak 开发者和运营这的实际影响是什么？
 
-A *cluster* in Riak is a managed collection of nodes that share a common Ring.
+在Riak中一个 *集群* 是一个分享普通环的节点的管理集合。
 
-<h3>The Ring</h3>
+<h3>环</h3>
 
-*The Ring* in Riak is actually a two-fold concept.
+在Riak中 *环* 实际上是一个双重概念。
 
 Firstly, the Ring represents the consistent hash partitions (the partitions
 managed by vnodes). This partition range is treated as circular, from 0 to
@@ -32,11 +23,17 @@ limited to 2^160 nodes, which is a limit of a 1.46 quindecillion, or
 `1.46 x 10^48`, node cluster. For comparison, there are only `1.92 x 10^49`
 [silicon atoms on Earth](http://education.jlab.org/qa/mathatom_05.html).)
 
+首先，环表示一致的哈希分区 (分区由 vnodes 管理。此分区范围被视为循环, 从零到2^ 160-1 再回到零。(如果你想知道的话, 这意味着我们的分区
+限制为2^ 160 节点, 也是一个被限制为1.46乘以千的16次幂或者
+"1.46 x 10 ^48"的节点群集。为了比较, 只有 "1.92 x 10 ^49"。[地球上的硅原子](http://education.jlab.org/qa/mathatom_05.html).)
+
 When we consider replication, the N value defines how many nodes an object is
 replicated to. Riak makes a best attempt at spreading that value to as many
 nodes as it can, so it copies to the next N adjacent nodes, starting with the
 primary partition and counting around the Ring, if it reaches the last
 partition, it loops around back to the first one.
+
+当我们考虑复制时, n 值定义了一个对象被复制的节点数。riak 尽其所能尝试将该值传播为尽可能多的节点, 这样它就可以复制到相邻的 n 个节点, 从主分区开始, 并在环上计数, 如果它到达最后一个分区, 它会绕回第一个分区。
 
 Secondly, the Ring is also used as a shorthand for describing the state of the
 circular hash ring I just mentioned. This Ring (aka *Ring State*) is a
@@ -46,29 +43,44 @@ request for an object managed by other nodes, it consults the Ring and forwards
 the request to the proper nodes. It's a local copy of a contract that all of
 the nodes agree to follow.
 
+其次, 这个环也被用作描述我刚才提到的循环哈希环（hash ring）的状态的简称。这个环 (aka *环状态* ) 是一个数据结构, 通过在节点之间传递, 让每个人都知道整个集群的状态。哪个节点管理哪个 vnodes？如果一个节点获取了由其他节点管理的对象的请求, 那它会咨询该环, 并将请求转发到适当的节点。这是一个所有的节点都同意遵循的合同的本地副本 。
+
 Obviously, this contract needs to stay in sync between all of the nodes. If a node is permanently taken
 offline or a new one added, the other nodes need to readjust, balancing the partitions around the cluster,
 then updating the Ring with this new structure. This Ring state gets passed between the nodes by means of
 a *gossip protocol*.
 
-<h3>Gossip and CMD</h3>
+显然, 此合同需要在所有节点之间保持同步。如果一个节点被永久性地下线或一个新的节点被添加, 其他节点需要重新调整来平衡集群周围的分区, 然后更新这个环的新结构。此环形状态通过 *"gossip协议"* 在节点之间传递。
+
+<h3>Gossip（办公室八卦）和CMD（集群元数据）</h3>
 
 Riak has two methods of keeping nodes current on the state of the Ring. The first, and oldest, is the *gossip protocol*. If a node's state in the cluster is altered, information is propagated to other nodes. Periodically, nodes will also send their status to a random peer for added consistency.
 
+riak有两种方法 使节点的状态保持环的状态。第一个, 最古老的, 是 *gossip协议*。如果群集中的节点状态被改变, 信息将传播到其他节点。周期性地, 节点也将它们的状态发送到随机对等点, 以增加一致性。
+
 A newer method of information exchange in Riak is *cluster metadata* (CMD), which uses a more sophisticated method (plum-tree, DVV consistent state) to pass large amounts of metadata between nodes. The superiority of CMD is one of the benefits of using bucket types in Riak 2.0, discussed below.
+
+
+Riak中更新的信息交换方法是 *集群元数据（CMD）*，它使用更复杂的方法（plum-tree，数据仓库一致状态）在节点之间传递大量的元数据。 CMD的优势是在Riak 2.0中使用储存桶类型的好处之一，将在下面讨论。
 
 In both cases, propagating changes in Ring is an asynchronous operation, and can take a couple minutes depending on Ring size.
 
+在这两种情况下, 在环中传播变化是一个异步操作, 并且可能需要几分钟的时间，其时间取决于环形大小。
+
 <!-- Transfers will not start while a gossip is in progress. -->
 
-<h3>How Replication Uses the Ring</h3>
+<h3>如何重复使用环</h3>
 
 Even if you are not a programmer, it's worth taking a look at this Ring example. It's also worth
 remembering that partitions are managed by vnodes, and in conversation are sometimes interchanged,
 though I'll try to be more precise here.
 
+即使你不是一个程序员, 也值得看看这个环的例子。还值得记住的是, 分区是由 vnodes 管理的, 在对话中有时会互换, 但我在这里会尝试更精确。
+
 Let's start with Riak configured to have 8 partitions, which are set via `ring_creation_size`
 in the `etc/riak.conf` file (we'll dig deeper into this file later).
+
+让我们从被配置为有八分区的Riak开始, 分区是通过在`etc/riak.conf`文件中的"ring_creation_size"设置的(稍后我们将深入到此文件中)。
 
 ```bash
 ## Number of partitions in the cluster (only valid when first
@@ -85,12 +97,18 @@ ring_size = 8
 In this example, I have a total of 4 Riak nodes running on `riak@AAA.cluster`,
 `riak@BBB.cluster`, `riak@CCC.cluster`, and `riak@DDD.cluster`, each with two partitions (and thus vnodes)
 
+在本例中, 我共有有四个运行在 `riak@AAA.cluster`,`riak@BBB.cluster`, `riak@CCC.cluster`和`riak@DDD.cluster`上的riak节点，并且每个有两个分区 (因而是 vnodes)
+
 Riak has the amazing, and dangerous, `attach` command that attaches an Erlang console to a live Riak
 node, with access to all of the Riak modules.
+
+riak 具有惊人的、危险的 "附加" 命令, 它将erlang控制台附加到实时的Riak节点, 并访问所有的Riak模块。  
 
 The `riak_core_ring:chash(Ring)` function extracts the total count of partitions (8), with an array
 of numbers representing the start of the partition, some fraction of the 2^160 number, and the node
 name that represents a particular Riak server in the cluster.
+
+"riak_core_ring: chash (环)" 函数提取分区的总数 (8), 其中一个数字数组表示分区的开头、2^160个数的一部分以及表示群集中特定riak服务器的节点名称。
 
 ```bash
 $ bin/riak attach
@@ -111,8 +129,12 @@ To discover which partition the bucket/key `food/favorite` object would be store
 we execute `riak_core_util:chash_key( {<<"food">>, <<"favorite">>} )` and get a wacky 160 bit Erlang
 number we named `DocIdx` (document index).
 
+例如, 为了发现存储桶/钥匙的 "食物/收藏" 对象将被存放在哪个分区, 我们执行 ' riak_core_util: chash_key ({<"food">, < $xmltag$ >}), 并得到一个古怪的160比特的erlang数值, 我们将其命名为 "DocIdx" (文档索引)。
+
 Just to illustrate that Erlang binary value is a real number, the next line makes it a more
 readable format, similar to the ring partition numbers.
+
+只是为了说明 erlang 二进制值是实数, 下一行使它成为一种更可读的格式, 类似于环分区号。
 
 ```bash
 (riak@AAA.cluster)3> DocIdx =
@@ -126,6 +148,8 @@ readable format, similar to the ring partition numbers.
 With this `DocIdx` number, we can order the partitions, starting with first number greater than
 `DocIdx`. The remaining partitions are in numerical order, until we reach zero, then
 we loop around and continue to exhaust the list.
+
+有了"DocIdx"这个数字, 我们可以使分区有序化, 从第一个大于"DocIdx"的数字开始。剩下的分区按数字顺序排列, 直到我们达到零, 然后我们循环遍历直到穷尽list。
 
 ```bash
 (riak@AAA.cluster)5> Preflist = riak_core_ring:preflist(DocIdx, Ring).
@@ -144,57 +168,88 @@ down the list N times. If we set N=3, then the `food/favorite` object will be wr
 the `riak@DDD.cluster` node's partition `5480631...` (I truncated the number here),
 `riak@AAA.cluster` partition `7307508...`, and `riak@BBB.cluster` partition `9134385...`.
 
+那么, 所有这些都与复制有关？在上面的list中, 我们只需复制一个写下的list N次。如果我们设置 N=3, 然后,“食物/喜爱”的对象将被写到“riak@DDD.cluster”点的分区 "5480631" (此处截断了数字), "riak@AAA.cluster"分区"7307508..."和"riak@BBB.cluster"分区 "9134385..."。
+
 If something has happened to one of those nodes, like a network split
 (confusingly also called a partition---the "P" in "CAP"), the remaining
 active nodes in the list become candidates to hold the data.
+
+如果这些节点之一发生了某些变化，如网络划分（广义上也称为分区 ———“CAP”中的“P”），list中剩余的活动节点将成为保存数据的候选者。
 
 So if the node coordinating the write could not reach node
 `riak@AAA.cluster` to write to partition `7307508...`, it would then attempt
 to write that partition `7307508...` to `riak@CCC.cluster` as a fallback
 (it's the next node in the list preflist after the 3 primaries).
 
+因此，如果协调写入的节点无法到达节点“riak @ AAA.cluster”而写入分区“7307508 ...”，则会尝试将该分区“7307508 ...”写入"riak@CCC.cluster “作为回退（即list中的下一个节点，在3个基准之后的preflist）。
+
 The way that the Ring is structured allows Riak to ensure data is always
 written to the appropriate number of physical nodes, even in cases where one
 or more physical nodes are unavailable. It does this by simply trying the next
 available node in the preflist.
 
-<h3>Hinted Handoff</h3>
+Ring的结构方式允许Riak确保数据总是被写入适当数量的物理节点，即使在一个或多个物理节点不可用的情况下也是如此。 它通过简单地尝试preflist中的下一个可用节点来实现。
+
+<h3>提示移交（Hinted Handoff）</h3>
 
 When a node goes down, data is replicated to a backup node. This is
 not permanent; Riak will periodically examine whether each vnode
 resides on the correct physical node and hands them off to the proper
 node when possible.
 
+当节点停机时, 数据将复制到备份节点。这不是永久性的;riak会定期检查是否每个vnode驻留在正确的物理节点上, 并在可能需要的时候将它们交给适当的节点。
+
 As long as the temporary node cannot connect to the primary, it will continue
 to accept write and read requests on behalf of its incapacitated brethren.
+
+只要临时节点无法连接到主点, 它就会继续代表其无行为能力的兄弟节点接受读写请求。
 
 Hinted handoff not only helps Riak achieve high availability, it also facilitates
 data migration when physical nodes are added or removed from the Ring.
 
+提示移交不仅有助于riak实现高可用性, 而且在从环中添加或删除物理节点时, 它也便于数据迁移。
 
-## Managing a Cluster
+
+## 管理集群
 
 Now that we have a grasp of the general concepts of Riak, how users query it,
 and how Riak manages replication, it's time to build a cluster. It's so easy to
 do, in fact, I didn't bother discussing it for most of this book.
 
-<h3>Install</h3>
+现在, 我们掌握了 riak 的一般概念, 用户如何查询它 以及riak如何管理复制, 所以是时候构建集群了。事实上，这是很容易做到的, 但是这本书的大部分我都没有费心讨论它。
+
+<h3>安装</h3>
 
 The Riak docs have all of the information you need to [install](http://docs.basho.com/riak/latest/tutorials/installation/) it per operating system. The general sequence is:
+riak 文档的所有信息都需要 [安装] (http://docs.basho.com/riak/latest/tutorials/installation/) 每个操作系统。一般顺序是:
 
 1. Install Erlang
+
+1. 安装Erlang
+
 2. Get Riak from a package manager (<em>a la</em> `apt-get` or Homebrew), or build from source (the results end up under `rel/riak`, with the binaries under `bin`).
+
+2.从包管理器 (<em>a la</em> `apt-get` or Homebrew) 获取 riak, 或从源生成 (结果最终在 "riak" 下, 二进制文件在 "bin" 下)。
+
 3. Run `riak start`
+
+3. 运行`riak start`
 
 Install Riak on four or five nodes---five being the recommended safe minimum for production. Fewer nodes are OK during software development and testing.
 
-<h3>Command Line</h3>
+在四或五个节点上安装 riak-五个是推荐的安全生产线。在软件开发和测试期间, 较少的节点是可行的的。
+
+<h3>命令行（Command Line）</h3>
 
 Most Riak operations can be performed though the command line. We'll concern ourselves with two commands: `riak` and `riak-admin`.
+
+大多数 riak 操作都可以通过命令行执行。我们将关注两个命令: “riak” 和“riak-admin”。
 
 <h4>riak</h4>
 
 Simply typing the `riak` command will give a usage list. If you want more information, you can try `riak help`.
+
+只需键入 "riak" 命令就会给出一个使用表。如果您需要更多信息, 可以尝试 "riak help"。
 
 ```bash
 Usage: riak <command>
@@ -204,12 +259,16 @@ where <command> is one of the following:
       top [-interval N] [-sort { reductions | memory | msg_q }] [-lines N] } |
       config { generate | effective | describe VARIABLE } [-l debug]
 
-Run 'riak help' for more detailed information.
+运行"riak help"来得到更多细节上的信息.
 ```
 
 Most of these commands are self explanatory, once you know what they mean. `start` and `stop` are simple enough. `restart` means to stop the running node and restart it inside of the same Erlang VM (virtual machine), while `reboot` will take down the Erlang VM and restart everything.
 
+这些命令大多是自我解释的, 一旦你知道它们的含义。“开始”和“停止”是很简单的。"重新启动" 意味着停止运行的节点并在同一个erlang vm(虚拟机) 内重新启动它, 而 "重新启动" 将占用erlang vm并重新启动所有内容。
+
 You can print the current running `version`. `ping` will return `pong` if the server is in good shape, otherwise you'll get the *just-similar-enough-to-be-annoying* response `pang` (with an *a*), or a simple `Node X not responding to pings` if it's not running at all.
+
+您可以打印当前运行的 "版本"。如果服务器处于良好状态, "ping" 将返回 "pong". 否则,如果它没有运行,您将得到 *只是类似的足以令人讨厌* 响应 "pong"(带一个*a*), 或一个简单的"节点 x 没有响应 pings"。
 
 `chkconfig` is useful if you want to ensure your `etc/riak.conf` is not broken
 (that is to say, it's parsable). I mentioned `attach` briefly above, when
@@ -217,9 +276,17 @@ we looked into the details of the Ring---it attaches a console to the local
 running Riak server so you can execute Riak's Erlang code. `escript` is similar
 to `attach`, except you pass in script file of commands you wish to run automatically.
 
+"chkconfig"是有用的, 如果你想确保你的 "etc/riak.conf"没有被破坏(也就是说, 它是可解析的)。我在前面简要地提到了“附加” ，当我们看到环的细节-它附加一个控制台到本地运行的 riak 服务器, 以便您可以执行 riak 的 erlang 代码。"escript" 与 "附加" 类似,  只不过是在你希望自动运行的命令的脚本文件中传递。
+
 <!--
 If you want to build this on a single dev machine, here is a truncated guide.
+
+如果要在单个 dev 计算机上生成此项, 请使用截取的指南。
+
 Download the Riak source code, then run the following:
+
+下载 riak 源代码, 然后运行以下内容:
+
 make deps
 make devrel
 for i in {1..5}; do dev/dev$i/bin/riak start; done
@@ -228,11 +295,16 @@ for i in {2..5}; do dev/dev$i/bin/riak-admin cluster join riak@AAA.cluster; done
 dev/dev1/bin/riak-admin cluster plan
 dev/dev1/bin/riak-admin cluster commit
 You should now have a 5 node cluster running locally.
+
+现在, 您应该在本地运行五个节点群集。
+
 -->
 
-<h4>riak-admin</h4>
+<h4>riak-admin命令</h4>
 
 The `riak-admin` command is the meat operations, the tool you'll use most often. This is where you'll join nodes to the Ring, diagnose issues, check status, and trigger backups.
+
+"riak-admin" 命令是meat操作, 你最常使用的工具。这是您将节点加入到环中、诊断问题、检查状态和触发备份的地方。
 
 ```bash
 Usage: riak-admin { cluster | join | leave | backup | restore | test |
@@ -247,10 +319,16 @@ Usage: riak-admin { cluster | join | leave | backup | restore | test |
 
 For more information on commands, you can try `man riak-admin`.
 
+更多关于命令的信息，你可以尝试“man riak-admin”。
+
 A few of these commands are deprecated, and many don't make sense without a
 cluster, but some we can look at now.
 
+这些命令中的大部分是不推荐的, 许多没有集群的意义, 但我们现在可以看到一些。
+
 `status` outputs a list of information about this cluster. It's mostly the same information you can get from getting `/stats` via HTTP, although the coverage of information is not exact (for example, riak-admin status returns `disk`, and `/stats` returns some computed values like `gossip_received`).
+
+"状态" 输出有关此群集的信息表。通过 http 获取 "/stats" 的信息大部分是相同的, 尽管信息的覆盖率并不确切 (例如,riak-admin状态返回 "disk", "/stats" 返回一些计算值, 如 "gossip_received")。
 
 ```bash
 $ riak-admin status
@@ -272,9 +350,13 @@ vnode_index_deletes : 0
 
 New JavaScript or Erlang files (as we did in the [developers](#developers) chapter) are not usable by the nodes until they are informed about them by the `js-reload` or `erl-reload` command.
 
+新的 javascript 或 erlang 文件 (正如我们在 [开发人员] (# 开发者) 章节中所做的那样）, 这些节点都无法使用, 直到它们被 "js-reload" 或 "erl-reload"命令告知它们。
+
 `riak-admin` also provides a little `test` command, so you can perform a read/write cycle
 to a node, which I find useful for testing a client's ability to connect, and the node's
 ability to write.
+
+"riak-admin" 还提供了一个小的 "测试" 命令, 因此您可以对节点执行读/写循环, 这对于测试客户端的连接能力和节点的写入能力非常有用。
 
 Finally, `top` is an analysis command checking the Erlang details of a particular node in
 real time. Different processes have different process ids (Pids), use varying amounts of memory,
@@ -282,9 +364,11 @@ queue up so many messages at a time (MsgQ), and so on. This is useful for advanc
 and is especially useful if you know Erlang or need help from other users, the Riak team, or
 Basho.
 
+最后, "top" 是一个分析命令, 实时检查特定节点的 erlang 细节。不同的进程具有不同的进程ids (pids), 使用不同数量的内存, 一次将这么多消息排队 (MsgQ) 等。这对于高级诊断非常有用, 如果您知道 erlang 或需要来自其他用户、riak团队或Basho的帮助, 则特别有用。
+
 ![Top](../assets/top.png)
 
-<h3>Making a Cluster</h3>
+<h3>制作群集（Making a Cluster）</h3>
 
 With several solitary nodes running---assuming they are networked and are able to communicate to
 each other---launching a cluster is the simplest part.
