@@ -381,37 +381,61 @@ The following commands stage changes to cluster membership. These commands
 do not take effect immediately. After staging a set of changes, the staged
 plan must be committed to take effect:
 
+下面的命令将对群集成员身份进行更改。这些命令不会立即生效。在进行一组更改后, 分级计划必须承诺生效:
+
  join <node>                  Join node to the cluster containing <node>
+                              将节点联接到包含 <node> 的群集
+
  leave                        Have this node leave the cluster and shutdown
+                              让此节点离开群集并关闭
+
  leave <node>                 Have <node> leave the cluster and shutdown
+                              已 <node> 离开群集并关闭
 
  force-remove <node>          Remove <node> from the cluster without
                               first handing off data. Designed for
                               crashed, unrecoverable nodes
+                              从群集中移除 <node>, 而不首先交出数据。专为崩溃, 无法恢复的节点                                                  
 
  replace <node1> <node2>      Have <node1> transfer all data to <node2>,
                               and then leave the cluster and shutdown
+                              已 <node1> 将所有数据传输到 <node2>, 然后离开群集并关闭
 
  force-replace <node1> <node2>  Reassign all partitions owned by <node1>
                               to <node2> without first handing off data,
                               and remove <node1> from the cluster.
+                              重新指派 <node1> 到 <node2> 拥有的所有分区, 而不先传递数据, 然后从群集中删除 <node1>
+
 
 Staging commands:
  plan                         Display the staged changes to the cluster
+                              显示对群集的分级更改
+
  commit                       Commit the staged changes
+                              提交分级更改
+
  clear                        Clear the staged changes
+                              清除分级更改
+
 ```
 
 To create a new cluster, you must `join` another node (any will do). Taking a
 node out of the cluster uses `leave` or `force-remove`, while swapping out
 an old node for a new one uses `replace` or `force-replace`.
 
+要创建新群集, 您必须 "加入" 另一个节点 (任何能够执行的节点)。使用 "离开" 或 "强制删除"从集群中取出一个节点, 同时使用 "替换" 或 "强制替换"用旧节点换出一个新的节点。
+
+
 I should mention here that using `leave` is the nice way of taking a node
 out of commission. However, you don't always get that choice. If a server
 happens to explode (or simply smoke ominously), you don't need its approval
 to remove it from the cluster, but can instead mark it as `down`.
 
+我应该在这里提到, 使用"离开" 是一个很好的方式使节点停止工作。但是, 你并不能总做那个选择。如果服务器碰巧发生爆炸 (或只是不祥的烟雾), 您将其从集群中删除不需要它的批准, 但可以标记为 "向下"。
+
 But before we worry about removing nodes, let's add some first.
+
+但是在我们担心删除节点之前, 我们可以先添加一些节点。
 
 ```bash
 $ riak-admin cluster join riak@AAA.cluster
@@ -425,9 +449,13 @@ all of the details of the nodes that are joining the cluster, and what it
 will look like after each step or *transition*, including the `member-status`,
 and how the `transfers` plan to handoff partitions.
 
+一旦所有更改都被暂存, 您必须审阅群集 "计划"。它将提供给你所有加入群集的节点的详细信息, 以及在每个步骤或 *过渡* 的状态, 包括 "成员状态", 以及 "传输" 计划如何切换分区。
+
 Below is a simple plan, but there are cases when Riak requires multiple
 transitions to enact all of your requested actions, such as adding and removing
 nodes in one stage.
+
+下面是一个简单的计划, 但是当 riak 需要多个转换来制定所有请求的操作时, 例如在一个阶段添加和删除节点。
 
 ```bash
 $ riak-admin cluster plan
@@ -467,8 +495,12 @@ choose to alter this `transfer-limit` using `riak-admin`, but bear in
 mind the higher the number, the greater normal operations will be
 impinged.
 
+对群集成员身份进行更改可以相当占用资源, 因此 riak 默认只能一次执行2传输。你可以使用 “riak-admin”选择改变这个 “转移限制” , 但切记, 数字越高, 正常操作将受到的冲击越大。
+
 At this point, if you find a mistake in the plan, you have the chance to `clear` it and try
 again. When you are ready, `commit` the cluster to enact the plan.
+
+此时, 如果你在计划中发现了一个错误, 你就有机会 "清除" 并再试一次。当您准备就绪时, "提交" 群集来制定计划。
 
 ```bash
 $ riak-admin cluster commit
@@ -478,11 +510,15 @@ Cluster changes committed
 Without any data, adding a node to a cluster is a quick operation. However, with large amounts of
 data to be transferred to a new node, it can take quite a while before the new node is ready to use.
 
-<h3>Status Options</h3>
+如果没有任何数据, 将节点添加到群集是一个快速操作。但是, 如果要将大量数据转移到新节点, 则在新节点准备使用之前可能需要一段时间。
+
+<h3>状态选项（Status Options）</h3>
 
 To check on a launching node's progress, you can run the `wait-for-service` command. It will
 output the status of the service and stop when it's finally up. In this example, we check
 the `riak_kv` service.
+
+要检查启动节点的进度, 可以运行 "wait-for-service" 命令。它将输出服务的状态, 并在最终结束时停止。在本例中, 我们检查 "riak_kv" 服务。
 
 ```bash
 $ riak-admin wait-for-service riak_kv riak@CCC.cluster
@@ -493,8 +529,12 @@ riak_kv is up
 
 You can get a list of available services with the `services` command.
 
+您可以使用 "services" 命令获取可用服务的列表。
+
 You can also see if the whole ring is ready to go with `ringready`. If the nodes do not agree
 on the state of the ring, it will output `FALSE`, otherwise `TRUE`.
+
+你也可以看到伴随着“ringready”整个环是否准备进行。如果节点不同意环的状态, 它将输出 "false", 否则为 "true"。
 
 ```bash
 $ riak-admin ringready
@@ -503,6 +543,8 @@ TRUE All nodes agree on the ring ['riak@AAA.cluster','riak@BBB.cluster',
 ```
 
 For a more complete view of the status of the nodes in the ring, you can check out `member-status`.
+
+有关环中节点状态的更完整视图, 可以检查 "member-status"。
 
 ```bash
 $ riak-admin member-status
@@ -519,6 +561,8 @@ Valid:3 / Leaving:0 / Exiting:0 / Joining:0 / Down:0
 And for more details of any current handoffs or unreachable nodes, try `ring-status`. It
 also lists some information from `ringready` and `transfers`. Below I turned off the C
 node to show what it might look like.
+
+有关任何当前切换或无法访问的节点的详细信息, 请尝试 "ring-status"。它还列出了一些来自 "ringready" 和 "transfers" 的信息。下面我关闭 c 节点, 以显示它可能的状态。
 
 ```bash
 $ riak-admin ring-status
