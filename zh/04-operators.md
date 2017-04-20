@@ -709,9 +709,15 @@ $ riak-admin bucket-type update unsafe '{"props":{"n_val":1}}'
 
 You can update a bucket type after it's actived. All of the changes that you make to the type will be inherited by every bucket under that type.
 
+您可以在他被激活后更新桶类型。您对该类型所做的所有更改将由该类型下的每个桶继承。
+
 Of course, you can always get a `list` of the current bucket types in the system. The list will also say whether the bucket type is activated or not.
 
+当然, 您总是可以获得系统中当前桶类型的 "列表"。该列表还将说明该桶类型是否已激活。
+
 Other than that, there's nothing interesting about bucket types from an operations point of view, per se. Sure, there are some cool internal mechanisms at work, such as propogated metadata via a path laied out by a plum-tree and causally tracked by dotted version vectors. But that's only code plumbing. What's most interesting about bucket types are the new features you can take advantage of: datatypes, strong consistency, and search.
+
+除了这一点, 从操作的角度来看, 关于桶形类型没有什么有趣的事, 本身就是这样. 当然, 在工作中有一些很酷的内部机制, 比如通过一条梅树状拟定的路径基值传播元数据, 并通过点式版本向量进行因果追踪。但这只是管道的代码。桶类型最有意思的是您可以利用的新功能: 数据类型、强一致性和搜索。
 
 
 <h3>Datatypes</h3>
