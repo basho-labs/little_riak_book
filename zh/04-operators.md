@@ -589,6 +589,9 @@ will continue. If the outages are long-term or permanent, you
 can either mark the nodes as down (riak-admin down NODE) or
 forcibly remove the nodes from the cluster (riak-admin
 force-remove NODE) to allow the remaining nodes to settle.
+
+警告: 在所有节点向上之前, 群集状态将不会收敛。一旦上述节点重新上线, 收敛就会继续下去。如果停机是长期的或永久性的, 您可以将节点标记为向下 (riak-admin down节点), 或者强行从集群中删除节点 (riak-admin force-remove节点)以允许余下的节点结算。
+
 ```
 
 If all of the above information options about your nodes weren't enough, you can
@@ -596,6 +599,8 @@ list the status of each vnode per node, via `vnode-status`. It'll show each
 vnode by its partition number, give any status information, and a count of each
 vnode's keys. Finally, you'll get to see each vnode's backend type---something I'll
 cover in the next section.
+
+如果有关节点的上述所有信息选项都不够, 您可以通过 "vnode-status" 列出每个节点的每个 vnode 的状态。它将按其分区号显示每个 vnode, 提供任何状态信息, 以及每个 vnode 的键的计数。最后, 您将看到每个 vnode 的后端类型--我将在下一部分中介绍。
 
 ```bash
 $ riak-admin vnode-status
@@ -633,24 +638,35 @@ Some commands we did not cover are either deprecated in favor of their `cluster`
 equivalents (`join`, `leave`, `force-remove`, `replace`, `force-replace`), or
 flagged for future removal `reip` (use `cluster replace`).
 
+一些我们没有覆盖的命令要么被否决来支持它们的 "集群" 等价性 ("join"、"leave"、"force-remove"、"replace"、"force-replace"), 或者标记为将来删除 "reip" (使用 "集群替换")。
+
 I know this was a lot to digest, and probably pretty dry. Walking through command
 line tools usually is. There are plenty of details behind many of the `riak-admin`
 commands, too numerous to cover in such a short book. I encourage you to toy around
 with them on your own installation.
 
+我知道这有很多需要消化, 可能相当干燥。通常是通过命令行工具行走。在“riak 管理”的命令背后有很多的细节, 太多以至于不能在这样一本短的书里全部涉及。我鼓励你们自己的安装后好好享受挖掘它的那份快乐。
 
-## New in Riak 2.0
+
+## 在 Riak 2.0的新的部分(New in Riak 2.0）
 
 Riak has been a project since 2009. And in that time, it has undergone a few evolutions, largely technical improvements, such as more reliability and data safety mechanisms like active anti-entropy.
 
+riak 自2009以来一直是一个项目。在这段时间里, 它经历了几次进化, 主要是技术上的改进, 比如更可靠的数据安全机制, 比如活跃的反熵。
+
 Riak 2.0 was not a rewrite, but rather, a huge shift in how developers who use Riak interact with it. While Basho continued to make backend improvements (such as better cluster metadata) and simplified using existing options (`repair-2i` is now a `riak-admin` command, rather than code you must execute), the biggest changes are immediately obvious to developers. But many of those improvements are also made easier for operators to administrate. So here are a few highlights of the new 2.0 interface options.
 
+riak 2.0 不是一个重写, 而在开发人员如何使用 riak 与它互动上是一个巨大的转变。虽然Basho继续进行后端改进 (如更好的集群元数据), 并使用现有选项进行简化 ("repair-2i" 现在是一个 "riak-admin" 命令, 而不是您必须执行的代码), 但对开发人员来说, 最大的改变是显而易见的。但是, 这些改进的许多也使得运营商更容易管理。下面是新增2.0 界面选项的一些亮点。
 
-<h3>Bucket Types</h3>
+<h3>桶类型（Bucket Types）</h3>
 
 A centerpiece of the new Riak 2.0 features is the addition of a higher-level bucket configuration namespace called *bucket types*. We discussed the general idea of bucket types in the previous chapters, but one major departure from standard buckets is that they are created via the command-line. This means that operators with server access can manage the default properties that all buckets of a given bucket type inherit.
 
+新的 riak 2.0 功能的核心是增加一个更高层次的称为 *桶类型* 的桶配置命名空间。我们在前几章中讨论了的桶类型的一般概念, 但从标准桶中的一个主要偏离是它们是通过命令行创建的。这意味着具有服务器访问权限的运算符可以管理给定存储桶类型的所有存储桶继承的默认属性。
+
 Bucket types have a set of tools for creating, managing and activating them.
+
+桶类型有一组用于创建、管理和激活它们的工具。
 
 ```bash
 $ riak-admin bucket-type
@@ -666,6 +682,8 @@ The follow commands can be used to manage bucket types for the cluster:
 ```
 
 It's rather straightforward to `create` a bucket type. The JSON string accepted after the bucket type name are any valid bucket propertied. Any bucket that uses this type will inherit those properties. For example, say that you wanted to create a bucket type whose n_val was always 1 (rather than the default 3), named unsafe.
+
+"创建" 一个桶类型非常简单。在桶类型名称后接受的 json 字符串是任何有效的存储桶。任何使用此类型的桶都将继承这些属性。例如, 假设您要创建一个桶类型, 其 n_val 始终为 1 (而不是缺省值 3), 命名为 "不安全"。
 
 ```bash
 $ riak-admin bucket-type create unsafe '{"props":{"n_val":1}}'
