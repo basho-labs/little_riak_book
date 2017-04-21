@@ -691,17 +691,25 @@ $ riak-admin bucket-type create unsafe '{"props":{"n_val":1}}'
 
 Once you create the bucket type, it's a good idea to check the `status`, and ensure the properties are what you meant to set.
 
+一旦你创建桶类型后, 最好检查 "status", 并确保属性是您要设置的。
+
+创建桶类型后, 最好检查 "状态", 并确保属性是您要设置的。
+
 ```bash
 $ riak-admin bucket-type status unsafe
 ```
 
 A bucket type is not active until you propgate it through the system by calling the `activate` command.
 
+在您通过调用 "activate 命令 propgate 系统之前, 桶类型不处于活动状态
+
 ```bash
 $ riak-admin bucket-type activate unsafe
 ```
 
 If something is wrong with the type's properties, you can always `update` it.
+
+如果类型的属性出错, 则始终可以 "更新" 它。
 
 ```bash
 $ riak-admin bucket-type update unsafe '{"props":{"n_val":1}}'
@@ -720,11 +728,15 @@ Other than that, there's nothing interesting about bucket types from an operatio
 除了这一点, 从操作的角度来看, 关于桶形类型没有什么有趣的事, 本身就是这样. 当然, 在工作中有一些很酷的内部机制, 比如通过一条梅树状拟定的路径基值传播元数据, 并通过点式版本向量进行因果追踪。但这只是管道的代码。桶类型最有意思的是您可以利用的新功能: 数据类型、强一致性和搜索。
 
 
-<h3>Datatypes</h3>
+<h3>数据类型（Datatypes）</h3>
 
 Datatypes are useful for engineers, since they no longer have to consider the complexity of manual conflict merges that can occur in fault situations. It can also be less stress on the system, since larger objects need only communicate their changes, rather than reinsert the full object.
 
+数据类型对于工程师非常有用, 因为它们不再需要考虑在故障情况下可能发生的手动冲突合并的复杂性。它也可以减少系统的压力, 因为更大的对象只需要传达他们的变化, 而不是重新插入完整的对象。
+
 Riak 2.0 supports four datatypes: *map*, *set*, *counter*, *flag*. You create a bucket type with a single datatype. It's not required, but often good form to name the bucket type after the datatype you're setting.
+
+riak 2.0 支持四种数据类型:*map*, *set*, *counter*, *flag*。您可以使用单个数据类型创建桶类型。这不是必需的, 但通常来说较好的形式是在您设置的数据类型之后命名桶类型。
 
 ```bash
 $ riak-admin bucket-type create maps '{"props":{"datatype":"map"}}'
@@ -735,6 +747,8 @@ $ riak-admin bucket-type create flags '{"props":{"datatype":"flag"}}'
 
 Once a bucket type is created with the given datatype, you need only active it. Developers can then use this datatype like we saw in the previous chapter, but hopefully this example makes clear the suggestion of naming bucket types after their datatype.
 
+一旦使用给定数据类型创建桶类型后, 您只需激活它。然后, 开发人员可以像我们在上一章中看到的那样使用此数据类型, 但希望本示例明确说明在数据类型之后命名桶类型的建议。
+
 ```bash
 curl -XPUT "$RIAK/types/counters/buckets/visitors/keys/index_page" \
   -H "Content-Type:application/json"
@@ -742,13 +756,19 @@ curl -XPUT "$RIAK/types/counters/buckets/visitors/keys/index_page" \
 ```
 
 
-<h3>Strong Consistency</h3>
+<h3>强一致性（Strong Consistency）</h3>
 
 Strong consistency (SC) is the opposite of everything that Riak stands for. Where Riak is all about high availability in the face of network or server errors, strong consistency is about safety over liveness. Either the network and servers are working perfectly, or the reads and writes fail. So why on earth would we ever want to provide SC and give up HA? Because you asked for. Really.
 
+强的一致性 (sc) 是 riak 所代表的一切的对立面。在网络或服务器错误的面前, riak 都是高可用性集群, 强一致性是关于活跃度之上的安全。网络和服务器工作正常, 或者读写失败。那么, 为什么我们要在地球上提供sc和放弃HA？因为这是你所需求的。这是事实.
+
 There are some very good use-cases for strong consistency. For example, when a user is completing a purchase, you might want to ensure that the system is always in a consistent state, or fail the purchase. Communicating that a purchase was made when it in fact was not, is not a good user experience. The opposite is even worse.
 
+有一些非常好的要保持强一致性的用例。例如, 当用户正在完成购买时, 您可能希望确保系统始终处于一致状态, 否则购买失败。当实际不是如此时, 购买所导致的沟通不是一个好的用户体验。相反的情况更糟。
+
 While Riak will continue to be primarily an HA system, there are cases where SC is useful, and developers should be allowed to choose without having to install an entirely new database. So all you need to do is activate it in `riak.conf`.
+
+虽然 riak 将继续主要作为一个 HA 系统, 但有些情况下 sc 是有用的, 而开发者应该被允许选择不必安装一个全新的数据库。所以你需要做的就是在 "riak.conf" 中激活它。
 
 ```bash
 strong_consistency = on
@@ -756,7 +776,11 @@ strong_consistency = on
 
 One thing to note is, although we generally recommend you have five nodes in a Riak cluster, it's not a hard requirement. Strong consistency, however, requires three nodes. It will not operate with fewer.
 
+要注意的一点是, 虽然我们通常建议您在 riak 集群中有五个节点, 但这不是一个硬性要求。但是, 强一致性需要三节点。少于三个节点它将不能操作。
+
 Once our SC systme is active, you'll lean on bucket types again. Only buckets that live under a bucket type setup for strong consistency will be strongly consistent. This means that you can have some buckets HA, other SC, in the same database. Let's call our SC bucket type `strong`.
+
+一旦我们的sc系统是活跃的, 你会再次倾向于桶类型。只有在桶类型设置下的存储桶才能保持强一致性。这意味着您可以在同一数据库中拥有一些高可用性集群桶类型, 以及其他一些sc类型。让我们称之为 "强大" 的SC桶类型。
 
 ```bash
 $ riak-admin bucket-type create strong '{"props":{"consistent":true}}'
@@ -765,6 +789,8 @@ $ riak-admin bucket-type activate strong
 
 That's all the operator should need to do. The developers can use the `strong` bucket similarly to other buckets.
 
+这就是操作员需要做的所有事情。开发商可以使用 "强" 桶类比到其他桶类型。
+
 ```bash
 curl -XPUT "$RIAK/types/strong/buckets/purchases/keys/jane" \
   -d '{"action":"buy"}'
@@ -772,13 +798,20 @@ curl -XPUT "$RIAK/types/strong/buckets/purchases/keys/jane" \
 
 Jane's purchases will either succeed or fail. It will not be eventually consistent. If it fails, of course, she can try again.
 
+简的购买要么成功要么失败。它最终不会是一致的。如果它失败了, 当然, 她可以再试一次。
+
+
 What if your system is having problems with strong consistency? Basho has provided a command to interrogate the current status of the subsystem responsible for SC named ensemble. You can check it out by running `ensemble-status`.
+
+如果您的系统有很强的一致性问题怎么办？Basho提供了一个命令来询问负责全部命名sc的子系统的当前状态。您可以通过运行 "ensemble-status" 来检查它。
 
 ```bash
 $ riak-admin ensemble-status
 ```
 
 It will give you the best information it has as to the state of the system. For example, if you didn't enable `strong_consistency` in every node's `riak.conf`, you might see this.
+
+它将为您提供已有的与系统状态有关的最佳信息。例如, 如果在每个节点的 riak.conf" 中没有启用 "strong_consistency", 则您可能会看到这一点。
 
 ```bash
 ============================== Consensus System ===============================
@@ -795,6 +828,8 @@ There are no active ensembles.
 ```
 
 In the common case when all is working, you should see an output similar to the following:
+
+在常见的情况下, 当所有工作正常时, 您应该看到类似于以下内容的输出:
 
 ```bash
 ============================== Consensus System ===============================
@@ -819,12 +854,18 @@ Metadata:    best-effort replication (asynchronous)
 
 This output tells you that the consensus system is both enabled and active, as well as lists details about all known consensus groups (ensembles).
 
+此输出告诉您, 协商一致的系统既启用又有效, 并列出所有已知一致的组 (集成) 的详细信息。
+
 There is plenty more information about the details of strong consistency in the online docs.
 
+在线文档中有远远更多的有关强一致性细节的详细信息。
 
-<h3>Search 2.0</h3>
 
-From an operations standpoint, search is deceptively simple. Functionally, there isn't much you should need to do with search, other than activate it in `riak.conf`.
+<h3>搜索 2.0（Search 2.0）</h3>
+
+From an operations standpoint, search is deceptively simple. Functionally, there isn't much you should need to do with search, other than activate it in ``.
+
+从操作的角度来看, 搜索看似简单。在功能上, 除了在 "riak.conf" 中激活它之外, 您不需要使用搜索来做很多事情。
 
 ```bash
 search = on
@@ -832,9 +873,15 @@ search = on
 
 However, looks are deceiving. Under the covers, Riak Search 2.0 actually runs the search index software called Solr. Solr runs as a Java service. All of the code required to convert an object that you insert into a document that Solr can recognize (by a module called an *Extractor*) is Erlang, and so is the code which keeps the Riak objects and Solr indexes in sync through faults (via AAE), as well as all of the interfaces, security, stats, and query distribution. But since Solr is Java, we have to manage the JVM.
 
+然而, 外表是骗人的。在所涉及范围下, riak Search 2.0 实际上运行了称为 solr 的搜索索引软件。solr 作为java服务器运行。将你插入的对象转换成solr可以识别的文档(由称为 *Extractor* 的模块) 的被要求所有代码都是Erlang, 并且通过故障 (通过 AAE)使 riak 对象和 solr 索引同步的代码也一样, 包括所有的接口, 安全, 统计和查询分布。但是由于 solr 是 java, 我们必须运用jvm。
+
 If you don't have much experience running Java code, let me distill most problems for you: you need more memory. Solr is a memory hog, easily requiring a minimum of 2 GiB of RAM dedicated only to the Solr service itself. This is in addition to the 4 GiB of RAM minimum that Basho recommends per node. So, according to math, you need a minimum of 6 GiB of RAM to run Riak Search. But we're not quite through yet.
 
+如果您没有运行 java 代码的经验, 请让我为您提炼出大多数问题: 您需要更多的内存。solr 是非常占用内存, 很容易需要至少2GiB的RAM专用于solr服务本身。还不算上4 GiB的Basho所建议每个节点的RAM最小值,。因此, 根据数学, 你需要至少6 GiB的 ram 来运行 riak 搜索。但我们还没有完成。
+
 The most important setting in Riak Search are the JVM options. These options are passed into the JVM command-line when the Solr service is started, and most of the options chosen are excellent defaults. I recommend not getting to hung up on tweaking those, with one notable exception.
+
+riak 搜索中最重要的设置是 jvm 选项。当 solr 服务启动时, 这些选项将传递到 jvm 命令行中, 而被选择的大多数选项都是极佳的缺省值。我建议有一个明显的例外时不要挂断调整。
 
 ```bash
 ## The options to pass to the Solr JVM.  Non-standard options,
