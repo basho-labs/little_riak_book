@@ -897,7 +897,11 @@ search.solr.jvm_options = -d64 -Xms1g -Xmx1g -XX:+UseStringCache -XX:+UseCompres
 
 In the default setting, Riak gives 1 GiB of RAM to the Solr JVM heap. This is fine for small clusters with small, lightly used indexes. You may want to bump those heap values up---the two args of note are: `-Xms1g` (minimum size 1 gigabyte) and `-Xmx1g` (maximum size 1 gigabyte). Push those to 2 or 4 (or even higher) and you should be fine.
 
+在缺省设置中, riak 向 solr jvm 堆提供1 GiB的随机存取存储器。对于小的集群, 简单地使用索引是很好的。你可能想撞那些堆值--两个参数的注解是: '-Xms1g ' (最小大小 1 十亿字节) 和 '-Xmx1g ' (最大大小 1 十亿字节)。把这些推到2或 4 (甚至更高)也是可以的。
+
 In the interested of completeness, Riak also communicates to Solr internally through a port, which you can configure (along with an option JMX port). You should never need to connect to this port yourself.
+
+在对完整性感兴趣的情况下, riak还通过一个你可以配置的端口 (一个选项 jmx 端口) 在内部与 solr 通信。您绝不需要亲自连接到此端口。
 
 ```bash
 ## The port number which Solr binds to.
