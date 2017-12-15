@@ -381,37 +381,61 @@ The following commands stage changes to cluster membership. These commands
 do not take effect immediately. After staging a set of changes, the staged
 plan must be committed to take effect:
 
+下面的命令将对群集成员身份进行更改。这些命令不会立即生效。在进行一组更改后, 分级计划必须承诺生效:
+
  join <node>                  Join node to the cluster containing <node>
+                              将节点联接到包含 <node> 的群集
+
  leave                        Have this node leave the cluster and shutdown
+                              让此节点离开群集并关闭
+
  leave <node>                 Have <node> leave the cluster and shutdown
+                              已 <node> 离开群集并关闭
 
  force-remove <node>          Remove <node> from the cluster without
                               first handing off data. Designed for
                               crashed, unrecoverable nodes
+                              从群集中移除 <node>, 而不首先交出数据。专为崩溃, 无法恢复的节点                                                  
 
  replace <node1> <node2>      Have <node1> transfer all data to <node2>,
                               and then leave the cluster and shutdown
+                              已 <node1> 将所有数据传输到 <node2>, 然后离开群集并关闭
 
  force-replace <node1> <node2>  Reassign all partitions owned by <node1>
                               to <node2> without first handing off data,
                               and remove <node1> from the cluster.
+                              重新指派 <node1> 到 <node2> 拥有的所有分区, 而不先传递数据, 然后从群集中删除 <node1>
+
 
 Staging commands:
  plan                         Display the staged changes to the cluster
+                              显示对群集的分级更改
+
  commit                       Commit the staged changes
+                              提交分级更改
+
  clear                        Clear the staged changes
+                              清除分级更改
+
 ```
 
 To create a new cluster, you must `join` another node (any will do). Taking a
 node out of the cluster uses `leave` or `force-remove`, while swapping out
 an old node for a new one uses `replace` or `force-replace`.
 
+要创建新群集, 您必须 "加入" 另一个节点 (任何能够执行的节点)。使用 "离开" 或 "强制删除"从集群中取出一个节点, 同时使用 "替换" 或 "强制替换"用旧节点换出一个新的节点。
+
+
 I should mention here that using `leave` is the nice way of taking a node
 out of commission. However, you don't always get that choice. If a server
 happens to explode (or simply smoke ominously), you don't need its approval
 to remove it from the cluster, but can instead mark it as `down`.
 
+我应该在这里提到, 使用"离开" 是一个很好的方式使节点停止工作。但是, 你并不能总做那个选择。如果服务器碰巧发生爆炸 (或只是不祥的烟雾), 您将其从集群中删除不需要它的批准, 但可以标记为 "向下"。
+
 But before we worry about removing nodes, let's add some first.
+
+但是在我们担心删除节点之前, 我们可以先添加一些节点。
 
 ```bash
 $ riak-admin cluster join riak@AAA.cluster
@@ -425,9 +449,13 @@ all of the details of the nodes that are joining the cluster, and what it
 will look like after each step or *transition*, including the `member-status`,
 and how the `transfers` plan to handoff partitions.
 
+一旦所有更改都被暂存, 您必须审阅群集 "计划"。它将提供给你所有加入群集的节点的详细信息, 以及在每个步骤或 *过渡* 的状态, 包括 "成员状态", 以及 "传输" 计划如何切换分区。
+
 Below is a simple plan, but there are cases when Riak requires multiple
 transitions to enact all of your requested actions, such as adding and removing
 nodes in one stage.
+
+下面是一个简单的计划, 但是当 riak 需要多个转换来制定所有请求的操作时, 例如在一个阶段添加和删除节点。
 
 ```bash
 $ riak-admin cluster plan
@@ -467,8 +495,12 @@ choose to alter this `transfer-limit` using `riak-admin`, but bear in
 mind the higher the number, the greater normal operations will be
 impinged.
 
+对群集成员身份进行更改可以相当占用资源, 因此 riak 默认只能一次执行2传输。你可以使用 “riak-admin”选择改变这个 “转移限制” , 但切记, 数字越高, 正常操作将受到的冲击越大。
+
 At this point, if you find a mistake in the plan, you have the chance to `clear` it and try
 again. When you are ready, `commit` the cluster to enact the plan.
+
+此时, 如果你在计划中发现了一个错误, 你就有机会 "清除" 并再试一次。当您准备就绪时, "提交" 群集来制定计划。
 
 ```bash
 $ riak-admin cluster commit
@@ -478,11 +510,15 @@ Cluster changes committed
 Without any data, adding a node to a cluster is a quick operation. However, with large amounts of
 data to be transferred to a new node, it can take quite a while before the new node is ready to use.
 
-<h3>Status Options</h3>
+如果没有任何数据, 将节点添加到群集是一个快速操作。但是, 如果要将大量数据转移到新节点, 则在新节点准备使用之前可能需要一段时间。
+
+<h3>状态选项（Status Options）</h3>
 
 To check on a launching node's progress, you can run the `wait-for-service` command. It will
 output the status of the service and stop when it's finally up. In this example, we check
 the `riak_kv` service.
+
+要检查启动节点的进度, 可以运行 "wait-for-service" 命令。它将输出服务的状态, 并在最终结束时停止。在本例中, 我们检查 "riak_kv" 服务。
 
 ```bash
 $ riak-admin wait-for-service riak_kv riak@CCC.cluster
@@ -493,8 +529,12 @@ riak_kv is up
 
 You can get a list of available services with the `services` command.
 
+您可以使用 "services" 命令获取可用服务的列表。
+
 You can also see if the whole ring is ready to go with `ringready`. If the nodes do not agree
 on the state of the ring, it will output `FALSE`, otherwise `TRUE`.
+
+你也可以看到伴随着“ringready”整个环是否准备进行。如果节点不同意环的状态, 它将输出 "false", 否则为 "true"。
 
 ```bash
 $ riak-admin ringready
@@ -503,6 +543,8 @@ TRUE All nodes agree on the ring ['riak@AAA.cluster','riak@BBB.cluster',
 ```
 
 For a more complete view of the status of the nodes in the ring, you can check out `member-status`.
+
+有关环中节点状态的更完整视图, 可以检查 "member-status"。
 
 ```bash
 $ riak-admin member-status
@@ -519,6 +561,8 @@ Valid:3 / Leaving:0 / Exiting:0 / Joining:0 / Down:0
 And for more details of any current handoffs or unreachable nodes, try `ring-status`. It
 also lists some information from `ringready` and `transfers`. Below I turned off the C
 node to show what it might look like.
+
+有关任何当前切换或无法访问的节点的详细信息, 请尝试 "ring-status"。它还列出了一些来自 "ringready" 和 "transfers" 的信息。下面我关闭 c 节点, 以显示它可能的状态。
 
 ```bash
 $ riak-admin ring-status
@@ -545,6 +589,9 @@ will continue. If the outages are long-term or permanent, you
 can either mark the nodes as down (riak-admin down NODE) or
 forcibly remove the nodes from the cluster (riak-admin
 force-remove NODE) to allow the remaining nodes to settle.
+
+警告: 在所有节点向上之前, 群集状态将不会收敛。一旦上述节点重新上线, 收敛就会继续下去。如果停机是长期的或永久性的, 您可以将节点标记为向下 (riak-admin down节点), 或者强行从集群中删除节点 (riak-admin force-remove节点)以允许余下的节点结算。
+
 ```
 
 If all of the above information options about your nodes weren't enough, you can
@@ -552,6 +599,8 @@ list the status of each vnode per node, via `vnode-status`. It'll show each
 vnode by its partition number, give any status information, and a count of each
 vnode's keys. Finally, you'll get to see each vnode's backend type---something I'll
 cover in the next section.
+
+如果有关节点的上述所有信息选项都不够, 您可以通过 "vnode-status" 列出每个节点的每个 vnode 的状态。它将按其分区号显示每个 vnode, 提供任何状态信息, 以及每个 vnode 的键的计数。最后, 您将看到每个 vnode 的后端类型--我将在下一部分中介绍。
 
 ```bash
 $ riak-admin vnode-status
@@ -589,24 +638,35 @@ Some commands we did not cover are either deprecated in favor of their `cluster`
 equivalents (`join`, `leave`, `force-remove`, `replace`, `force-replace`), or
 flagged for future removal `reip` (use `cluster replace`).
 
+一些我们没有覆盖的命令要么被否决来支持它们的 "集群" 等价性 ("join"、"leave"、"force-remove"、"replace"、"force-replace"), 或者标记为将来删除 "reip" (使用 "集群替换")。
+
 I know this was a lot to digest, and probably pretty dry. Walking through command
 line tools usually is. There are plenty of details behind many of the `riak-admin`
 commands, too numerous to cover in such a short book. I encourage you to toy around
 with them on your own installation.
 
+我知道这有很多需要消化, 可能相当干燥。通常是通过命令行工具行走。在“riak 管理”的命令背后有很多的细节, 太多以至于不能在这样一本短的书里全部涉及。我鼓励你们自己的安装后好好享受挖掘它的那份快乐。
 
-## New in Riak 2.0
+
+## 在 Riak 2.0的新的部分(New in Riak 2.0）
 
 Riak has been a project since 2009. And in that time, it has undergone a few evolutions, largely technical improvements, such as more reliability and data safety mechanisms like active anti-entropy.
 
+riak 自2009以来一直是一个项目。在这段时间里, 它经历了几次进化, 主要是技术上的改进, 比如更可靠的数据安全机制, 比如活跃的反熵。
+
 Riak 2.0 was not a rewrite, but rather, a huge shift in how developers who use Riak interact with it. While Basho continued to make backend improvements (such as better cluster metadata) and simplified using existing options (`repair-2i` is now a `riak-admin` command, rather than code you must execute), the biggest changes are immediately obvious to developers. But many of those improvements are also made easier for operators to administrate. So here are a few highlights of the new 2.0 interface options.
 
+riak 2.0 不是一个重写, 而在开发人员如何使用 riak 与它互动上是一个巨大的转变。虽然Basho继续进行后端改进 (如更好的集群元数据), 并使用现有选项进行简化 ("repair-2i" 现在是一个 "riak-admin" 命令, 而不是您必须执行的代码), 但对开发人员来说, 最大的改变是显而易见的。但是, 这些改进的许多也使得运营商更容易管理。下面是新增2.0 界面选项的一些亮点。
 
-<h3>Bucket Types</h3>
+<h3>桶类型（Bucket Types）</h3>
 
 A centerpiece of the new Riak 2.0 features is the addition of a higher-level bucket configuration namespace called *bucket types*. We discussed the general idea of bucket types in the previous chapters, but one major departure from standard buckets is that they are created via the command-line. This means that operators with server access can manage the default properties that all buckets of a given bucket type inherit.
 
+新的 riak 2.0 功能的核心是增加一个更高层次的称为 *桶类型* 的桶配置命名空间。我们在前几章中讨论了的桶类型的一般概念, 但从标准桶中的一个主要偏离是它们是通过命令行创建的。这意味着具有服务器访问权限的运算符可以管理给定存储桶类型的所有存储桶继承的默认属性。
+
 Bucket types have a set of tools for creating, managing and activating them.
+
+桶类型有一组用于创建、管理和激活它们的工具。
 
 ```bash
 $ riak-admin bucket-type
@@ -623,11 +683,17 @@ The follow commands can be used to manage bucket types for the cluster:
 
 It's rather straightforward to `create` a bucket type. The JSON string accepted after the bucket type name are any valid bucket propertied. Any bucket that uses this type will inherit those properties. For example, say that you wanted to create a bucket type whose n_val was always 1 (rather than the default 3), named unsafe.
 
+"创建" 一个桶类型非常简单。在桶类型名称后接受的 json 字符串是任何有效的存储桶。任何使用此类型的桶都将继承这些属性。例如, 假设您要创建一个桶类型, 其 n_val 始终为 1 (而不是缺省值 3), 命名为 "不安全"。
+
 ```bash
 $ riak-admin bucket-type create unsafe '{"props":{"n_val":1}}'
 ```
 
 Once you create the bucket type, it's a good idea to check the `status`, and ensure the properties are what you meant to set.
+
+一旦你创建桶类型后, 最好检查 "status", 并确保属性是您要设置的。
+
+创建桶类型后, 最好检查 "状态", 并确保属性是您要设置的。
 
 ```bash
 $ riak-admin bucket-type status unsafe
@@ -635,11 +701,15 @@ $ riak-admin bucket-type status unsafe
 
 A bucket type is not active until you propgate it through the system by calling the `activate` command.
 
+在您通过调用 "activate 命令 propgate 系统之前, 桶类型不处于活动状态
+
 ```bash
 $ riak-admin bucket-type activate unsafe
 ```
 
 If something is wrong with the type's properties, you can always `update` it.
+
+如果类型的属性出错, 则始终可以 "更新" 它。
 
 ```bash
 $ riak-admin bucket-type update unsafe '{"props":{"n_val":1}}'
@@ -647,16 +717,26 @@ $ riak-admin bucket-type update unsafe '{"props":{"n_val":1}}'
 
 You can update a bucket type after it's actived. All of the changes that you make to the type will be inherited by every bucket under that type.
 
+您可以在他被激活后更新桶类型。您对该类型所做的所有更改将由该类型下的每个桶继承。
+
 Of course, you can always get a `list` of the current bucket types in the system. The list will also say whether the bucket type is activated or not.
+
+当然, 您总是可以获得系统中当前桶类型的 "列表"。该列表还将说明该桶类型是否已激活。
 
 Other than that, there's nothing interesting about bucket types from an operations point of view, per se. Sure, there are some cool internal mechanisms at work, such as propogated metadata via a path laied out by a plum-tree and causally tracked by dotted version vectors. But that's only code plumbing. What's most interesting about bucket types are the new features you can take advantage of: datatypes, strong consistency, and search.
 
+除了这一点, 从操作的角度来看, 关于桶形类型没有什么有趣的事, 本身就是这样. 当然, 在工作中有一些很酷的内部机制, 比如通过一条梅树状拟定的路径基值传播元数据, 并通过点式版本向量进行因果追踪。但这只是管道的代码。桶类型最有意思的是您可以利用的新功能: 数据类型、强一致性和搜索。
 
-<h3>Datatypes</h3>
+
+<h3>数据类型（Datatypes）</h3>
 
 Datatypes are useful for engineers, since they no longer have to consider the complexity of manual conflict merges that can occur in fault situations. It can also be less stress on the system, since larger objects need only communicate their changes, rather than reinsert the full object.
 
+数据类型对于工程师非常有用, 因为它们不再需要考虑在故障情况下可能发生的手动冲突合并的复杂性。它也可以减少系统的压力, 因为更大的对象只需要传达他们的变化, 而不是重新插入完整的对象。
+
 Riak 2.0 supports four datatypes: *map*, *set*, *counter*, *flag*. You create a bucket type with a single datatype. It's not required, but often good form to name the bucket type after the datatype you're setting.
+
+riak 2.0 支持四种数据类型:*map*, *set*, *counter*, *flag*。您可以使用单个数据类型创建桶类型。这不是必需的, 但通常来说较好的形式是在您设置的数据类型之后命名桶类型。
 
 ```bash
 $ riak-admin bucket-type create maps '{"props":{"datatype":"map"}}'
@@ -667,6 +747,8 @@ $ riak-admin bucket-type create flags '{"props":{"datatype":"flag"}}'
 
 Once a bucket type is created with the given datatype, you need only active it. Developers can then use this datatype like we saw in the previous chapter, but hopefully this example makes clear the suggestion of naming bucket types after their datatype.
 
+一旦使用给定数据类型创建桶类型后, 您只需激活它。然后, 开发人员可以像我们在上一章中看到的那样使用此数据类型, 但希望本示例明确说明在数据类型之后命名桶类型的建议。
+
 ```bash
 curl -XPUT "$RIAK/types/counters/buckets/visitors/keys/index_page" \
   -H "Content-Type:application/json"
@@ -674,13 +756,19 @@ curl -XPUT "$RIAK/types/counters/buckets/visitors/keys/index_page" \
 ```
 
 
-<h3>Strong Consistency</h3>
+<h3>强一致性（Strong Consistency）</h3>
 
 Strong consistency (SC) is the opposite of everything that Riak stands for. Where Riak is all about high availability in the face of network or server errors, strong consistency is about safety over liveness. Either the network and servers are working perfectly, or the reads and writes fail. So why on earth would we ever want to provide SC and give up HA? Because you asked for. Really.
 
+强的一致性 (sc) 是 riak 所代表的一切的对立面。在网络或服务器错误的面前, riak 都是高可用性集群, 强一致性是关于活跃度之上的安全。网络和服务器工作正常, 或者读写失败。那么, 为什么我们要在地球上提供sc和放弃HA？因为这是你所需求的。这是事实.
+
 There are some very good use-cases for strong consistency. For example, when a user is completing a purchase, you might want to ensure that the system is always in a consistent state, or fail the purchase. Communicating that a purchase was made when it in fact was not, is not a good user experience. The opposite is even worse.
 
+有一些非常好的要保持强一致性的用例。例如, 当用户正在完成购买时, 您可能希望确保系统始终处于一致状态, 否则购买失败。当实际不是如此时, 购买所导致的沟通不是一个好的用户体验。相反的情况更糟。
+
 While Riak will continue to be primarily an HA system, there are cases where SC is useful, and developers should be allowed to choose without having to install an entirely new database. So all you need to do is activate it in `riak.conf`.
+
+虽然 riak 将继续主要作为一个 HA 系统, 但有些情况下 sc 是有用的, 而开发者应该被允许选择不必安装一个全新的数据库。所以你需要做的就是在 "riak.conf" 中激活它。
 
 ```bash
 strong_consistency = on
@@ -688,7 +776,11 @@ strong_consistency = on
 
 One thing to note is, although we generally recommend you have five nodes in a Riak cluster, it's not a hard requirement. Strong consistency, however, requires three nodes. It will not operate with fewer.
 
+要注意的一点是, 虽然我们通常建议您在 riak 集群中有五个节点, 但这不是一个硬性要求。但是, 强一致性需要三节点。少于三个节点它将不能操作。
+
 Once our SC systme is active, you'll lean on bucket types again. Only buckets that live under a bucket type setup for strong consistency will be strongly consistent. This means that you can have some buckets HA, other SC, in the same database. Let's call our SC bucket type `strong`.
+
+一旦我们的sc系统是活跃的, 你会再次倾向于桶类型。只有在桶类型设置下的存储桶才能保持强一致性。这意味着您可以在同一数据库中拥有一些高可用性集群桶类型, 以及其他一些sc类型。让我们称之为 "强大" 的SC桶类型。
 
 ```bash
 $ riak-admin bucket-type create strong '{"props":{"consistent":true}}'
@@ -697,6 +789,8 @@ $ riak-admin bucket-type activate strong
 
 That's all the operator should need to do. The developers can use the `strong` bucket similarly to other buckets.
 
+这就是操作员需要做的所有事情。开发商可以使用 "强" 桶类比到其他桶类型。
+
 ```bash
 curl -XPUT "$RIAK/types/strong/buckets/purchases/keys/jane" \
   -d '{"action":"buy"}'
@@ -704,13 +798,20 @@ curl -XPUT "$RIAK/types/strong/buckets/purchases/keys/jane" \
 
 Jane's purchases will either succeed or fail. It will not be eventually consistent. If it fails, of course, she can try again.
 
+简的购买要么成功要么失败。它最终不会是一致的。如果它失败了, 当然, 她可以再试一次。
+
+
 What if your system is having problems with strong consistency? Basho has provided a command to interrogate the current status of the subsystem responsible for SC named ensemble. You can check it out by running `ensemble-status`.
+
+如果您的系统有很强的一致性问题怎么办？Basho提供了一个命令来询问负责全部命名sc的子系统的当前状态。您可以通过运行 "ensemble-status" 来检查它。
 
 ```bash
 $ riak-admin ensemble-status
 ```
 
 It will give you the best information it has as to the state of the system. For example, if you didn't enable `strong_consistency` in every node's `riak.conf`, you might see this.
+
+它将为您提供已有的与系统状态有关的最佳信息。例如, 如果在每个节点的 riak.conf" 中没有启用 "strong_consistency", 则您可能会看到这一点。
 
 ```bash
 ============================== Consensus System ===============================
@@ -727,6 +828,8 @@ There are no active ensembles.
 ```
 
 In the common case when all is working, you should see an output similar to the following:
+
+在常见的情况下, 当所有工作正常时, 您应该看到类似于以下内容的输出:
 
 ```bash
 ============================== Consensus System ===============================
@@ -751,12 +854,18 @@ Metadata:    best-effort replication (asynchronous)
 
 This output tells you that the consensus system is both enabled and active, as well as lists details about all known consensus groups (ensembles).
 
+此输出告诉您, 协商一致的系统既启用又有效, 并列出所有已知一致的组 (集成) 的详细信息。
+
 There is plenty more information about the details of strong consistency in the online docs.
 
+在线文档中有远远更多的有关强一致性细节的详细信息。
 
-<h3>Search 2.0</h3>
 
-From an operations standpoint, search is deceptively simple. Functionally, there isn't much you should need to do with search, other than activate it in `riak.conf`.
+<h3>搜索 2.0（Search 2.0）</h3>
+
+From an operations standpoint, search is deceptively simple. Functionally, there isn't much you should need to do with search, other than activate it in ``.
+
+从操作的角度来看, 搜索看似简单。在功能上, 除了在 "riak.conf" 中激活它之外, 您不需要使用搜索来做很多事情。
 
 ```bash
 search = on
@@ -764,9 +873,15 @@ search = on
 
 However, looks are deceiving. Under the covers, Riak Search 2.0 actually runs the search index software called Solr. Solr runs as a Java service. All of the code required to convert an object that you insert into a document that Solr can recognize (by a module called an *Extractor*) is Erlang, and so is the code which keeps the Riak objects and Solr indexes in sync through faults (via AAE), as well as all of the interfaces, security, stats, and query distribution. But since Solr is Java, we have to manage the JVM.
 
+然而, 外表是骗人的。在所涉及范围下, riak Search 2.0 实际上运行了称为 solr 的搜索索引软件。solr 作为java服务器运行。将你插入的对象转换成solr可以识别的文档(由称为 *Extractor* 的模块) 的被要求所有代码都是Erlang, 并且通过故障 (通过 AAE)使 riak 对象和 solr 索引同步的代码也一样, 包括所有的接口, 安全, 统计和查询分布。但是由于 solr 是 java, 我们必须运用jvm。
+
 If you don't have much experience running Java code, let me distill most problems for you: you need more memory. Solr is a memory hog, easily requiring a minimum of 2 GiB of RAM dedicated only to the Solr service itself. This is in addition to the 4 GiB of RAM minimum that Basho recommends per node. So, according to math, you need a minimum of 6 GiB of RAM to run Riak Search. But we're not quite through yet.
 
+如果您没有运行 java 代码的经验, 请让我为您提炼出大多数问题: 您需要更多的内存。solr 是非常占用内存, 很容易需要至少2GiB的RAM专用于solr服务本身。还不算上4 GiB的Basho所建议每个节点的RAM最小值,。因此, 根据数学, 你需要至少6 GiB的 ram 来运行 riak 搜索。但我们还没有完成。
+
 The most important setting in Riak Search are the JVM options. These options are passed into the JVM command-line when the Solr service is started, and most of the options chosen are excellent defaults. I recommend not getting to hung up on tweaking those, with one notable exception.
+
+riak 搜索中最重要的设置是 jvm 选项。当 solr 服务启动时, 这些选项将传递到 jvm 命令行中, 而被选择的大多数选项都是极佳的缺省值。我建议有一个明显的例外时不要挂断调整。
 
 ```bash
 ## The options to pass to the Solr JVM.  Non-standard options,
@@ -782,7 +897,11 @@ search.solr.jvm_options = -d64 -Xms1g -Xmx1g -XX:+UseStringCache -XX:+UseCompres
 
 In the default setting, Riak gives 1 GiB of RAM to the Solr JVM heap. This is fine for small clusters with small, lightly used indexes. You may want to bump those heap values up---the two args of note are: `-Xms1g` (minimum size 1 gigabyte) and `-Xmx1g` (maximum size 1 gigabyte). Push those to 2 or 4 (or even higher) and you should be fine.
 
+在缺省设置中, riak 向 solr jvm 堆提供1 GiB的随机存取存储器。对于小的集群, 简单地使用索引是很好的。你可能想撞那些堆值--两个参数的注解是: '-Xms1g ' (最小大小 1 十亿字节) 和 '-Xmx1g ' (最大大小 1 十亿字节)。把这些推到2或 4 (甚至更高)也是可以的。
+
 In the interested of completeness, Riak also communicates to Solr internally through a port, which you can configure (along with an option JMX port). You should never need to connect to this port yourself.
+
+在对完整性感兴趣的情况下, riak还通过一个你可以配置的端口 (一个选项 jmx 端口) 在内部与 solr 通信。您绝不需要亲自连接到此端口。
 
 ```bash
 ## The port number which Solr binds to.
