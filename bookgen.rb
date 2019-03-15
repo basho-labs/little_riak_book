@@ -194,7 +194,7 @@ def gen_pdf(languages)
       ### Output a PDF suitable for a 8.5x11 PDF
       isprint = false
       print "\tParsing markdown... "
-      latex = IO.popen('pandoc -p --no-wrap -f markdown -t latex', 'w+') do |pipe|
+      latex = IO.popen('pandoc -p --wrap=none -f markdown -t latex', 'w+') do |pipe|
         pipe.write(pre_pandoc(markdown, config, isprint))
         pipe.close_write
         post_pandoc(pipe.read, config, isprint)
@@ -229,10 +229,10 @@ def gen_pdf(languages)
         puts "done"
       end
 
-      ### Output a PDF suitable for a 6x9 print book 
+      ### Output a PDF suitable for a 6x9 print book
       isprint = true
       print "\tParsing markdown for print... "
-      latex = IO.popen('pandoc -p --no-wrap -f markdown -t latex', 'w+') do |pipe|
+      latex = IO.popen('pandoc -p --wrap=none -f markdown -t latex', 'w+') do |pipe|
         pipe.write(pre_pandoc(markdown, config, isprint))
         pipe.close_write
         post_pandoc(pipe.read, config, isprint)
